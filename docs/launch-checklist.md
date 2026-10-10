@@ -26,8 +26,6 @@ marked.
 - [ ] Donation methods added in `src/lib/site.ts` (or left clearly as "coming
       soon").
 - [ ] `public/og-default.svg` replaced with a 1200×630 PNG/JPG.
-- [ ] Amharic (if launching it) reviewed by an Amharic speaker; the language
-      switcher and `/am/` pages checked.
 
 ## Forms and email
 

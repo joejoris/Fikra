@@ -29,10 +29,9 @@ src/
   components/       Reusable UI pieces (Header, Footer, cards, Form…)
   content/          Editable content (programs, news, impact, team, faq, events, documents)
   content.config.ts Content schemas — the rules each entry must follow
-  i18n/ui.ts        Translations and language helpers (English + Amharic)
   layouts/          BaseLayout (head, SEO, header, footer)
   lib/site.ts       Organisation details, nav, stats, donation settings
-  pages/            One file per page/route (Amharic pages live in pages/am/)
+  pages/            One file per page/route
   scripts/forms.ts  Client-side form handling
   styles/global.css Design tokens + base styles
 functions/
@@ -69,8 +68,6 @@ These are tracked in [docs/fikra-inputs.md](docs/fikra-inputs.md). At minimum:
   registration number, social links, stats).
 - **Donation:** add one or more giving methods to `DONATION.methods` in
   `src/lib/site.ts` when a payment link or bank account exists.
-- **Amharic:** review `src/i18n/ui.ts` and `src/pages/am/` with an Amharic
-  speaker; extend `TRANSLATED_PATHS` as more pages are translated.
 - **Team, programs, news, stories, FAQ, events, documents:** replace placeholder
   `[CONFIRM]` content.
 - **Social image:** replace `public/og-default.svg` with a 1200×630 PNG/JPG.
@@ -156,16 +153,6 @@ npx wrangler pages dev dist
 - **RSS** at `/rss.xml` and NGO JSON-LD on every page.
 - **Document downloads** (`/documents`) for governance documents and reports.
 - **Newsletter**, **submissions inbox** and **file uploads** (above).
-- **Amharic** (`/am/`) — homepage, about and contact translated; a language
-  switcher appears in the header and footer.
-
-### Internationalisation
-
-English is the source of truth. Amharic strings live in `src/i18n/ui.ts` and the
-translated pages in `src/pages/am/`. To add a page, translate it under
-`src/pages/am/` and add its path to `TRANSLATED_PATHS` so the language switcher
-links to it. The Amharic copy was machine-drafted and **must be reviewed by an
-Amharic speaker at FIKRA** before launch.
 
 ## Deployment
 

@@ -8,8 +8,7 @@ points are fine.
 
 - [ ] **(blocking)** What is the site's single most important job — showcase
       programs, attract partners and donors, recruit members, or all three?
-- [ ] **(blocking)** Language: English only, or English and Amharic? (If both,
-      we need the sitemap and copy duplicated, and a translation decision.)
+- [x] Language: English only (decided).
 - [ ] **(blocking)** Who is the one person at FIKRA who consolidates feedback and
       gives final approval on content and documents? Name them.
 - [ ] Brand assets: logo file, colours, fonts — or confirm none exist and we
@@ -34,7 +33,6 @@ points are fine.
 - [ ] Newsletter: go-ahead to collect email addresses, and who will send updates.
 - [ ] Documents to publish: constitution, strategic plan, annual reports, policies
       (PDFs), and in which categories.
-- [ ] Amharic: who at FIKRA will review the translation before launch.
 - [ ] FAQ: any answers only FIKRA can give (cost, location, eligibility).
 - [ ] Events: any confirmed dates, venues and registration links to publish.
 - [ ] Uploads: is R2 file storage wanted, or are email attachments enough?
