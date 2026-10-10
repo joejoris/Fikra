@@ -1,0 +1,138 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import Form from '../components/Form.astro';
+import CTASection from '../components/CTASection.astro';
+---
+
+<BaseLayout
+  title="Get involved"
+  description="Volunteer, partner or become a member of FIKRA and help young founders build lasting enterprises."
+>
+  <Section>
+    <PageHero
+      eyebrow="Get involved"
+      title="There is a place for you here"
+      intro="Whether you can give time, expertise, money or a partnership, you can help a young founder get further, faster."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="grid gap-6 sm:grid-cols-3">
+      <a class="rounded-[var(--radius-card)] border border-border p-6 hover:border-primary/40" href="#volunteer">
+        <h2 class="text-lg font-bold text-ink">Volunteer</h2>
+        <p class="mt-2 text-sm text-ink-soft">Mentor a founder or lend a professional skill.</p>
+      </a>
+      <a class="rounded-[var(--radius-card)] border border-border p-6 hover:border-primary/40" href="#partner">
+        <h2 class="text-lg font-bold text-ink">Partner</h2>
+        <p class="mt-2 text-sm text-ink-soft">Bring your organisation's support to our programmes.</p>
+      </a>
+      <a class="rounded-[var(--radius-card)] border border-border p-6 hover:border-primary/40" href="#member">
+        <h2 class="text-lg font-bold text-ink">Become a member</h2>
+        <p class="mt-2 text-sm text-ink-soft">Join a FIKRA programme as a founder.</p>
+      </a>
+    </div>
+  </Section>
+
+  <Section id="volunteer" tone="soft">
+    <div class="grid gap-10 lg:grid-cols-2">
+      <div>
+        <h2 class="text-2xl font-bold">Volunteer</h2>
+        <p class="mt-3 text-ink-soft">
+          Our mentors are the heart of FIKRA. You might be a business owner, an
+          accountant, a marketer or simply someone a few steps ahead. If you can
+          give a few hours a month, a founder can change their trajectory.
+        </p>
+        <ul class="mt-5 space-y-2 text-sm text-ink-soft">
+          <li>· Mentoring a founder one-to-one</li>
+          <li>· Running a clinic on your area of expertise</li>
+          <li>· Reviewing a business model or pitch</li>
+          <li>· Helping at an event or workshop</li>
+        </ul>
+      </div>
+      <div class="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <Form
+          name="volunteer"
+          submitLabel="Register interest"
+          showMessage
+          interestOptions={[
+            { value: 'mentoring', label: 'Mentoring a founder' },
+            { value: 'clinic', label: 'Running a skills clinic' },
+            { value: 'events', label: 'Helping at events' },
+            { value: 'other', label: 'Something else' },
+          ]}
+          showOrg
+          heading="Volunteer with FIKRA"
+        />
+      </div>
+    </div>
+  </Section>
+
+  <Section id="partner" tone="white">
+    <div class="grid gap-10 lg:grid-cols-2">
+      <div>
+        <h2 class="text-2xl font-bold">Partner with us</h2>
+        <p class="mt-3 text-ink-soft">
+          Partnerships let us do more than we could alone — from funding a cohort
+          to opening markets for the businesses we support. We are open to
+          funding partners, corporate partners and delivery partners.
+        </p>
+        <ul class="mt-5 space-y-2 text-sm text-ink-soft">
+          <li>· Sponsor a programme or a cohort</li>
+          <li>· Offer internships, work or market access</li>
+          <li>· Co-deliver training or mentorship</li>
+          <li>· Fund a specific piece of work</li>
+        </ul>
+      </div>
+      <div class="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <Form
+          name="partner"
+          submitLabel="Start a conversation"
+          showMessage
+          interestOptions={[
+            { value: 'funding', label: 'Funding a programme' },
+            { value: 'access', label: 'Market or work access' },
+            { value: 'delivery', label: 'Co-delivering training' },
+            { value: 'other', label: 'Other partnership' },
+          ]}
+          showOrg
+          heading="Partner with FIKRA"
+        />
+      </div>
+    </div>
+  </Section>
+
+  <Section id="member" tone="soft">
+    <div class="grid gap-10 lg:grid-cols-2">
+      <div>
+        <h2 class="text-2xl font-bold">Become a member</h2>
+        <p class="mt-3 text-ink-soft">
+          If you have an idea and the drive to build it, we would like to hear
+          from you. Tell us where you are and we will point you to the right
+          programme — Idea Lab, Launchpad or Growth Circles.
+        </p>
+        <p class="mt-3 text-sm text-muted">
+          Membership terms and any fees are set out in our constitution and will
+          be confirmed with you before you commit.
+        </p>
+      </div>
+      <div class="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <Form
+          name="member"
+          submitLabel="Apply to join"
+          showMessage
+          interestOptions={[
+            { value: 'idea-lab', label: 'Idea Lab — I have an idea' },
+            { value: 'launchpad', label: 'Launchpad — I am building' },
+            { value: 'growth-circles', label: 'Growth Circles — I am trading' },
+            { value: 'unsure', label: 'I am not sure yet' },
+          ]}
+          heading="Join a programme"
+        />
+      </div>
+    </div>
+  </Section>
+
+  <CTASection />
+</BaseLayout>

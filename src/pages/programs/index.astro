@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import PageHero from '../../components/PageHero.astro';
+import ProgramCard from '../../components/ProgramCard.astro';
+import CTASection from '../../components/CTASection.astro';
+
+const programs = (await getCollection('programs')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<BaseLayout
+  title="Programs"
+  description="FIKRA's programs support young founders from first idea through to established business."
+>
+  <Section>
+    <PageHero
+      eyebrow="Programs"
+      title="A path for every stage"
+      intro="Whether you are testing your first idea or running a business that is already trading, there is a FIKRA programme that meets you where you are."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {programs.map((program) => <ProgramCard program={program} />)}
+    </div>
+  </Section>
+
+  <Section tone="soft">
+    <h2 class="text-2xl font-bold">Not sure where you fit?</h2>
+    <p class="mt-3 max-w-2xl text-ink-soft">
+      Tell us a little about where you are and we will point you to the right
+      programme — or to someone who can help.
+    </p>
+    <div class="mt-6">
+      <a class="font-semibold text-primary underline" href="/contact">Talk to us →</a>
+    </div>
+  </Section>
+
+  <CTASection />
+</BaseLayout>

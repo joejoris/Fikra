@@ -1,0 +1,93 @@
+/**
+ * Dependency-free form handling for FIKRA.
+ *
+ * Progressive enhancement: forms have a real `action`/`method`, so they work
+ * without JavaScript. This script upgrades them to fetch + inline feedback.
+ */
+
+const THANKS_PATH = '/thanks';
+
+type Status = 'idle' | 'sending' | 'success' | 'error';
+
+function setStatus(el: HTMLElement | null, state: Status, message: string) {
+  if (!el) return;
+  el.textContent = message;
+  el.dataset.state = state;
+  el.classList.toggle('text-primary', state === 'success');
+  el.classList.toggle('text-red-600', state === 'error');
+}
+
+function collect(form: HTMLFormElement): Record<string, string> {
+  const data = new FormData(form);
+  const payload: Record<string, string> = {};
+  for (const [key, value] of data.entries()) {
+    if (typeof value === 'string' && value.trim() !== '') {
+      payload[key] = value.trim();
+    }
+  }
+  return payload;
+}
+
+async function submit(form: HTMLFormElement) {
+  const statusEl = form.querySelector<HTMLElement>('[data-status]');
+  const button = form.querySelector<HTMLButtonElement>('[data-submit]');
+  const endpoint = form.getAttribute('action') || '/api/contact';
+
+  const payload = collect(form);
+
+  // Honeypot filled => silently pretend success, send nothing.
+  if (payload._gotcha) {
+    window.location.assign(THANKS_PATH);
+    return;
+  }
+
+  // Basic client guard for the consent checkbox (novalidate disables native UI).
+  if (!form.reportValidity()) return;
+
+  setStatus(statusEl, 'sending', 'Sending…');
+  if (button) {
+    button.disabled = true;
+    button.dataset.label = button.textContent ?? '';
+    button.textContent = 'Sending…';
+  }
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Request failed with ${res.status}`);
+    }
+
+    setStatus(statusEl, 'success', 'Thank you — redirecting…');
+    window.location.assign(THANKS_PATH);
+  } catch (error) {
+    console.error(error);
+    setStatus(
+      statusEl,
+      'error',
+      'Sorry, something went wrong. Please try again, or email us directly.',
+    );
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = button.dataset.label ?? 'Send';
+    }
+  }
+}
+
+export function initForms() {
+  const forms = document.querySelectorAll<HTMLFormElement>('form[data-form]');
+  forms.forEach((form) => {
+    const loadedAt = form.querySelector<HTMLInputElement>('[data-loaded-at]');
+    if (loadedAt) loadedAt.value = String(Date.now());
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      void submit(form);
+    });
+  });
+}

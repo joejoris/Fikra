@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import { SITE } from '../lib/site';
+---
+
+<BaseLayout
+  title="Privacy policy"
+  description="How FIKRA collects, uses and protects your personal information."
+>
+  <Section>
+    <PageHero eyebrow="Legal" title="Privacy policy" />
+  </Section>
+
+  <Section tone="white">
+    <div class="prose">
+      <p>
+        This policy explains what personal information FIKRA collects through
+        this website, why we collect it, and how we look after it. It is a
+        starting draft for review — FIKRA should align it with its constitution
+        and any applicable data-protection law before launch.
+      </p>
+
+      <h2>What we collect</h2>
+      <p>
+        When you use a form on this site, we collect the information you provide:
+        your name, email address, phone number, organisation and message, and
+        the programme or interest you selected.
+      </p>
+      <p>
+        This site does not use advertising cookies. Any analytics we use are
+        cookie-free and do not identify you personally.
+      </p>
+
+      <h2>Why we use it</h2>
+      <ul>
+        <li>To respond to your enquiry or application</li>
+        <li>To contact you about programmes, volunteering or partnerships you asked about</li>
+        <li>To keep appropriate records of our work and reporting</li>
+      </ul>
+
+      <h2>Who can see it</h2>
+      <p>
+        Your information is available only to the FIKRA staff and volunteers who
+        need it to respond to you. We do not sell your information. It is shared
+        with service providers only where necessary to operate the site (for
+        example, our email service), and only to the extent needed.
+      </p>
+
+      <h2>How long we keep it</h2>
+      <p>
+        We keep enquiry and application details only as long as needed for the
+        purpose you provided them, or as required by law.
+      </p>
+
+      <h2>Your choices</h2>
+      <p>
+        You can ask us to show you the information we hold about you, correct
+        it, or delete it. To do so, email
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about this policy can be sent to
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a> or posted to
+        {SITE.address.line1}, {SITE.address.city}, {SITE.address.country}.
+      </p>
+    </div>
+  </Section>
+</BaseLayout>

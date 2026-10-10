@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import PageHero from '../../components/PageHero.astro';
+import NewsCard from '../../components/NewsCard.astro';
+
+const posts = (
+  await getCollection('news', ({ data }) =>
+    import.meta.env.PROD ? data.draft !== true : true,
+  )
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout
+  title="News"
+  description="Updates and announcements from FIKRA."
+>
+  <Section>
+    <PageHero
+      eyebrow="News"
+      title="What is happening at FIKRA"
+      intro="Programme announcements, founder updates and news from our work."
+    />
+  </Section>
+
+  <Section tone="white">
+    {
+      posts.length > 0 ? (
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post) => <NewsCard post={post} />)}
+        </div>
+      ) : (
+        <p class="max-w-2xl text-ink-soft">
+          No news yet — check back soon.
+        </p>
+      )
+    }
+  </Section>
+</BaseLayout>

@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import CTASection from '../components/CTASection.astro';
+---
+
+<BaseLayout
+  title="About"
+  description="FIKRA is a youth entrepreneurship organisation helping young people turn ideas into sustainable enterprises."
+>
+  <Section>
+    <PageHero
+      eyebrow="About FIKRA"
+      title="Talent is everywhere. Opportunity should be too."
+      intro="FIKRA supports young people to build businesses that last — with training, mentorship and access to the networks and capital that are usually out of reach."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="grid gap-10 lg:grid-cols-2">
+      <div class="prose">
+        <h2>Our mission</h2>
+        <p>
+          To help young people turn ideas into sustainable enterprises that
+          create work, income and dignity — for themselves and for the people
+          they employ.
+        </p>
+        <h2>Our vision</h2>
+        <p>
+          A generation of young builders who can start, grow and sustain
+          businesses from where they are, with what they have.
+        </p>
+        <h2>What we believe</h2>
+        <ul>
+          <li><strong>Practical over theoretical.</strong> Founders learn by doing.</li>
+          <li><strong>Local knowledge.</strong> Our work is shaped with the communities we serve.</li>
+          <li><strong>Honesty.</strong> We report what works — and what does not.</li>
+          <li><strong>Durability.</strong> We build for enterprises that outlast our support.</li>
+        </ul>
+      </div>
+      <div class="prose">
+        <h2>Our story</h2>
+        <p>
+          [CONFIRM — replace this section with FIKRA's real founding story: who
+          started it, when, and why. This is drafted placeholder text.]
+        </p>
+        <p>
+          FIKRA began with a simple observation: the young people with the best
+          ideas were not always the ones with the best access to support. What
+          started as informal mentoring grew into structured programmes that
+          now carry founders from first idea to established business.
+        </p>
+        <h2>Where we work</h2>
+        <p>
+          [CONFIRM — describe the areas FIKRA serves, and any hub or office
+          locations.]
+        </p>
+        <h2>Governance</h2>
+        <p>
+          FIKRA is governed by its constitution and a board of directors, and
+          reports on progress against a three-year strategic plan. Our org chart
+          and key documents are available on request.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <Section tone="soft">
+    <div class="grid gap-8 sm:grid-cols-3">
+      <a class="rounded-[var(--radius-card)] border border-border bg-surface p-6 hover:border-primary/40" href="/programs">
+        <h2 class="font-bold text-ink">Programs</h2>
+        <p class="mt-2 text-sm text-ink-soft">See how we support founders at each stage.</p>
+      </a>
+      <a class="rounded-[var(--radius-card)] border border-border bg-surface p-6 hover:border-primary/40" href="/team">
+        <h2 class="font-bold text-ink">Team</h2>
+        <p class="mt-2 text-sm text-ink-soft">Meet the people behind FIKRA.</p>
+      </a>
+      <a class="rounded-[var(--radius-card)] border border-border bg-surface p-6 hover:border-primary/40" href="/impact">
+        <h2 class="font-bold text-ink">Impact</h2>
+        <p class="mt-2 text-sm text-ink-soft">What our work has changed so far.</p>
+      </a>
+    </div>
+  </Section>
+
+  <CTASection />
+</BaseLayout>

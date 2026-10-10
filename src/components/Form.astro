@@ -1,0 +1,171 @@
+---
+interface Props {
+  name: string;
+  submitLabel?: string;
+  showMessage?: boolean;
+  interestOptions?: { value: string; label: string }[];
+  presetProgram?: string;
+  showOrg?: boolean;
+  heading?: string;
+  description?: string;
+}
+
+const {
+  name,
+  submitLabel = 'Send',
+  showMessage = true,
+  interestOptions,
+  presetProgram,
+  showOrg = false,
+  heading,
+  description,
+} = Astro.props;
+
+const id = (field: string) => `${name}-${field}`;
+---
+
+<form
+  class="space-y-5"
+  data-form
+  novalidate
+  action={import.meta.env.PUBLIC_FORM_ENDPOINT || '/api/contact'}
+  method="post"
+>
+  {heading && <h3 class="text-lg font-bold text-ink">{heading}</h3>}
+  {description && <p class="text-sm text-ink-soft">{description}</p>}
+
+  <input type="hidden" name="_formName" value={name} />
+  <input type="hidden" name="_loadedAt" value="" data-loaded-at />
+  {presetProgram && <input type="hidden" name="program" value={presetProgram} />}
+
+  <!-- Honeypot: hidden from humans, tempting to bots. -->
+  <div class="hidden" aria-hidden="true">
+    <label for={id('gotcha')}>Leave this field empty</label>
+    <input id={id('gotcha')} type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <label class="block text-sm font-semibold text-ink" for={id('name')}>Full name</label>
+      <input
+        class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+        id={id('name')}
+        name="name"
+        type="text"
+        autocomplete="name"
+        required
+      />
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-ink" for={id('email')}>Email</label>
+      <input
+        class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+        id={id('email')}
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+      />
+    </div>
+  </div>
+
+  {
+    showOrg && (
+      <div>
+        <label class="block text-sm font-semibold text-ink" for={id('organisation')}>
+          Organisation <span class="font-normal text-muted">(if relevant)</span>
+        </label>
+        <input
+          class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+          id={id('organisation')}
+          name="organisation"
+          type="text"
+          autocomplete="organization"
+        />
+      </div>
+    )
+  }
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <label class="block text-sm font-semibold text-ink" for={id('phone')}>
+        Phone <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <input
+        class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+        id={id('phone')}
+        name="phone"
+        type="tel"
+        autocomplete="tel"
+      />
+    </div>
+    {
+      interestOptions && (
+        <div>
+          <label class="block text-sm font-semibold text-ink" for={id('interest')}>
+            I'm interested in
+          </label>
+          <select
+            class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+            id={id('interest')}
+            name="interest"
+            required
+          >
+            <option value="">Please choose…</option>
+            {interestOptions.map((opt) => (
+              <option value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+      )
+    }
+  </div>
+
+  {
+    showMessage && (
+      <div>
+        <label class="block text-sm font-semibold text-ink" for={id('message')}>
+          Your message
+        </label>
+        <textarea
+          class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+          id={id('message')}
+          name="message"
+          rows="5"
+          required
+        ></textarea>
+      </div>
+    )
+  }
+
+  <div class="flex items-start gap-3">
+    <input
+      class="mt-1 h-4 w-4 rounded border-border"
+      id={id('consent')}
+      name="consent"
+      type="checkbox"
+      value="yes"
+      required
+    />
+    <label class="text-sm text-ink-soft" for={id('consent')}>
+      I agree that FIKRA may store these details to respond to my enquiry. See our
+      <a class="text-primary underline" href="/privacy">privacy policy</a>.
+    </label>
+  </div>
+
+  <div class="flex items-center gap-4">
+    <button
+      class="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
+      type="submit"
+      data-submit
+    >
+      {submitLabel}
+    </button>
+    <p class="text-sm text-muted" data-status role="status" aria-live="polite"></p>
+  </div>
+</form>
+
+<script>
+  import { initForms } from '../scripts/forms';
+  initForms();
+</script>

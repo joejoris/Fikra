@@ -1,0 +1,49 @@
+---
+interface Props {
+  href?: string;
+  type?: 'button' | 'submit';
+  variant?: 'primary' | 'accent' | 'ghost' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+  disabled?: boolean;
+  ariaLabel?: string;
+}
+
+const {
+  href,
+  type = 'button',
+  variant = 'primary',
+  size = 'md',
+  class: className = '',
+  disabled = false,
+  ariaLabel,
+} = Astro.props;
+
+const base =
+  'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed';
+
+const variants: Record<string, string> = {
+  primary: 'bg-primary text-white hover:bg-primary-dark',
+  accent: 'bg-accent text-ink hover:bg-accent-dark',
+  outline: 'border border-primary text-primary hover:bg-primary-soft',
+  ghost: 'text-primary hover:bg-primary-soft',
+};
+
+const sizes: Record<string, string> = {
+  sm: 'px-3 py-1.5 text-sm',
+  md: 'px-4 py-2.5 text-sm',
+  lg: 'px-6 py-3 text-base',
+};
+
+const classes = [base, variants[variant], sizes[size], className].join(' ');
+
+const Tag = href && !disabled ? 'a' : 'button';
+---
+
+<Tag
+  class={classes}
+  {...href && !disabled ? { href } : { type, disabled }}
+  aria-label={ariaLabel}
+>
+  <slot />
+</Tag>

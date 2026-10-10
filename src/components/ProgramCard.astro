@@ -1,0 +1,48 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Card from './Card.astro';
+
+interface Props {
+  program: CollectionEntry<'programs'>;
+}
+
+const { program } = Astro.props;
+const { title, summary, audience, status, location, duration, tags } = program.data;
+
+const statusLabels: Record<string, { text: string; class: string }> = {
+  open: { text: 'Applications open', class: 'bg-primary-soft text-primary' },
+  'coming-soon': { text: 'Coming soon', class: 'bg-bg text-ink-soft border border-border' },
+  closed: { text: 'Closed', class: 'bg-bg text-muted border border-border' },
+};
+const badge = statusLabels[status];
+---
+
+<Card href={`/programs/${program.id}`} class="h-full">
+  <article class="flex h-full flex-col">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <span class:list={['rounded-full px-2.5 py-1 text-xs font-semibold', badge.class]}>
+        {badge.text}
+      </span>
+    </div>
+    <h3 class="text-lg font-bold text-ink group-hover:text-primary">{title}</h3>
+    <p class="mt-2 flex-1 text-sm text-ink-soft">{summary}</p>
+    <dl class="mt-4 space-y-1 text-xs text-muted">
+      <div><dt class="inline font-semibold text-ink-soft">Who:</dt> <dd class="inline">{audience}</dd></div>
+      {duration && <div><dt class="inline font-semibold text-ink-soft">Duration:</dt> <dd class="inline">{duration}</dd></div>}
+      {location && <div><dt class="inline font-semibold text-ink-soft">Where:</dt> <dd class="inline">{location}</dd></div>}
+    </dl>
+    {
+      tags.length > 0 && (
+        <ul class="mt-4 flex flex-wrap gap-2">
+          {tags.map((tag) => (
+            <li class="rounded-full bg-bg px-2.5 py-1 text-xs text-ink-soft">{tag}</li>
+          ))}
+        </ul>
+      )
+    }
+    <span class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+      Learn more
+      <span aria-hidden="true">→</span>
+    </span>
+  </article>
+</Card>

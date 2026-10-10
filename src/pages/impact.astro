@@ -1,0 +1,76 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import Stat from '../components/Stat.astro';
+import CTASection from '../components/CTASection.astro';
+import { STATS } from '../lib/site';
+
+const stories = (
+  await getCollection('impact', ({ data }) =>
+    import.meta.env.PROD ? data.draft !== true : true,
+  )
+).sort((a, b) => a.data.order - b.data.order);
+
+const rendered = await Promise.all(
+  stories.map(async (story) => ({
+    story,
+    Content: (await render(story)).Content,
+  })),
+);
+---
+
+<BaseLayout
+  title="Impact"
+  description="The change FIKRA's work has made for young founders and their communities."
+>
+  <Section>
+    <PageHero
+      eyebrow="Impact"
+      title="What our work changes"
+      intro="Numbers matter, but so do the people behind them. Here is what FIKRA's work has made possible so far."
+    />
+  </Section>
+
+  <Section tone="soft">
+    <div class="grid gap-8 sm:grid-cols-3">
+      {STATS.map((stat) => <Stat value={stat.value} label={stat.label} />)}
+    </div>
+    <p class="mt-8 text-sm text-muted">
+      Figures to be confirmed with FIKRA before launch.
+    </p>
+  </Section>
+
+  <Section tone="white">
+    <h2 class="text-2xl font-bold sm:text-3xl">Stories</h2>
+    {
+      rendered.length > 0 ? (
+        <div class="mt-10 space-y-12">
+          {rendered.map(({ story, Content }) => (
+            <article class="max-w-3xl">
+              <h3 class="text-xl font-bold text-ink">{story.data.title}</h3>
+              <p class="mt-2 text-ink-soft">{story.data.summary}</p>
+              {(story.data.person || story.data.location) && (
+                <p class="mt-4 text-sm font-medium text-muted">
+                  {[story.data.person, story.data.location].filter(Boolean).join(' · ')}
+                </p>
+              )}
+              <div class="prose mt-6">
+                <Content />
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p class="mt-6 max-w-2xl text-ink-soft">
+          We are preparing to share the stories of the founders we work with.
+          Check back soon, or
+          <a class="text-primary underline" href="/contact">get in touch</a> to hear more.
+        </p>
+      )
+    }
+  </Section>
+
+  <CTASection />
+</BaseLayout>

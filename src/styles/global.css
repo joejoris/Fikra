@@ -1,0 +1,139 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   FIKRA design tokens
+   System fonts only — no web-font downloads, which keeps the first load small
+   for visitors on metered mobile data.
+   --------------------------------------------------------------------------- */
+@theme {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, 'Noto Sans', sans-serif;
+  --font-display: var(--font-sans);
+
+  --color-ink: #0b1f33;
+  --color-ink-soft: #2c4257;
+  --color-muted: #5a6b7b;
+
+  --color-primary: #0e6e6e;
+  --color-primary-dark: #0a4f4f;
+  --color-primary-soft: #e2f1ef;
+
+  --color-accent: #e4a13c;
+  --color-accent-dark: #c07f1b;
+
+  --color-bg: #f7f5f0;
+  --color-surface: #ffffff;
+  --color-border: #e3ded3;
+
+  --radius-card: 0.75rem;
+  --shadow-card: 0 1px 2px rgb(11 31 51 / 0.04), 0 4px 16px rgb(11 31 51 / 0.06);
+}
+
+/* Base ------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/* Visible focus for keyboard users, everywhere. */
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Skip link -------------------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.75rem 1rem;
+}
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+/* Prose (rendered Markdown from the CMS) --------------------------------- */
+.prose {
+  max-width: 68ch;
+  color: var(--color-ink-soft);
+}
+.prose > * + * {
+  margin-top: 1.1em;
+}
+.prose h2 {
+  margin-top: 1.8em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.prose h3 {
+  margin-top: 1.4em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.prose p,
+.prose li {
+  font-size: 1.0625rem;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose a:hover {
+  color: var(--color-primary-dark);
+}
+.prose blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 1rem;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+.prose strong {
+  color: var(--color-ink);
+}
+.prose img {
+  border-radius: var(--radius-card);
+  max-width: 100%;
+  height: auto;
+}

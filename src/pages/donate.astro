@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import { DONATION, SITE } from '../lib/site';
+---
+
+<BaseLayout
+  title="Donate"
+  description="Support young founders to turn ideas into sustainable enterprises."
+>
+  <Section>
+    <PageHero
+      eyebrow="Support our work"
+      title="Your giving turns ideas into income"
+      intro="Every contribution goes directly to the programmes that help young people start and grow real businesses."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
+      <div class="prose">
+        <h2>What your support funds</h2>
+        <ul>
+          <li>Training and materials for a cohort of first-time founders</li>
+          <li>Small startup grants for founders reaching first revenue</li>
+          <li>Mentor coordination and matching</li>
+          <li>Workspace, internet and the everyday costs of running programmes</li>
+        </ul>
+        <h2>Accountability</h2>
+        <p>
+          FIKRA is governed by its constitution and reports on progress against
+          its strategic plan. If you would like to see our governance documents
+          before you give, please ask — we are happy to share them.
+        </p>
+      </div>
+
+      <aside class="rounded-[var(--radius-card)] border border-border bg-bg p-6">
+        {
+          DONATION.configured ? (
+            <div>
+              <h2 class="text-lg font-bold">Give now</h2>
+              <p class="mt-2 text-sm text-ink-soft">
+                You will be taken to our secure payment page ({DONATION.provider}).
+              </p>
+              <Button href={DONATION.url} variant="accent" size="lg" class="mt-5 w-full">
+                Donate securely
+              </Button>
+            </div>
+          ) : (
+            <div>
+              <h2 class="text-lg font-bold">Online giving is coming soon</h2>
+              <p class="mt-2 text-sm text-ink-soft">{DONATION.note}</p>
+              <ul class="mt-4 space-y-2 text-sm">
+                <li>
+                  Email
+                  <a class="text-primary underline" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+                </li>
+                <li>Phone {SITE.phone}</li>
+              </ul>
+              <Button href="/contact" variant="primary" size="md" class="mt-5 w-full">
+                Contact us to give
+              </Button>
+            </div>
+          )
+        }
+      </aside>
+    </div>
+  </Section>
+
+  <Section tone="soft">
+    <h2 class="text-2xl font-bold">Prefer to give in another way?</h2>
+    <p class="mt-3 max-w-2xl text-ink-soft">
+      We welcome in-kind support, equipment, and introductions to funders. If
+      you would like to discuss a gift, get in touch and we will find the
+      simplest way that works for you.
+    </p>
+    <div class="mt-6">
+      <Button href="/contact" variant="outline" size="lg">Talk to us</Button>
+    </div>
+  </Section>
+</BaseLayout>

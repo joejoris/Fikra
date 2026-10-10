@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fikra.example.org/sitemap-index.xml

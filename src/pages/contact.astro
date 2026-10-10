@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import Form from '../components/Form.astro';
+import { SITE } from '../lib/site';
+---
+
+<BaseLayout
+  title="Contact"
+  description="Get in touch with FIKRA."
+>
+  <Section>
+    <PageHero
+      eyebrow="Contact"
+      title="Get in touch"
+      intro="Questions, ideas, partnerships or feedback — we would like to hear from you."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="grid gap-12 lg:grid-cols-[1fr_1.2fr]">
+      <div>
+        <h2 class="text-lg font-bold">Reach us directly</h2>
+        <dl class="mt-5 space-y-4 text-sm">
+          <div>
+            <dt class="font-semibold text-ink">Email</dt>
+            <dd><a class="text-primary underline" href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+          </div>
+          <div>
+            <dt class="font-semibold text-ink">Phone</dt>
+            <dd class="text-ink-soft">{SITE.phone}</dd>
+          </div>
+          <div>
+            <dt class="font-semibold text-ink">Address</dt>
+            <dd class="not-italic text-ink-soft">
+              {SITE.address.line1}<br />
+              {SITE.address.city}{SITE.address.region && `, ${SITE.address.region}`}<br />
+              {SITE.address.country}
+            </dd>
+          </div>
+        </dl>
+        <p class="mt-8 text-sm text-muted">
+          We aim to reply within a few working days.
+        </p>
+      </div>
+
+      <div class="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <Form name="contact" submitLabel="Send message" showMessage heading="Send us a message" />
+      </div>
+    </div>
+  </Section>
+</BaseLayout>

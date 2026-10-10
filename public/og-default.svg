@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="FIKRA — from idea to enterprise">
+  <rect width="1200" height="630" fill="#0e6e6e"/>
+  <circle cx="240" cy="315" r="60" fill="#e4a13c"/>
+  <path d="M214 429V341m0 0-70-70m70 70 70-70" fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="400" y="300" font-family="system-ui, sans-serif" font-size="96" font-weight="700" fill="#ffffff">FIKRA</text>
+  <text x="404" y="370" font-family="system-ui, sans-serif" font-size="40" fill="#cfe7e5">From idea to enterprise.</text>
+  <text x="404" y="440" font-family="system-ui, sans-serif" font-size="28" fill="#9fd0cc">Placeholder social image — replace with a 1200×630 PNG/JPG.</text>
+</svg>

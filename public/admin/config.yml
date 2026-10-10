@@ -1,0 +1,99 @@
+backend:
+  name: github
+  # [CONFIRM] Point this at the repo FIKRA owns (see docs/admin-guide.md).
+  repo: FIKRA/fikra-website
+  branch: main
+  # Enables editing on your own machine with `npm run cms`.
+  local_backend: true
+
+# `local_backend: true` is ignored in production. To let staff edit in the
+# browser, FIKRA must set up GitHub OAuth or an auth proxy. See
+# docs/admin-guide.md for the options and steps.
+
+media_folder: 'public/images/uploads'
+public_folder: '/images/uploads'
+
+site_url: https://fikra.example.org
+display_url: https://fikra.example.org
+logo_url: /favicon.svg
+
+collections:
+  - name: news
+    label: News
+    label_singular: News post
+    folder: src/content/news
+    create: true
+    slug: '{{slug}}'
+    extension: md
+    format: frontmatter
+    summary: '{{title}} — {{pubDate | date("DD MMM YYYY")}}'
+    sortable_fields: [pubDate, title]
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: description, label: Short description, widget: text, hint: 'One line, shown in lists.' }
+      - { name: pubDate, label: Date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, picker_utc: true }
+      - { name: author, label: Author, widget: string, default: FIKRA }
+      - { name: draft, label: Draft (hidden from the live site), widget: boolean, default: true }
+      - { name: body, label: Body, widget: markdown }
+
+  - name: programs
+    label: Programs
+    label_singular: Program
+    folder: src/content/programs
+    create: true
+    extension: md
+    format: frontmatter
+    summary: '{{title}}'
+    sortable_fields: [order, title]
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: summary, label: Summary, widget: text }
+      - { name: audience, label: Who it is for, widget: string }
+      - name: status
+        label: Status
+        widget: select
+        options:
+          - { label: Applications open, value: open }
+          - { label: Coming soon, value: coming-soon }
+          - { label: Closed, value: closed }
+        default: coming-soon
+      - { name: duration, label: Duration, widget: string, required: false }
+      - { name: location, label: Location, widget: string, required: false }
+      - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
+      - { name: tags, label: Tags, widget: list, required: false, default: [] }
+      - { name: body, label: Details, widget: markdown }
+
+  - name: impact
+    label: Impact stories
+    label_singular: Impact story
+    folder: src/content/impact
+    create: true
+    extension: md
+    format: frontmatter
+    summary: '{{title}}'
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: summary, label: Summary, widget: text }
+      - { name: person, label: Person, widget: string, required: false }
+      - { name: location, label: Location, widget: string, required: false }
+      - { name: date, label: Date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, required: false }
+      - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
+      - { name: draft, label: Draft (hidden from the live site), widget: boolean, default: true }
+      - { name: body, label: Story, widget: markdown }
+
+  - name: team
+    label: Team
+    label_singular: Team member
+    folder: src/content/team
+    create: true
+    extension: md
+    format: frontmatter
+    summary: '{{name}} — {{role}}'
+    sortable_fields: [order, name]
+    fields:
+      - { name: name, label: Name, widget: string }
+      - { name: role, label: Role, widget: string }
+      - { name: bio, label: Short bio, widget: text }
+      - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
+      - { name: photo, label: Photo, widget: image, required: false }
+      - { name: email, label: Email, widget: string, required: false }

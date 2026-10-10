@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Card from './Card.astro';
+
+interface Props {
+  post: CollectionEntry<'news'>;
+}
+
+const { post } = Astro.props;
+const date = post.data.pubDate.toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<Card href={`/news/${post.id}`} class="h-full">
+  <article class="flex h-full flex-col">
+    <time class="text-xs font-medium uppercase tracking-wide text-muted" datetime={post.data.pubDate.toISOString()}>
+      {date}
+    </time>
+    <h3 class="mt-2 text-lg font-bold text-ink group-hover:text-primary">{post.data.title}</h3>
+    <p class="mt-2 flex-1 text-sm text-ink-soft">{post.data.description}</p>
+    <span class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+      Read more
+      <span aria-hidden="true">→</span>
+    </span>
+  </article>
+</Card>

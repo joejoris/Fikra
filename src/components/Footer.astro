@@ -1,0 +1,71 @@
+---
+import Logo from './Logo.astro';
+import { SITE, FOOTER_LINKS, SOCIAL_LABELS } from '../lib/site';
+
+const year = new Date().getFullYear();
+const socialEntries = Object.entries(SITE.social).filter(([, url]) => url);
+const columns = [
+  { heading: 'Organisation', links: FOOTER_LINKS.organisation },
+  { heading: 'Get involved', links: FOOTER_LINKS.engage },
+  { heading: 'More', links: FOOTER_LINKS.legal },
+];
+---
+
+<footer class="mt-8 border-t border-border bg-surface">
+  <div class="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8">
+    <div class="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <div>
+        <Logo />
+        <p class="mt-4 max-w-xs text-sm text-ink-soft">{SITE.description}</p>
+        <address class="mt-4 text-sm not-italic text-muted">
+          {SITE.address.line1}<br />
+          {SITE.address.city}{SITE.address.region && `, ${SITE.address.region}`}<br />
+          {SITE.address.country}
+        </address>
+        <p class="mt-3 text-sm text-muted">
+          <a class="hover:text-primary" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </p>
+      </div>
+
+      {
+        columns.map((col) => (
+          <div>
+            <h2 class="text-sm font-semibold text-ink">{col.heading}</h2>
+            <ul class="mt-3 space-y-2 text-sm">
+              {col.links.map((link) => (
+                <li>
+                  <a class="text-ink-soft hover:text-primary" href={link.href}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    {
+      socialEntries.length > 0 && (
+        <div class="mt-10 flex flex-wrap gap-4">
+          {socialEntries.map(([key, url]) => (
+            <a
+              class="text-sm font-medium text-ink-soft hover:text-primary"
+              href={url}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {SOCIAL_LABELS[key] ?? key}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    <div class="mt-10 border-t border-border pt-6 text-xs text-muted">
+      <p>
+        © {year} {SITE.legalName}. Registration number {SITE.registrationNumber}.
+      </p>
+    </div>
+  </div>
+</footer>
