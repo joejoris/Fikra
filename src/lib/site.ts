@@ -38,16 +38,74 @@ export const SITE = {
 } as const;
 
 /**
- * Donation configuration. `url` must be replaced with the real payment link.
- * Until then the Donate page shows a clear "coming soon" state instead of a
+ * Donation configuration.
+ *
+ * Add one or more giving methods below once a provider is chosen. While the
+ * list is empty the Donate page shows a clear "coming soon" state rather than a
  * broken button. See docs/fikra-inputs.md.
  */
-export const DONATION = {
-  configured: false,
-  provider: '', // e.g. "Chapa", "telebirr", "PayPal", "Stripe"
-  url: '',
+export interface DonationAccount {
+  name: string;
+  bank: string;
+  number: string;
+  swift?: string;
+  note?: string;
+}
+
+export interface DonationMethod {
+  id: string;
+  label: string;
+  description?: string;
+  /** 'link' opens `url`; 'bank' lists `accounts`. */
+  kind?: 'link' | 'bank';
+  url?: string;
+  accounts?: DonationAccount[];
+}
+
+export const DONATION: {
+  methods: DonationMethod[];
+  /** Optional quick amounts; used to pre-fill link providers via `amountParam`. */
+  presets: number[];
+  /** Query parameter appended for an amount, e.g. `amount`. */
+  amountParam: string;
+  currency: string;
+  note: string;
+} = {
+  methods: [
+    // Uncomment and fill in once a provider and/or bank account is confirmed:
+    //
+    // {
+    //   id: 'chapa',
+    //   label: 'Give by card or mobile money',
+    //   description: 'Secure checkout via Chapa.',
+    //   kind: 'link',
+    //   url: 'https://checkout.chapa.co/REPLACE_ME',
+    // },
+    // {
+    //   id: 'paypal',
+    //   label: 'Give with PayPal',
+    //   kind: 'link',
+    //   url: 'https://www.paypal.com/donate/?hosted_button_id=REPLACE_ME',
+    // },
+    // {
+    //   id: 'bank',
+    //   label: 'Bank transfer',
+    //   kind: 'bank',
+    //   accounts: [
+    //     {
+    //       name: 'FIKRA [CONFIRM registered name]',
+    //       bank: '[CONFIRM bank]',
+    //       number: '[CONFIRM account number]',
+    //       swift: '[CONFIRM SWIFT/BIC]',
+    //     },
+    //   ],
+    // },
+  ],
+  presets: [], // e.g. [10, 25, 50, 100]
+  amountParam: 'amount',
+  currency: '',
   note: 'Online giving is being set up. In the meantime, contact us to give.',
-} as const;
+};
 
 export const NAV_LINKS = [
   { label: 'About', href: '/about' },

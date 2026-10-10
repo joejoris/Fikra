@@ -4,6 +4,22 @@ import Section from '../components/Section.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
 import { DONATION, SITE } from '../lib/site';
+
+const methods = DONATION.methods;
+const hasMethods = methods.length > 0;
+const firstLink = methods.find((method) => method.kind === 'link' && method.url);
+const showPresets = DONATION.presets.length > 0 && !!firstLink;
+
+const withAmount = (url: string, amount: number) => {
+  if (!DONATION.amountParam) return url;
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set(DONATION.amountParam, String(amount));
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+};
 ---
 
 <BaseLayout
@@ -31,22 +47,79 @@ import { DONATION, SITE } from '../lib/site';
         <h2>Accountability</h2>
         <p>
           FIKRA is governed by its constitution and reports on progress against
-          its strategic plan. If you would like to see our governance documents
-          before you give, please ask — we are happy to share them.
+          its strategic plan. Our governance documents are
+          <a href="/documents">available to download</a>, and if you would like to
+          ask anything before you give, please do.
         </p>
       </div>
 
       <aside class="rounded-[var(--radius-card)] border border-border bg-bg p-6">
         {
-          DONATION.configured ? (
+          hasMethods ? (
             <div>
               <h2 class="text-lg font-bold">Give now</h2>
-              <p class="mt-2 text-sm text-ink-soft">
-                You will be taken to our secure payment page ({DONATION.provider}).
-              </p>
-              <Button href={DONATION.url} variant="accent" size="lg" class="mt-5 w-full">
-                Donate securely
-              </Button>
+
+              {showPresets && (
+                <div class="mt-4">
+                  <p class="text-sm text-ink-soft">Choose an amount{DONATION.currency && ` (${DONATION.currency})`}:</p>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    {DONATION.presets.map((amount) => (
+                      <a
+                        class="rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary-soft"
+                        href={withAmount(firstLink!.url!, amount)}
+                      >
+                        {DONATION.currency} {amount}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div class="mt-5 space-y-4">
+                {methods.map((method) =>
+                  method.kind === 'bank' ? (
+                    <div>
+                      <h3 class="text-sm font-bold text-ink">{method.label}</h3>
+                      {method.description && (
+                        <p class="mt-1 text-sm text-ink-soft">{method.description}</p>
+                      )}
+                      <dl class="mt-3 space-y-2 text-sm">
+                        {method.accounts?.map((account) => (
+                          <div class="rounded-lg border border-border bg-surface p-3">
+                            <dt class="font-semibold text-ink">{account.name}</dt>
+                            <dd class="mt-1 text-ink-soft">
+                              {account.bank}
+                              <br />
+                              Account {account.number}
+                              {account.swift && (
+                                <>
+                                  <br />
+                                  SWIFT {account.swift}
+                                </>
+                              )}
+                              {account.note && (
+                                <>
+                                  <br />
+                                  {account.note}
+                                </>
+                              )}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  ) : (
+                    <div>
+                      <Button href={method.url ?? '#'} variant="accent" size="lg" class="w-full">
+                        {method.label}
+                      </Button>
+                      {method.description && (
+                        <p class="mt-2 text-sm text-ink-soft">{method.description}</p>
+                      )}
+                    </div>
+                  ),
+                )}
+              </div>
             </div>
           ) : (
             <div>
