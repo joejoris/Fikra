@@ -35,11 +35,6 @@ async function submit(form: HTMLFormElement) {
   const inline = form.dataset.success === 'inline';
   const multipart = form.hasAttribute('data-multipart') || !!form.querySelector('input[type="file"]');
 
-  const sendingMsg = form.dataset.msgSending ?? 'Sending…';
-  const thanksMsg = form.dataset.msgThanks ?? 'Thank you — redirecting…';
-  const errorMsg =
-    form.dataset.msgError ?? 'Sorry, something went wrong. Please try again, or email us directly.';
-
   const payload = collect(form);
 
   // Honeypot filled => silently pretend success, send nothing.
@@ -55,11 +50,11 @@ async function submit(form: HTMLFormElement) {
   // Basic client guard for the consent checkbox (novalidate disables native UI).
   if (!form.reportValidity()) return;
 
-  setStatus(statusEl, 'sending', sendingMsg);
+  setStatus(statusEl, 'sending', 'Sending…');
   if (button) {
     button.disabled = true;
     button.dataset.label = button.textContent ?? '';
-    button.textContent = sendingMsg;
+    button.textContent = 'Sending…';
   }
 
   try {
@@ -83,12 +78,16 @@ async function submit(form: HTMLFormElement) {
       setStatus(statusEl, 'success', form.dataset.successMessage ?? 'Thank you.');
       form.reset();
     } else {
-      setStatus(statusEl, 'success', thanksMsg);
+      setStatus(statusEl, 'success', 'Thank you — redirecting…');
       window.location.assign(THANKS_PATH);
     }
   } catch (error) {
     console.error(error);
-    setStatus(statusEl, 'error', errorMsg);
+    setStatus(
+      statusEl,
+      'error',
+      'Sorry, something went wrong. Please try again, or email us directly.',
+    );
   } finally {
     if (button) {
       button.disabled = false;

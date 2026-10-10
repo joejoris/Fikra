@@ -1,33 +1,20 @@
 ---
 import Logo from './Logo.astro';
 import Button from './Button.astro';
-import LanguageSwitcher from './LanguageSwitcher.astro';
-import { NAV, useTranslations, localizePath, type Lang } from '../i18n/ui';
-
-interface Props {
-  lang?: Lang;
-}
-
-const { lang = 'en' } = Astro.props;
-const t = useTranslations(lang);
-
-const nav = NAV.map((item) => ({ href: localizePath(item.href, lang), label: t(item.key) }));
-const contactHref = localizePath('/contact', lang);
-const donateHref = localizePath('/donate', lang);
-const homeHref = localizePath('/', lang);
+import { NAV_LINKS } from '../lib/site';
 ---
 
 <header class="sticky top-0 z-40 border-b border-border bg-bg/90 backdrop-blur">
   <div
     class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8"
   >
-    <a href={homeHref} aria-label={t('nav.home')}>
+    <a href="/" aria-label="FIKRA — home">
       <Logo />
     </a>
 
     <nav class="hidden items-center gap-1 md:flex" aria-label="Primary">
       {
-        nav.map((link) => (
+        NAV_LINKS.map((link) => (
           <a
             href={link.href}
             class="rounded-md px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-primary-soft hover:text-primary"
@@ -39,16 +26,15 @@ const homeHref = localizePath('/', lang);
     </nav>
 
     <div class="hidden items-center gap-2 md:flex">
-      <LanguageSwitcher lang={lang} />
-      <Button href={contactHref} variant="ghost" size="sm">{t('nav.contact')}</Button>
-      <Button href={donateHref} variant="accent" size="sm">{t('nav.donate')}</Button>
+      <Button href="/contact" variant="ghost" size="sm">Contact</Button>
+      <Button href="/donate" variant="accent" size="sm">Donate</Button>
     </div>
 
     <details class="relative md:hidden">
       <summary
         class="flex cursor-pointer list-none items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden"
       >
-        <span class="sr-only">{t('nav.menu')}</span>
+        <span class="sr-only">Menu</span>
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
           <path
             d="M4 7h16M4 12h16M4 17h16"
@@ -56,14 +42,14 @@ const homeHref = localizePath('/', lang);
             stroke-width="2"
             stroke-linecap="round"></path>
         </svg>
-        {t('nav.menu')}
+        Menu
       </summary>
       <div
         class="absolute right-0 mt-2 w-60 rounded-xl border border-border bg-surface p-2 shadow-lg"
       >
         <nav class="flex flex-col" aria-label="Mobile">
           {
-            nav.map((link) => (
+            NAV_LINKS.map((link) => (
               <a
                 href={link.href}
                 class="rounded-md px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-primary-soft hover:text-primary"
@@ -73,24 +59,21 @@ const homeHref = localizePath('/', lang);
             ))
           }
           <a
-            href={localizePath('/team', lang)}
+            href="/team"
             class="rounded-md px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-primary-soft hover:text-primary"
           >
-            {t('nav.team')}
+            Team
           </a>
           <a
-            href={contactHref}
+            href="/contact"
             class="rounded-md px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-primary-soft hover:text-primary"
           >
-            {t('nav.contact')}
+            Contact
           </a>
         </nav>
-        <div class="border-t border-border p-2">
-          <LanguageSwitcher lang={lang} variant="block" />
-        </div>
-        <div class="p-2 pt-0">
-          <Button href={donateHref} variant="accent" size="md" class="w-full">
-            {t('nav.donate')}
+        <div class="p-2">
+          <Button href="/donate" variant="accent" size="md" class="w-full">
+            Donate
           </Button>
         </div>
       </div>

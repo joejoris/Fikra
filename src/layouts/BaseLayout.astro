@@ -5,7 +5,6 @@ interface Props {
   image?: string;
   ogType?: 'website' | 'article';
   noindex?: boolean;
-  lang?: 'en' | 'am';
 }
 
 import { SITE } from '../lib/site';
@@ -13,7 +12,6 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import BackToTop from '../components/BackToTop.astro';
-import { useTranslations, localizePath, logicalPath, type Lang } from '../i18n/ui';
 import '../styles/global.css';
 
 const {
@@ -22,19 +20,11 @@ const {
   image = '/og-default.svg',
   ogType = 'website',
   noindex = false,
-  lang: langProp,
 } = Astro.props;
-
-const lang: Lang = langProp ?? (Astro.currentLocale === 'am' ? 'am' : 'en');
-const t = useTranslations(lang);
 
 const pageTitle = title.includes(SITE.name) ? title : `${title} — ${SITE.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
 const ogImage = new URL(image, Astro.site ?? SITE.url).href;
-
-const logical = logicalPath(Astro.url.pathname);
-const enHref = new URL(localizePath(logical, 'en'), Astro.site ?? SITE.url).href;
-const amHref = new URL(localizePath(logical, 'am'), Astro.site ?? SITE.url).href;
 
 const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC;
 const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
@@ -61,7 +51,7 @@ const structuredData = {
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={SITE.locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -69,9 +59,6 @@ const structuredData = {
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang="en" href={enHref} />
-    <link rel="alternate" hreflang="am" href={amHref} />
-    <link rel="alternate" hreflang="x-default" href={enHref} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -101,12 +88,12 @@ const structuredData = {
     )}
   </head>
   <body class="min-h-screen flex flex-col">
-    <a class="skip-link" href="#main">{t('skip')}</a>
-    <Header lang={lang} />
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
     <main id="main" class="flex-1">
       <slot />
     </main>
-    <Footer lang={lang} />
+    <Footer />
     <WhatsAppButton />
     <BackToTop />
   </body>

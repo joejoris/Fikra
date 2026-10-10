@@ -1,32 +1,27 @@
 ---
-import { useTranslations, localizePath, type Lang } from '../i18n/ui';
-
 interface Props {
   heading?: string;
   description?: string;
   /** Renders the email/name/subscribe controls in a row on larger screens. */
   layout?: 'stacked' | 'wide';
-  lang?: Lang;
 }
 
-const { heading, description, layout = 'stacked', lang = 'en' } = Astro.props;
-const t = useTranslations(lang);
-const resolvedHeading = heading ?? t('newsletter.heading');
-const resolvedDescription = description ?? t('newsletter.description');
+const {
+  heading = 'Get FIKRA updates',
+  description = 'Occasional news about cohorts, events and openings. No spam, unsubscribe any time.',
+  layout = 'stacked',
+} = Astro.props;
 
 const name = 'newsletter';
 const id = (field: string) => `${name}-${field}`;
 const wide = layout === 'wide';
-
-const privacyHref = localizePath('/privacy', lang);
-const consentParts = t('newsletter.consent').split('{privacyLink}');
 ---
 
 <form
   class="space-y-4"
   data-form
   data-success="inline"
-  data-success-message={t('newsletter.thanks')}
+  data-success-message="Thank you — please check your inbox to confirm."
   action="/api/subscribe"
   method="post"
   novalidate
@@ -40,11 +35,11 @@ const consentParts = t('newsletter.consent').split('{privacyLink}');
     <input id={id('gotcha')} type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
   </div>
 
-  {resolvedHeading && <h3 class="text-sm font-semibold text-ink">{resolvedHeading}</h3>}
-  {resolvedDescription && <p class="text-sm text-ink-soft">{resolvedDescription}</p>}
+  {heading && <h3 class="text-sm font-semibold text-ink">{heading}</h3>}
+  {description && <p class="text-sm text-ink-soft">{description}</p>}
 
   <div class:list={['space-y-3', wide && 'sm:flex sm:items-center sm:gap-2 sm:space-y-0']}>
-    <label class="sr-only" for={id('email')}>{t('newsletter.email')}</label>
+    <label class="sr-only" for={id('email')}>Email address</label>
     <input
       class:list={['w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm', wide && 'sm:max-w-xs']}
       id={id('email')}
@@ -54,21 +49,21 @@ const consentParts = t('newsletter.consent').split('{privacyLink}');
       placeholder="you@example.com"
       required
     />
-    <label class="sr-only" for={id('firstName')}>{t('newsletter.firstName')}</label>
+    <label class="sr-only" for={id('firstName')}>First name (optional)</label>
     <input
       class:list={['w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm', wide && 'sm:max-w-[10rem]']}
       id={id('firstName')}
       name="first_name"
       type="text"
       autocomplete="given-name"
-      placeholder={t('newsletter.firstName')}
+      placeholder="First name (optional)"
     />
     <button
       class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
       type="submit"
       data-submit
     >
-      {t('newsletter.subscribe')}
+      Subscribe
     </button>
   </div>
 
@@ -82,7 +77,8 @@ const consentParts = t('newsletter.consent').split('{privacyLink}');
       required
     />
     <label class="text-xs text-muted" for={id('consent')}>
-      {consentParts[0]}<a class="text-primary underline" href={privacyHref}>{t('newsletter.privacy')}</a>{consentParts[1] ?? ''}
+      I agree to receive email updates and accept our
+      <a class="text-primary underline" href="/privacy">privacy policy</a>.
     </label>
   </div>
 

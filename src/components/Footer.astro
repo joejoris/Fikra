@@ -1,25 +1,15 @@
 ---
 import Logo from './Logo.astro';
 import NewsletterForm from './NewsletterForm.astro';
-import { SITE, SOCIAL_LABELS } from '../lib/site';
-import { FOOTER_GROUPS, useTranslations, localizePath, type Lang } from '../i18n/ui';
-
-interface Props {
-  lang?: Lang;
-}
-
-const { lang = 'en' } = Astro.props;
-const t = useTranslations(lang);
+import { SITE, FOOTER_LINKS, SOCIAL_LABELS } from '../lib/site';
 
 const year = new Date().getFullYear();
 const socialEntries = Object.entries(SITE.social).filter(([, url]) => url);
-const columns = FOOTER_GROUPS.map((group) => ({
-  heading: t(group.heading),
-  links: group.links.map((link) => ({
-    href: localizePath(link.href, lang),
-    label: t(link.key),
-  })),
-}));
+const columns = [
+  { heading: 'Organisation', links: FOOTER_LINKS.organisation },
+  { heading: 'Get involved', links: FOOTER_LINKS.engage },
+  { heading: 'More', links: FOOTER_LINKS.legal },
+];
 ---
 
 <footer class="mt-8 border-t border-border bg-surface">
@@ -74,7 +64,7 @@ const columns = FOOTER_GROUPS.map((group) => ({
     }
 
     <div class="mt-10 border-t border-border pt-8">
-      <NewsletterForm lang={lang} layout="wide" />
+      <NewsletterForm layout="wide" />
     </div>
 
     <div class="mt-10 border-t border-border pt-6 text-xs text-muted">

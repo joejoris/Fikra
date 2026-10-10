@@ -8,14 +8,6 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://fikra.example.org',
   output: 'static',
-  i18n: {
-    defaultLocale: 'en',
-    locales: ['en', 'am'],
-    routing: {
-      // English lives at the root; Amharic at /am/.
-      prefixDefaultLocale: false,
-    },
-  },
   integrations: [sitemap()],
   vite: {
     plugins: [tailwindcss()],

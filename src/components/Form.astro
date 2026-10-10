@@ -1,6 +1,4 @@
 ---
-import { useTranslations, localizePath, type Lang } from '../i18n/ui';
-
 interface Props {
   name: string;
   submitLabel?: string;
@@ -12,12 +10,11 @@ interface Props {
   description?: string;
   /** Show a file upload field (CV, pitch deck) posting multipart to the endpoint. */
   allowFile?: boolean;
-  lang?: Lang;
 }
 
 const {
   name,
-  submitLabel,
+  submitLabel = 'Send',
   showMessage = true,
   interestOptions,
   presetProgram,
@@ -25,14 +22,9 @@ const {
   heading,
   description,
   allowFile = false,
-  lang = 'en',
 } = Astro.props;
 
-const t = useTranslations(lang);
 const id = (field: string) => `${name}-${field}`;
-
-const privacyHref = localizePath('/privacy', lang);
-const consentParts = t('form.consent').split('{privacyLink}');
 ---
 
 <form
@@ -43,9 +35,6 @@ const consentParts = t('form.consent').split('{privacyLink}');
   method="post"
   enctype={allowFile ? 'multipart/form-data' : undefined}
   data-multipart={allowFile ? '' : undefined}
-  data-msg-sending={t('form.sending')}
-  data-msg-thanks={t('form.thanks')}
-  data-msg-error={t('form.error')}
 >
   {heading && <h3 class="text-lg font-bold text-ink">{heading}</h3>}
   {description && <p class="text-sm text-ink-soft">{description}</p>}
@@ -62,7 +51,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
 
   <div class="grid gap-5 sm:grid-cols-2">
     <div>
-      <label class="block text-sm font-semibold text-ink" for={id('name')}>{t('form.name')}</label>
+      <label class="block text-sm font-semibold text-ink" for={id('name')}>Full name</label>
       <input
         class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
         id={id('name')}
@@ -73,7 +62,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
       />
     </div>
     <div>
-      <label class="block text-sm font-semibold text-ink" for={id('email')}>{t('form.email')}</label>
+      <label class="block text-sm font-semibold text-ink" for={id('email')}>Email</label>
       <input
         class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
         id={id('email')}
@@ -89,8 +78,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
     showOrg && (
       <div>
         <label class="block text-sm font-semibold text-ink" for={id('organisation')}>
-          {t('form.organisation')}{' '}
-          <span class="font-normal text-muted">{t('form.organisationHint')}</span>
+          Organisation <span class="font-normal text-muted">(if relevant)</span>
         </label>
         <input
           class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
@@ -106,8 +94,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
   <div class="grid gap-5 sm:grid-cols-2">
     <div>
       <label class="block text-sm font-semibold text-ink" for={id('phone')}>
-        {t('form.phone')}{' '}
-        <span class="font-normal text-muted">{t('form.phoneHint')}</span>
+        Phone <span class="font-normal text-muted">(optional)</span>
       </label>
       <input
         class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
@@ -121,7 +108,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
       interestOptions && (
         <div>
           <label class="block text-sm font-semibold text-ink" for={id('interest')}>
-            {t('form.interest')}
+            I'm interested in
           </label>
           <select
             class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
@@ -129,7 +116,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
             name="interest"
             required
           >
-            <option value="">{t('form.choose')}</option>
+            <option value="">Please choose…</option>
             {interestOptions.map((opt) => (
               <option value={opt.value}>{opt.label}</option>
             ))}
@@ -143,7 +130,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
     showMessage && (
       <div>
         <label class="block text-sm font-semibold text-ink" for={id('message')}>
-          {t('form.message')}
+          Your message
         </label>
         <textarea
           class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
@@ -160,7 +147,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
     allowFile && (
       <div>
         <label class="block text-sm font-semibold text-ink" for={id('attachment')}>
-          {t('form.attachment')} <span class="font-normal text-muted">({t('form.optional')})</span>
+          Attachment <span class="font-normal text-muted">(optional)</span>
         </label>
         <input
           class="mt-1 block w-full text-sm text-ink-soft file:mr-3 file:rounded-lg file:border-0 file:bg-primary-soft file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary"
@@ -170,7 +157,9 @@ const consentParts = t('form.consent').split('{privacyLink}');
           multiple
           accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg"
         />
-        <p class="mt-1 text-xs text-muted">{t('form.attachmentHint')}</p>
+        <p class="mt-1 text-xs text-muted">
+          A CV, pitch deck or similar. PDF or Word, up to 8&nbsp;MB each (max 2 files).
+        </p>
       </div>
     )
   }
@@ -185,7 +174,8 @@ const consentParts = t('form.consent').split('{privacyLink}');
       required
     />
     <label class="text-sm text-ink-soft" for={id('consent')}>
-      {consentParts[0]}<a class="text-primary underline" href={privacyHref}>{t('form.privacy')}</a>{consentParts[1] ?? ''}
+      I agree that FIKRA may store these details to respond to my enquiry. See our
+      <a class="text-primary underline" href="/privacy">privacy policy</a>.
     </label>
   </div>
 
@@ -195,7 +185,7 @@ const consentParts = t('form.consent').split('{privacyLink}');
       type="submit"
       data-submit
     >
-      {submitLabel ?? t('form.send')}
+      {submitLabel}
     </button>
     <p class="text-sm text-muted" data-status role="status" aria-live="polite"></p>
   </div>
