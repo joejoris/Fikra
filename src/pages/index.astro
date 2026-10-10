@@ -3,14 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Button from '../components/Button.astro';
-import ProgramCard from '../components/ProgramCard.astro';
 import NewsCard from '../components/NewsCard.astro';
 import CTASection from '../components/CTASection.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
-
-const programs = (await getCollection('programs')).sort(
-  (a, b) => a.data.order - b.data.order,
-);
 
 const news = (
   await getCollection('news', ({ data }) =>
@@ -185,24 +180,6 @@ const values = [
           </div>
         ))
       }
-    </div>
-  </Section>
-
-  <!-- Programs -->
-  <Section>
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div class="max-w-2xl">
-        <p class="text-sm font-semibold uppercase tracking-widest text-primary">Programs</p>
-        <h2 class="mt-2 text-2xl font-bold sm:text-3xl">A path for every stage</h2>
-        <p class="mt-3 text-ink-soft">
-          From your first idea to a business that is already trading — pick up
-          where you are.
-        </p>
-      </div>
-      <Button href="/programs" variant="ghost">See all programs</Button>
-    </div>
-    <div class="mt-10 grid gap-6 md:grid-cols-3">
-      {programs.map((program) => <ProgramCard program={program} />)}
     </div>
   </Section>
 
