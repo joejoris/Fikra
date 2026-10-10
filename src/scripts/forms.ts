@@ -32,12 +32,17 @@ async function submit(form: HTMLFormElement) {
   const statusEl = form.querySelector<HTMLElement>('[data-status]');
   const button = form.querySelector<HTMLButtonElement>('[data-submit]');
   const endpoint = form.getAttribute('action') || '/api/contact';
+  const inline = form.dataset.success === 'inline';
 
   const payload = collect(form);
 
   // Honeypot filled => silently pretend success, send nothing.
   if (payload._gotcha) {
-    window.location.assign(THANKS_PATH);
+    if (inline) {
+      setStatus(statusEl, 'success', form.dataset.successMessage ?? 'Thank you.');
+    } else {
+      window.location.assign(THANKS_PATH);
+    }
     return;
   }
 
@@ -62,8 +67,13 @@ async function submit(form: HTMLFormElement) {
       throw new Error(`Request failed with ${res.status}`);
     }
 
-    setStatus(statusEl, 'success', 'Thank you — redirecting…');
-    window.location.assign(THANKS_PATH);
+    if (inline) {
+      setStatus(statusEl, 'success', form.dataset.successMessage ?? 'Thank you.');
+      form.reset();
+    } else {
+      setStatus(statusEl, 'success', 'Thank you — redirecting…');
+      window.location.assign(THANKS_PATH);
+    }
   } catch (error) {
     console.error(error);
     setStatus(
@@ -82,6 +92,9 @@ async function submit(form: HTMLFormElement) {
 export function initForms() {
   const forms = document.querySelectorAll<HTMLFormElement>('form[data-form]');
   forms.forEach((form) => {
+    if (form.dataset.initialized === 'true') return;
+    form.dataset.initialized = 'true';
+
     const loadedAt = form.querySelector<HTMLInputElement>('[data-loaded-at]');
     if (loadedAt) loadedAt.value = String(Date.now());
 

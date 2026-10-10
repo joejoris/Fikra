@@ -158,6 +158,37 @@ export async function onRequestPost(context: Ctx): Promise<Response> {
     return json({ ok: false, error: 'Could not send your message. Please try again.' }, 502);
   }
 
+  // Acknowledge to the submitter (best effort — never fail the request for this).
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [email],
+        reply_to: to,
+        subject: 'We received your message — FIKRA',
+        text: [
+          `Hello ${name},`,
+          '',
+          `Thank you for getting in touch with FIKRA. This is just to confirm that`,
+          `your message has reached us, and we will reply as soon as we can.`,
+          '',
+          'For your records, here is what you sent:',
+          '',
+          message || '(no message)',
+          '',
+          '— FIKRA',
+        ].join('\n'),
+      }),
+    });
+  } catch (error) {
+    console.error('contact: auto-reply failed', error);
+  }
+
   return json({ ok: true });
 }
 

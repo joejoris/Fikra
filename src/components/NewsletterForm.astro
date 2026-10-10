@@ -1,0 +1,91 @@
+---
+interface Props {
+  heading?: string;
+  description?: string;
+  /** Renders the email/name/subscribe controls in a row on larger screens. */
+  layout?: 'stacked' | 'wide';
+}
+
+const {
+  heading = 'Get FIKRA updates',
+  description = 'Occasional news about cohorts, events and openings. No spam, unsubscribe any time.',
+  layout = 'stacked',
+} = Astro.props;
+
+const name = 'newsletter';
+const id = (field: string) => `${name}-${field}`;
+const wide = layout === 'wide';
+---
+
+<form
+  class="space-y-4"
+  data-form
+  data-success="inline"
+  data-success-message="Thank you — please check your inbox to confirm."
+  action="/api/subscribe"
+  method="post"
+  novalidate
+>
+  <input type="hidden" name="_formName" value="newsletter" />
+  <input type="hidden" name="_loadedAt" value="" data-loaded-at />
+
+  <!-- Honeypot -->
+  <div class="hidden" aria-hidden="true">
+    <label for={id('gotcha')}>Leave this field empty</label>
+    <input id={id('gotcha')} type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
+  </div>
+
+  {heading && <h3 class="text-sm font-semibold text-ink">{heading}</h3>}
+  {description && <p class="text-sm text-ink-soft">{description}</p>}
+
+  <div class:list={['space-y-3', wide && 'sm:flex sm:items-center sm:gap-2 sm:space-y-0']}>
+    <label class="sr-only" for={id('email')}>Email address</label>
+    <input
+      class:list={['w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm', wide && 'sm:max-w-xs']}
+      id={id('email')}
+      name="email"
+      type="email"
+      autocomplete="email"
+      placeholder="you@example.com"
+      required
+    />
+    <label class="sr-only" for={id('firstName')}>First name (optional)</label>
+    <input
+      class:list={['w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm', wide && 'sm:max-w-[10rem]']}
+      id={id('firstName')}
+      name="first_name"
+      type="text"
+      autocomplete="given-name"
+      placeholder="First name (optional)"
+    />
+    <button
+      class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
+      type="submit"
+      data-submit
+    >
+      Subscribe
+    </button>
+  </div>
+
+  <div class:list={['flex items-start gap-2', wide && 'max-w-2xl']}>
+    <input
+      class="mt-1 h-4 w-4 rounded border-border"
+      id={id('consent')}
+      name="consent"
+      type="checkbox"
+      value="yes"
+      required
+    />
+    <label class="text-xs text-muted" for={id('consent')}>
+      I agree to receive email updates and accept our
+      <a class="text-primary underline" href="/privacy">privacy policy</a>.
+    </label>
+  </div>
+
+  <p class="text-sm text-muted" data-status role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  import { initForms } from '../scripts/forms';
+  initForms();
+</script>
