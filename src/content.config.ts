@@ -56,4 +56,28 @@ const team = defineCollection({
   }),
 });
 
-export const collections = { programs, news, impact, team };
+const faq = defineCollection({
+  loader: glob({ base: './src/content/faq', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    question: z.string(),
+    order: z.number().default(99),
+    draft: z.boolean().default(false),
+  }),
+});
+
+const events = defineCollection({
+  loader: glob({ base: './src/content/events', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date().optional(),
+    startTime: z.string().optional(),
+    location: z.string().optional(),
+    registrationUrl: z.string().optional(),
+    order: z.number().default(99),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { programs, news, impact, team, faq, events };

@@ -1,0 +1,68 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import CTASection from '../components/CTASection.astro';
+
+const items = (
+  await getCollection('faq', ({ data }) =>
+    import.meta.env.PROD ? data.draft !== true : true,
+  )
+).sort((a, b) => a.data.order - b.data.order);
+
+const rendered = await Promise.all(
+  items.map(async (entry) => ({
+    entry,
+    Content: (await render(entry)).Content,
+  })),
+);
+---
+
+<BaseLayout
+  title="Frequently asked questions"
+  description="Answers to common questions about joining FIKRA, costs, and how we work."
+>
+  <Section>
+    <PageHero
+      eyebrow="FAQ"
+      title="Frequently asked questions"
+      intro="The questions we are asked most. If yours is not here, get in touch."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="mx-auto max-w-3xl divide-y divide-border">
+      {
+        rendered.map(({ entry, Content }) => (
+          <details class="group py-4">
+            <summary class="flex cursor-pointer list-none items-start justify-between gap-4 text-lg font-semibold text-ink [&::-webkit-details-marker]:hidden">
+              <span>{entry.data.question}</span>
+              <span
+                class="mt-1 shrink-0 text-primary transition-transform group-open:rotate-45"
+                aria-hidden="true"
+              >
+                +
+              </span>
+            </summary>
+            <div class="prose mt-4">
+              <Content />
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section tone="soft">
+    <h2 class="text-2xl font-bold">Still have a question?</h2>
+    <p class="mt-3 max-w-2xl text-ink-soft">
+      We are happy to help — reach us on the contact page or by email.
+    </p>
+    <div class="mt-6">
+      <a class="font-semibold text-primary underline" href="/contact">Contact us →</a>
+    </div>
+  </Section>
+
+  <CTASection />
+</BaseLayout>

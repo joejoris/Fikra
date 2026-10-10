@@ -1,0 +1,105 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+---
+
+<BaseLayout
+  title="Search"
+  description="Search the FIKRA website."
+  noindex
+>
+  <Section>
+    <PageHero eyebrow="Search" title="Search FIKRA" intro="Find a programme, an answer or a page." />
+  </Section>
+
+  <Section tone="white">
+    <div class="mx-auto max-w-2xl">
+      <label class="block text-sm font-semibold text-ink" for="search-input">Search</label>
+      <input
+        id="search-input"
+        type="search"
+        placeholder="Try “Idea Lab”, “volunteer”, “cost”…"
+        autocomplete="off"
+        class="mt-2 w-full rounded-lg border border-border bg-surface px-4 py-3 text-base"
+      />
+      <p class="mt-2 text-sm text-muted" data-search-status role="status" aria-live="polite"></p>
+      <ul class="mt-6 space-y-3" data-search-results></ul>
+    </div>
+  </Section>
+
+  <script>
+    interface SearchItem {
+      title: string;
+      url: string;
+      summary: string;
+      tags?: string[];
+      type: string;
+    }
+
+    const input = document.getElementById('search-input') as HTMLInputElement | null;
+    const resultsList = document.querySelector<HTMLUListElement>('[data-search-results]');
+    const status = document.querySelector<HTMLElement>('[data-search-status]');
+    let index: SearchItem[] = [];
+
+    const render = (items: SearchItem[]) => {
+      if (!resultsList) return;
+      resultsList.innerHTML = items
+        .map(
+          (item) => `
+            <li class="rounded-[var(--radius-card)] border border-border p-4">
+              <a class="font-semibold text-primary underline" href="${item.url}">${item.title}</a>
+              <span class="ml-2 text-xs uppercase tracking-wide text-muted">${item.type}</span>
+              ${item.summary ? `<p class="mt-1 text-sm text-ink-soft">${item.summary}</p>` : ''}
+            </li>`,
+        )
+        .join('');
+    };
+
+    const run = (query: string) => {
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        if (status) status.textContent = 'Type to search.';
+        render([]);
+        return;
+      }
+      const terms = q.split(/\s+/);
+      const matches = index
+        .map((item) => {
+          const haystack = [item.title, item.summary, ...(item.tags ?? [])]
+            .join(' ')
+            .toLowerCase();
+          const score = terms.reduce((acc, term) => acc + (haystack.includes(term) ? 1 : 0), 0);
+          return { item, score };
+        })
+        .filter((entry) => entry.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map((entry) => entry.item)
+        .slice(0, 20);
+
+      if (status) {
+        status.textContent =
+          matches.length === 1 ? '1 result' : `${matches.length} results`;
+      }
+      render(matches);
+    };
+
+    const start = async () => {
+      try {
+        const res = await fetch('/search-index.json');
+        index = (await res.json()) as SearchItem[];
+      } catch {
+        if (status) status.textContent = 'Search is unavailable right now.';
+        return;
+      }
+      const initial = new URLSearchParams(window.location.search).get('q') ?? '';
+      if (input && initial) {
+        input.value = initial;
+      }
+      run(initial);
+    };
+
+    input?.addEventListener('input', () => run(input.value));
+    void start();
+  </script>
+</BaseLayout>

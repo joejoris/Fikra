@@ -10,6 +10,8 @@ interface Props {
 import { SITE } from '../lib/site';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import BackToTop from '../components/BackToTop.astro';
 import '../styles/global.css';
 
 const {
@@ -26,6 +28,26 @@ const ogImage = new URL(image, Astro.site ?? SITE.url).href;
 
 const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC;
 const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
+
+const socialUrls = Object.values(SITE.social).filter(Boolean);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'NGO',
+  name: SITE.name,
+  legalName: SITE.legalName,
+  url: SITE.url,
+  description: SITE.description,
+  email: SITE.email,
+  telephone: SITE.phone,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: SITE.address.line1,
+    addressLocality: SITE.address.city,
+    addressRegion: SITE.address.region,
+    addressCountry: SITE.address.country,
+  },
+  sameAs: socialUrls,
+};
 ---
 
 <!doctype html>
@@ -41,6 +63,8 @@ const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#0e6e6e" />
+    <link rel="alternate" type="application/rss+xml" title="FIKRA news" href="/rss.xml" />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
 
     <!-- Open Graph / social -->
     <meta property="og:type" content={ogType} />
@@ -70,5 +94,7 @@ const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
       <slot />
     </main>
     <Footer />
+    <WhatsAppButton />
+    <BackToTop />
   </body>
 </html>

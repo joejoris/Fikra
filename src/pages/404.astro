@@ -12,6 +12,17 @@ import Button from '../components/Button.astro';
       <p class="mt-4 text-lg text-ink-soft">
         The page may have moved or the address may be mistyped.
       </p>
+      <form class="mx-auto mt-8 flex max-w-md gap-2" action="/search" method="get">
+        <label class="sr-only" for="notfound-search">Search the site</label>
+        <input
+          id="notfound-search"
+          type="search"
+          name="q"
+          placeholder="Search FIKRA…"
+          class="w-full rounded-lg border border-border bg-surface px-4 py-3"
+        />
+        <Button type="submit" variant="primary">Search</Button>
+      </form>
       <div class="mt-8 flex justify-center gap-3">
         <Button href="/" variant="primary">Back to home</Button>
         <Button href="/contact" variant="outline">Contact us</Button>

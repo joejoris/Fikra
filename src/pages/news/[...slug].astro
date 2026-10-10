@@ -5,7 +5,9 @@ import Section from '../../components/Section.astro';
 import CTASection from '../../components/CTASection.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('news');
+  const posts = await getCollection('news', ({ data }) =>
+    import.meta.env.PROD ? data.draft !== true : true,
+  );
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },
@@ -19,6 +21,7 @@ const date = post.data.pubDate.toLocaleDateString('en-GB', {
   day: 'numeric',
   month: 'long',
   year: 'numeric',
+  timeZone: 'UTC',
 });
 ---
 

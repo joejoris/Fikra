@@ -30,6 +30,9 @@ export const SITE = {
     x: '',
     youtube: '',
   },
+  // WhatsApp number in international format, digits only (e.g. 254712345678).
+  // Leave empty to hide the WhatsApp button entirely.
+  whatsapp: '', // [CONFIRM]
   // Registration / legal details shown in the footer and on the Donate page.
   registrationNumber: '[CONFIRM registration number]', // [CONFIRM]
 } as const;
@@ -50,6 +53,7 @@ export const NAV_LINKS = [
   { label: 'About', href: '/about' },
   { label: 'Programs', href: '/programs' },
   { label: 'Impact', href: '/impact' },
+  { label: 'Events', href: '/events' },
   { label: 'Get Involved', href: '/get-involved' },
   { label: 'News', href: '/news' },
 ] as const;
@@ -59,6 +63,7 @@ export const FOOTER_LINKS = {
     { label: 'About', href: '/about' },
     { label: 'Programs', href: '/programs' },
     { label: 'Impact', href: '/impact' },
+    { label: 'Events', href: '/events' },
     { label: 'Team', href: '/team' },
     { label: 'News', href: '/news' },
   ],
@@ -71,6 +76,8 @@ export const FOOTER_LINKS = {
   ],
   legal: [
     { label: 'Contact', href: '/contact' },
+    { label: 'FAQ', href: '/faq' },
+    { label: 'Search', href: '/search' },
     { label: 'Privacy policy', href: '/privacy' },
   ],
 } as const;
