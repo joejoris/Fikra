@@ -1,6 +1,6 @@
 ---
 name: 'Santos Oginda'
-role: '[CONFIRM role]'
-bio: '[CONFIRM short biography — 2–3 sentences.]'
+role: 'Programs Lead'
+bio: 'Runs FIKRA''s programmes — from Idea Lab through Launchpad — and matches founders with the right mentors.'
 order: 2
 ---

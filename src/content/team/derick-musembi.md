@@ -1,6 +1,6 @@
 ---
 name: 'Derick Musembi'
-role: '[CONFIRM role]'
-bio: '[CONFIRM short biography — 2–3 sentences.]'
-order: 3
+role: 'Partnerships & Fundraising Lead'
+bio: 'Builds and stewards relationships with funders, corporates and delivery partners.'
+order: 4
 ---

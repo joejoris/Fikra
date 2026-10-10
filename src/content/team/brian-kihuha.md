@@ -1,6 +1,6 @@
 ---
 name: 'Brian Kihuha'
-role: '[CONFIRM role]'
-bio: '[CONFIRM short biography — 2–3 sentences.]'
+role: 'Executive Director'
+bio: 'Leads FIKRA''s strategy and partnerships, and represents the organisation to funders, government and the community.'
 order: 1
 ---

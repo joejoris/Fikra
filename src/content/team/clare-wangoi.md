@@ -1,6 +1,6 @@
 ---
 name: 'Clare Wangoi'
-role: '[CONFIRM role]'
-bio: '[CONFIRM short biography — 2–3 sentences.]'
-order: 4
+role: 'Finance & Operations Lead'
+bio: 'Oversees FIKRA''s finances, reporting and day-to-day operations, keeping the organisation accountable and well run.'
+order: 3
 ---
