@@ -80,4 +80,19 @@ const events = defineCollection({
   }),
 });
 
-export const collections = { programs, news, impact, team, faq, events };
+const documents = defineCollection({
+  loader: glob({ base: './src/content/documents', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    category: z.enum(['Governance', 'Reports', 'Policies', 'Other']).default('Other'),
+    file: z.string(),
+    fileType: z.enum(['PDF', 'DOCX', 'XLSX']).default('PDF'),
+    size: z.string().optional(),
+    date: z.coerce.date().optional(),
+    order: z.number().default(99),
+    draft: z.boolean().default(true),
+  }),
+});
+
+export const collections = { programs, news, impact, team, faq, events, documents };

@@ -133,3 +133,34 @@ collections:
       - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
       - { name: draft, label: Draft (hidden from the live site), widget: boolean, default: true }
       - { name: body, label: Details, widget: markdown }
+
+  - name: documents
+    label: Documents
+    label_singular: Document
+    folder: src/content/documents
+    create: true
+    extension: md
+    format: frontmatter
+    media_folder: 'public/documents'
+    public_folder: '/documents'
+    summary: '{{title}}'
+    sortable_fields: [category, order, title]
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: description, label: Description, widget: text }
+      - name: category
+        label: Category
+        widget: select
+        options: [Governance, Reports, Policies, Other]
+        default: Governance
+      - { name: file, label: Document file, widget: file }
+      - name: fileType
+        label: File type
+        widget: select
+        options: [PDF, DOCX, XLSX]
+        default: PDF
+      - { name: size, label: File size, widget: string, required: false, hint: 'e.g. 1.2 MB' }
+      - { name: date, label: Date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, required: false }
+      - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
+      - { name: draft, label: Draft (hidden from the live site), widget: boolean, default: true }
+      - { name: body, label: Notes, widget: markdown, required: false }

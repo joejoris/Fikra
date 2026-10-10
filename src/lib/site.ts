@@ -77,6 +77,7 @@ export const FOOTER_LINKS = {
   legal: [
     { label: 'Contact', href: '/contact' },
     { label: 'FAQ', href: '/faq' },
+    { label: 'Documents', href: '/documents' },
     { label: 'Search', href: '/search' },
     { label: 'Privacy policy', href: '/privacy' },
   ],

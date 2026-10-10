@@ -22,6 +22,7 @@ export const GET: APIRoute = async () => {
     { title: 'Contact', url: '/contact', summary: 'Get in touch with FIKRA.', type: 'Page' },
     { title: 'News', url: '/news', summary: 'Updates and announcements.', type: 'Page' },
     { title: 'FAQ', url: '/faq', summary: 'Frequently asked questions.', type: 'Page' },
+    { title: 'Documents & reports', url: '/documents', summary: 'Governance documents, policies and annual reports.', type: 'Page' },
     { title: 'Privacy policy', url: '/privacy', summary: 'How we handle your information.', type: 'Page' },
   ];
 
