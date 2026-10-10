@@ -3,12 +3,10 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Button from '../components/Button.astro';
-import Stat from '../components/Stat.astro';
 import ProgramCard from '../components/ProgramCard.astro';
 import NewsCard from '../components/NewsCard.astro';
 import CTASection from '../components/CTASection.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
-import { STATS } from '../lib/site';
 
 const programs = (await getCollection('programs')).sort(
   (a, b) => a.data.order - b.data.order,
@@ -41,22 +39,72 @@ const initials = (name: string) =>
     .map((part) => part[0] ?? '')
     .join('')
     .toUpperCase() || '–';
+
+const howWeWork = [
+  {
+    title: 'Test the idea.',
+    text: 'Learn who the customer is and whether the problem is real.',
+  },
+  {
+    title: 'Build the business.',
+    text: 'Mentorship, workspace and small grants to reach first revenue.',
+  },
+  {
+    title: 'Grow with peers.',
+    text: 'Ongoing circles keep founders learning and accountable.',
+  },
+];
+
+const outcomes = [
+  {
+    title: 'Skills that stick',
+    text: 'Practical skills founders use the day they leave training — and every day after.',
+    svg: 'M22 9 12 4 2 9l10 5 10-5ZM6 11.5V16c0 1.1 2.7 2.5 6 2.5s6-1.4 6-2.5v-4.5M22 9v5',
+  },
+  {
+    title: 'From idea to income',
+    text: 'Ideas become products, services and income that founders can build on.',
+    svg: 'M3 21h18M4 17l5-5 3 3 8-8M14 7h7v7',
+  },
+  {
+    title: 'Confidence and dignity',
+    text: 'Self-built income, and the belief that comes with earning it.',
+    svg: 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z',
+  },
+];
+
+const values = [
+  { title: 'Practical', text: 'We learn by doing, not by lecturing.' },
+  { title: 'Local', text: 'Built with and for the communities we serve.' },
+  { title: 'Honest', text: 'We report what works and what does not.' },
+  { title: 'Lasting', text: 'We aim for enterprises that outlive our support.' },
+];
 ---
 
 <BaseLayout title="FIKRA — from idea to enterprise">
   <!-- Hero -->
-  <div class="border-b border-border bg-surface">
-    <div class="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-24">
+  <div class="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary-soft/70 via-surface to-surface">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div class="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-accent/25 blur-3xl"></div>
+      <div class="absolute -left-32 bottom-0 h-96 w-96 rounded-full bg-primary/15 blur-3xl"></div>
+      <div class="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-soft blur-3xl"></div>
+    </div>
+
+    <div class="relative mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-24">
       <div>
-        <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
+        <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-surface/80 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary backdrop-blur">
+          <span class="h-1.5 w-1.5 rounded-full bg-accent"></span>
           Youth entrepreneurship
         </p>
-        <h1 class="text-4xl font-bold sm:text-5xl lg:text-6xl">
-          From idea to enterprise.
+        <h1 class="text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
+          From idea to{' '}
+          <span class="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+            enterprise.
+          </span>
         </h1>
         <p class="mt-5 max-w-xl text-lg text-ink-soft">
-          FIKRA supports young people to turn ideas into sustainable businesses —
-          through training, mentorship and access to real opportunity.
+          FIKRA supports young people to turn ideas into sustainable businesses
+          — through training, mentorship and access to real opportunity.
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <Button href="/get-involved" variant="primary" size="lg">
@@ -66,49 +114,89 @@ const initials = (name: string) =>
             Explore programs
           </Button>
         </div>
+        <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-border pt-6 text-sm font-medium text-ink-soft">
+          {
+            ['Practical training', 'Real mentorship', 'Access to opportunity'].map((item) => (
+              <li class="flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" class="text-primary">
+                  <path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                {item}
+              </li>
+            ))
+          }
+        </ul>
       </div>
 
-      <div class="rounded-[var(--radius-card)] border border-border bg-bg p-8 shadow-[var(--shadow-card)]">
-        <h2 class="text-lg font-bold">How we work</h2>
-        <ol class="mt-5 space-y-5">
-          <li class="flex gap-4">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white">1</span>
-            <span><strong class="text-ink">Test the idea.</strong> <span class="text-ink-soft">Learn who the customer is and whether the problem is real.</span></span>
-          </li>
-          <li class="flex gap-4">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white">2</span>
-            <span><strong class="text-ink">Build the business.</strong> <span class="text-ink-soft">Mentorship, workspace and small grants to reach first revenue.</span></span>
-          </li>
-          <li class="flex gap-4">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white">3</span>
-            <span><strong class="text-ink">Grow with peers.</strong> <span class="text-ink-soft">Ongoing circles keep founders learning and accountable.</span></span>
-          </li>
-        </ol>
+      <div class="relative">
+        <div
+          aria-hidden="true"
+          class="absolute -inset-1.5 rounded-3xl bg-gradient-to-br from-primary/30 via-accent/30 to-primary/30 blur-xl"
+        ></div>
+        <div class="relative rounded-2xl border border-border bg-surface/95 p-7 shadow-[var(--shadow-card)] backdrop-blur sm:p-8">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-lg font-bold">How we work</h2>
+            <span class="rounded-full bg-accent/15 px-2.5 py-1 text-xs font-bold text-accent-dark">
+              3 steps
+            </span>
+          </div>
+          <ol class="mt-6 space-y-6">
+            {
+              howWeWork.map((step, i) => (
+                <li class="flex gap-4">
+                  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-sm font-bold text-white shadow-[0_4px_12px_-4px_rgba(14,110,110,0.8)]">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <h3 class="font-bold text-ink">{step.title}</h3>
+                    <p class="mt-1 text-sm text-ink-soft">{step.text}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+          <div class="mt-7 flex items-center justify-between border-t border-border pt-5">
+            <span class="text-sm text-muted">Founder-led and practical</span>
+            <a
+              href="/programs"
+              class="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-colors hover:text-primary-dark"
+            >
+              See programs <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Stats -->
+  <!-- What changes for people -->
   <Section tone="soft">
-    <p class="mb-8 text-sm font-semibold uppercase tracking-widest text-primary">
-      Our impact so far
-    </p>
-    <div class="grid gap-8 sm:grid-cols-3">
-      {STATS.map((stat) => <Stat value={stat.value} label={stat.label} />)}
+    <div class="grid gap-6 sm:grid-cols-3">
+      {
+        outcomes.map((item) => (
+          <div class="flex flex-col items-start rounded-[var(--radius-card)] border border-primary/10 bg-surface p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:shadow-md">
+            <span class="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white shadow-[0_6px_16px_-6px_rgba(14,110,110,0.8)]">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d={item.svg}></path>
+              </svg>
+            </span>
+            <h3 class="mt-4 font-bold text-ink">{item.title}</h3>
+            <p class="mt-2 text-sm text-ink-soft">{item.text}</p>
+          </div>
+        ))
+      }
     </div>
-    <p class="mt-8 text-sm text-muted">
-      Figures to be confirmed with FIKRA before launch.
-    </p>
   </Section>
 
   <!-- Programs -->
   <Section>
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div class="max-w-2xl">
-        <h2 class="text-2xl font-bold sm:text-3xl">Programs</h2>
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary">Programs</p>
+        <h2 class="mt-2 text-2xl font-bold sm:text-3xl">A path for every stage</h2>
         <p class="mt-3 text-ink-soft">
-          A path for every stage — from your first idea to a business that is
-          already trading.
+          From your first idea to a business that is already trading — pick up
+          where you are.
         </p>
       </div>
       <Button href="/programs" variant="ghost">See all programs</Button>
@@ -118,31 +206,33 @@ const initials = (name: string) =>
     </div>
   </Section>
 
-  <!-- About teaser -->
+  <!-- Why FIKRA exists -->
   <Section tone="white">
     <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
       <div>
-        <h2 class="text-2xl font-bold sm:text-3xl">Why FIKRA exists</h2>
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary">Why FIKRA exists</p>
+        <h2 class="mt-2 text-2xl font-bold sm:text-3xl">
+          Talent is everywhere. Opportunity should be too.
+        </h2>
         <p class="mt-4 text-ink-soft">
-          Talent is everywhere; opportunity is not. FIKRA exists to close that
-          gap for young people who have the drive to build something but not
-          always the network, the capital or the know-how to get started.
+          FIKRA exists to close that gap for young people who have the drive to
+          build something but not always the network, the capital or the
+          know-how to get started.
         </p>
-        <div class="mt-6">
+        <blockquote class="mt-6 border-l-4 border-accent pl-4 text-lg font-semibold text-ink">
+          From idea to enterprise.
+        </blockquote>
+        <div class="mt-6 flex flex-wrap gap-3">
           <Button href="/about" variant="ghost">More about us</Button>
+          <Button href="/impact" variant="outline">Our impact</Button>
         </div>
       </div>
       <ul class="grid gap-4 sm:grid-cols-2">
         {
-          [
-            ['Practical', 'We learn by doing, not by lecturing.'],
-            ['Local', 'Built with and for the communities we serve.'],
-            ['Honest', 'We report what works and what does not.'],
-            ['Lasting', 'We aim for enterprises that outlive our support.'],
-          ].map(([title, text]) => (
-            <li class="rounded-[var(--radius-card)] border border-border p-5">
-              <h3 class="font-bold text-ink">{title}</h3>
-              <p class="mt-1 text-sm text-ink-soft">{text}</p>
+          values.map((value) => (
+            <li class="rounded-[var(--radius-card)] border border-border bg-bg p-5 transition hover:border-primary/40 hover:bg-surface">
+              <h3 class="font-bold text-ink">{value.title}</h3>
+              <p class="mt-1 text-sm text-ink-soft">{value.text}</p>
             </li>
           ))
         }
@@ -150,22 +240,32 @@ const initials = (name: string) =>
     </div>
   </Section>
 
-  <!-- Impact / stories -->
+  <!-- Stories -->
   <Section tone="soft">
-    <h2 class="text-2xl font-bold sm:text-3xl">Stories</h2>
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary">Stories</p>
+        <h2 class="mt-2 text-2xl font-bold sm:text-3xl">The people behind the numbers</h2>
+      </div>
+      <Button href="/impact" variant="ghost">See our impact</Button>
+    </div>
     {
       stories.length > 0 ? (
         <div class="mt-10 grid gap-6 md:grid-cols-2">
           {stories.slice(0, 2).map((story) => (
-            <article class="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
-              <h3 class="text-lg font-bold text-ink">{story.data.title}</h3>
-              <p class="mt-2 text-sm text-ink-soft">{story.data.summary}</p>
-              {story.data.person && (
+            <article class="relative overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:shadow-md">
+              <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary"></div>
+              <span aria-hidden="true" class="text-4xl font-serif font-bold leading-none text-primary/20">"</span>
+              <p class="-mt-4 text-ink-soft">{story.data.summary}</p>
+              {(story.data.person || story.data.location) && (
                 <p class="mt-4 text-sm font-medium text-muted">
                   {story.data.person}
                   {story.data.location && ` · ${story.data.location}`}
                 </p>
               )}
+              <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                Read the story <span aria-hidden="true">→</span>
+              </span>
             </article>
           ))}
         </div>
@@ -177,16 +277,14 @@ const initials = (name: string) =>
         </p>
       )
     }
-    <div class="mt-8">
-      <Button href="/impact" variant="ghost">See our impact</Button>
-    </div>
   </Section>
 
   <!-- Team -->
   <Section>
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div class="max-w-2xl">
-        <h2 class="text-2xl font-bold sm:text-3xl">The team</h2>
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary">Team</p>
+        <h2 class="mt-2 text-2xl font-bold sm:text-3xl">The people behind FIKRA</h2>
         <p class="mt-3 text-ink-soft">
           A small team, working closely with mentors and partners to support
           every founder we take on.
@@ -194,16 +292,16 @@ const initials = (name: string) =>
       </div>
       <Button href="/team" variant="ghost">Meet the team</Button>
     </div>
-    <ul class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {
         team.map((member) => (
-          <li class="flex items-center gap-4">
-            <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xl font-bold text-primary">
+          <li class="flex items-center gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)] transition hover:border-primary/40">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-lg font-bold text-white shadow-[0_4px_12px_-4px_rgba(14,110,110,0.7)]">
               {initials(member.data.name)}
             </span>
             <span>
               <span class="block font-bold text-ink">{member.data.name}</span>
-              <span class="block text-sm text-ink-soft">{member.data.role}</span>
+              <span class="mt-0.5 block text-sm text-ink-soft">{member.data.role}</span>
             </span>
           </li>
         ))
@@ -214,9 +312,12 @@ const initials = (name: string) =>
   <!-- News -->
   {
     news.length > 0 && (
-      <Section>
+      <Section tone="white">
         <div class="flex flex-wrap items-end justify-between gap-4">
-          <h2 class="text-2xl font-bold sm:text-3xl">News</h2>
+          <div class="max-w-2xl">
+            <p class="text-sm font-semibold uppercase tracking-widest text-primary">News</p>
+            <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Latest updates</h2>
+          </div>
           <Button href="/news" variant="ghost">All news</Button>
         </div>
         <div class="mt-10 grid gap-6 md:grid-cols-3">
@@ -227,15 +328,33 @@ const initials = (name: string) =>
   }
 
   <!-- Newsletter -->
-  <Section tone="white">
-    <div class="mx-auto max-w-2xl text-center">
-      <h2 class="text-2xl font-bold sm:text-3xl">Be first to hear</h2>
-      <p class="mt-3 text-ink-soft">
-        Join the FIKRA mailing list for new cohorts, events and opportunities —
-        a few emails a year, nothing more.
-      </p>
-      <div class="mt-8 text-left">
-        <NewsletterForm />
+  <Section>
+    <div class="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-bg to-primary-soft p-8 shadow-[var(--shadow-card)] sm:p-12">
+      <div aria-hidden="true" class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl"></div>
+      <div class="relative grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Newsletter</p>
+          <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Be first to hear</h2>
+          <p class="mt-3 text-ink-soft">
+            Join the FIKRA mailing list for new cohorts, events and
+            opportunities.
+          </p>
+          <ul class="mt-6 space-y-2 text-sm text-ink-soft">
+            {
+              ['New cohorts and openings', 'Events and opportunities', 'A few emails a year — nothing more'].map((item) => (
+                <li class="flex items-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" class="text-accent-dark">
+                    <path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                  {item}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class="rounded-2xl border border-border bg-surface p-6 shadow-[var(--shadow-card)] sm:p-8">
+          <NewsletterForm heading="Get updates" />
+        </div>
       </div>
     </div>
   </Section>

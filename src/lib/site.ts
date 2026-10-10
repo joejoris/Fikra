@@ -148,15 +148,3 @@ export const SOCIAL_LABELS: Record<string, string> = {
   x: 'X',
   youtube: 'YouTube',
 };
-
-/**
- * Homepage / impact figures.
- *
- * THESE ARE ILLUSTRATIVE PLACEHOLDERS. Replace with figures FIKRA has verified
- * and can stand behind. Do not publish invented statistics.
- */
-export const STATS = [
-  { value: '[N]', label: 'young people trained' },
-  { value: '[N]', label: 'enterprises supported' },
-  { value: '[N]', label: 'mentors and partners' },
-] as const;
