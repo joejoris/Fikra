@@ -26,6 +26,20 @@ const stories = (
     import.meta.env.PROD ? data.draft !== true : true,
   )
 ).sort((a, b) => a.data.order - b.data.order);
+
+const team = (await getCollection('team')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const initials = (name: string) =>
+  name
+    .replace(/\[.*?\]/g, '')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0] ?? '')
+    .join('')
+    .toUpperCase() || '–';
 ---
 
 <BaseLayout title="FIKRA — from idea to enterprise">
@@ -165,6 +179,35 @@ const stories = (
     <div class="mt-8">
       <Button href="/impact" variant="ghost">See our impact</Button>
     </div>
+  </Section>
+
+  <!-- Team -->
+  <Section>
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div class="max-w-2xl">
+        <h2 class="text-2xl font-bold sm:text-3xl">The team</h2>
+        <p class="mt-3 text-ink-soft">
+          A small team, working closely with mentors and partners to support
+          every founder we take on.
+        </p>
+      </div>
+      <Button href="/team" variant="ghost">Meet the team</Button>
+    </div>
+    <ul class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        team.map((member) => (
+          <li class="flex items-center gap-4">
+            <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xl font-bold text-primary">
+              {initials(member.data.name)}
+            </span>
+            <span>
+              <span class="block font-bold text-ink">{member.data.name}</span>
+              <span class="block text-sm text-ink-soft">{member.data.role}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
   </Section>
 
   <!-- News -->
