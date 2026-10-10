@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import PageHero from '../../components/PageHero.astro';
+import CTASection from '../../components/CTASection.astro';
+---
+
+<BaseLayout
+  title="ስለ እኛ"
+  description="FIKRA ወጣቶች ሀሳባቸውን ወደ ዘላቂ ድርጅት እንዲቀይሩ የሚደግፍ የወጣቶች ስራ ፈጠራ ድርጅት ነው።"
+  lang="am"
+>
+  <Section>
+    <PageHero
+      eyebrow="ስለ FIKRA"
+      title="ተሰጥኦ በሁሉም ቦታ አለ። ዕድልም እንዲሁ መሆን አለበት።"
+      intro="FIKRA ወጣቶች ዘላቂ ንግዶችን እንዲገነቡ ይደግፋል — በስልጠና፣ በማማከር እና ብዙ ጊዜ ተደራሽ ያልሆኑትን ትስስርና ካፒታል በማገናኘት።"
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="grid gap-10 lg:grid-cols-2">
+      <div class="prose">
+        <h2>ተልዕኮአችን</h2>
+        <p>
+          ወጣቶች ሀሳባቸውን ወደ ዘላቂ ድርጅት እንዲቀይሩ መርዳት — ለራሳቸውም ለሚቀጥሩትም
+          ሥራ፣ ገቢ እና ክብር የሚፈጥር።
+        </p>
+        <h2>ራዕያችን</h2>
+        <p>
+          ካላቸው ነገር እና ካሉበት ቦታ ተነስተው ንግድ ማስጀመር፣ ማሳደግ እና ማቆየት የሚችሉ
+          የወጣት ገንቢዎች ትውልድ።
+        </p>
+        <h2>የምናምንባቸው</h2>
+        <ul>
+          <li><strong>ተግባር ከንድፈ ሀሳብ ይቀድማል።</strong> ፈጣሪዎች በማድረግ ይማራሉ።</li>
+          <li><strong>የአካባቢ እውቀት።</strong> ሥራችን ከምናገለግላቸው ማህበረሰቦች ጋር አብሮ ይቀረጻል።</li>
+          <li><strong>ታማኝነት።</strong> የሰራውን — ያልሰራውንም — እንገልጻለን።</li>
+          <li><strong>ዘላቂነት።</strong> ከድጋፋችን በላይ የሚቆዩ ድርጅቶችን እንገነባለን።</li>
+        </ul>
+      </div>
+      <div class="prose">
+        <h2>ታሪካችን</h2>
+        <p>
+          [CONFIRM — ይህን ክፍል በFIKRA እውነተኛ የተመሰረተበት ታሪክ ይተኩ፡ ማን
+          መሰረተው፣ መቼ እና ለምን። ይህ ጊዜያዊ ጽሑፍ ነው።]
+        </p>
+        <p>
+          FIKRA የተጀመረው በአንድ ቀላል ምልከታ ነው፡ ምርጥ ሀሳብ ያላቸው ወጣቶች ሁልጊዜ
+          ምርጥ ድጋፍ የሚያገኙ አልነበሩም። ከመደበኛ ያልሆነ ማማከር የጀመረው ሥራ አሁን
+          ፈጣሪዎችን ከመጀመሪያ ሀሳብ እስከ የተመሰረተ ንግድ የሚወስዱ የተዋቀሩ ፕሮግራሞች ሆኗል።
+        </p>
+        <h2>የምንሰራበት አካባቢ</h2>
+        <p>
+          [CONFIRM — FIKRA የሚያገለግላቸውን አካባቢዎች እና የቢሮ ቦታዎችን ይግለጹ።]
+        </p>
+        <h2>አስተዳደር</h2>
+        <p>
+          FIKRA በሕገ መንግሥቱ እና በዳይሬክተሮች ቦርድ ይመራል፣ እንዲሁም በሦስት
+          ዓመት ስትራቴጂካዊ ዕቅድ ላይ ያለውን ሂደት ያሳውቃል። ድርጅታዊ መዋቅራችን እና
+          ቁልፍ ሰነዶቻችን በጥያቄ ይገኛሉ።
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <Section tone="soft">
+    <div class="grid gap-8 sm:grid-cols-3">
+      <a class="rounded-[var(--radius-card)] border border-border bg-surface p-6 hover:border-primary/40" href="/programs">
+        <h2 class="font-bold text-ink">ፕሮግራሞች</h2>
+        <p class="mt-2 text-sm text-ink-soft">በየደረጃው ፈጣሪዎችን እንዴት እንደምንደግፍ ይመልከቱ።</p>
+      </a>
+      <a class="rounded-[var(--radius-card)] border border-border bg-surface p-6 hover:border-primary/40" href="/team">
+        <h2 class="font-bold text-ink">ቡድን</h2>
+        <p class="mt-2 text-sm text-ink-soft">ከFIKRA ጀርባ ያሉትን ሰዎች ያውቁ።</p>
+      </a>
+      <a class="rounded-[var(--radius-card)] border border-border bg-surface p-6 hover:border-primary/40" href="/impact">
+        <h2 class="font-bold text-ink">ተጽእኖ</h2>
+        <p class="mt-2 text-sm text-ink-soft">ሥራችን እስካሁን የቀየረው።</p>
+      </a>
+    </div>
+  </Section>
+
+  <CTASection lang="am" />
+</BaseLayout>

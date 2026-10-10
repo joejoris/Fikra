@@ -1,0 +1,50 @@
+---
+import { languages, alternatePath, useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** 'inline' for the desktop header, 'block' for the mobile menu. */
+  variant?: 'inline' | 'block';
+}
+
+const { lang, variant = 'inline' } = Astro.props;
+const t = useTranslations(lang);
+const currentPath = Astro.url.pathname;
+const entries = Object.entries(languages) as [Lang, string][];
+---
+
+<nav
+  aria-label={t('lang.label')}
+  class:list={[
+    'flex items-center gap-1 text-sm',
+    variant === 'block' && 'flex-col items-stretch gap-0',
+  ]}
+>
+  {
+    entries.map(([code, label]) =>
+      code === lang ? (
+        <span
+          class:list={[
+            'rounded-md px-2 py-1 font-semibold text-primary',
+            variant === 'block' && 'px-3 py-2.5',
+          ]}
+          aria-current="true"
+        >
+          {label}
+        </span>
+      ) : (
+        <a
+          class:list={[
+            'rounded-md px-2 py-1 text-ink-soft hover:bg-primary-soft hover:text-primary',
+            variant === 'block' && 'px-3 py-2.5',
+          ]}
+          href={alternatePath(currentPath, code)}
+          hreflang={code}
+          lang={code}
+        >
+          {label}
+        </a>
+      ),
+    )
+  }
+</nav>

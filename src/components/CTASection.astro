@@ -1,15 +1,17 @@
 ---
 import Button from './Button.astro';
+import { useTranslations, localizePath, type Lang } from '../i18n/ui';
 
 interface Props {
   title?: string;
   text?: string;
+  lang?: Lang;
 }
 
-const {
-  title = 'Ready to build something?',
-  text = 'Whether you have an idea, want to mentor, or want to fund the next enterprise — there is a place for you at FIKRA.',
-} = Astro.props;
+const { title, text, lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+const resolvedTitle = title ?? t('cta.title');
+const resolvedText = text ?? t('cta.text');
 ---
 
 <section class="border-y border-border bg-primary text-white">
@@ -17,18 +19,20 @@ const {
     class="mx-auto flex w-full max-w-6xl flex-col items-start gap-6 px-5 py-14 sm:flex-row sm:items-center sm:justify-between sm:px-8"
   >
     <div class="max-w-xl">
-      <h2 class="text-2xl font-bold sm:text-3xl">{title}</h2>
-      <p class="mt-3 text-white/85">{text}</p>
+      <h2 class="text-2xl font-bold sm:text-3xl">{resolvedTitle}</h2>
+      <p class="mt-3 text-white/85">{resolvedText}</p>
     </div>
     <div class="flex flex-wrap gap-3">
-      <Button href="/get-involved" variant="accent" size="lg">Get involved</Button>
+      <Button href={localizePath('/get-involved', lang)} variant="accent" size="lg">
+        {t('cta.getInvolved')}
+      </Button>
       <Button
-        href="/donate"
+        href={localizePath('/donate', lang)}
         variant="outline"
         size="lg"
         class="border-white text-white hover:bg-white/10"
       >
-        Donate
+        {t('cta.donate')}
       </Button>
     </div>
   </div>

@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Button from '../../components/Button.astro';
+import Stat from '../../components/Stat.astro';
+import NewsletterForm from '../../components/NewsletterForm.astro';
+import CTASection from '../../components/CTASection.astro';
+import { STATS } from '../../lib/site';
+
+const stats = [
+  { value: STATS[0].value, label: 'የሰለጠኑ ወጣቶች' },
+  { value: STATS[1].value, label: 'የተደገፉ ድርጅቶች' },
+  { value: STATS[2].value, label: 'አማካሪዎች እና አጋሮች' },
+];
+---
+
+<BaseLayout
+  title="FIKRA — ከሀሳብ ወደ ድርጅት"
+  description="FIKRA ወጣቶች ሀሳባቸውን ወደ ዘላቂ ንግድ እንዲቀይሩ በስልጠና፣ በማማከር እና በዕድል ይደግፋል።"
+  lang="am"
+>
+  <!-- Hero -->
+  <div class="border-b border-border bg-surface">
+    <div class="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-24">
+      <div>
+        <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
+          የወጣቶች ስራ ፈጠራ
+        </p>
+        <h1 class="text-4xl font-bold sm:text-5xl lg:text-6xl">ከሀሳብ ወደ ድርጅት።</h1>
+        <p class="mt-5 max-w-xl text-lg text-ink-soft">
+          FIKRA ወጣቶች ሀሳባቸውን ወደ ዘላቂ ንግድ እንዲቀይሩ — በስልጠና፣ በማማከር እና በእውነተኛ ዕድል ይደግፋል።
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <Button href="/get-involved" variant="primary" size="lg">ይሳተፉ</Button>
+          <Button href="/am/about" variant="outline" size="lg">ስለ እኛ ይወቁ</Button>
+        </div>
+      </div>
+
+      <div class="rounded-[var(--radius-card)] border border-border bg-bg p-8 shadow-[var(--shadow-card)]">
+        <h2 class="text-lg font-bold">እንዴት እንሰራለን</h2>
+        <ol class="mt-5 space-y-5">
+          <li class="flex gap-4">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white">1</span>
+            <span><strong class="text-ink">ሀሳቡን ይፈትኑ።</strong> <span class="text-ink-soft">ደንበኛው ማን እንደሆነ እና ችግሩ እውነት መሆኑን ይማሩ።</span></span>
+          </li>
+          <li class="flex gap-4">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white">2</span>
+            <span><strong class="text-ink">ንግዱን ይገንቡ።</strong> <span class="text-ink-soft">ወደ መጀመሪያ ገቢ ለመድረስ ማማከር፣ የሥራ ቦታ እና ትንሽ ድጋፍ።</span></span>
+          </li>
+          <li class="flex gap-4">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white">3</span>
+            <span><strong class="text-ink">ከእኩዮች ጋር ያድጉ።</strong> <span class="text-ink-soft">ቀጣይ ክበቦች ፈጣሪዎች እንዲማሩ እና ተጠያቂ እንዲሆኑ ያደርጋሉ።</span></span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <Section tone="soft">
+    <p class="mb-8 text-sm font-semibold uppercase tracking-widest text-primary">እስካሁን ያለን ተጽእኖ</p>
+    <div class="grid gap-8 sm:grid-cols-3">
+      {stats.map((stat) => <Stat value={stat.value} label={stat.label} />)}
+    </div>
+    <p class="mt-8 text-sm text-muted">ቁጥሮቹ ከመታተማቸው በፊት ከFIKRA ጋር ይረጋገጣሉ።</p>
+  </Section>
+
+  <!-- About teaser -->
+  <Section tone="white">
+    <div class="max-w-2xl">
+      <h2 class="text-2xl font-bold sm:text-3xl">FIKRA ለምን አለ</h2>
+      <p class="mt-4 text-ink-soft">
+        ተሰጥኦ በሁሉም ቦታ አለ፤ ዕድል ግን አይደለም። FIKRA የሚገነባ ሀሳብ ያላቸውን ወጣቶች
+        ግን ብዙ ጊዜ ተደራሽ ያልሆኑትን ትስስር፣ ካፒታል እና ዕውቀት ለማገናኘት ነው።
+      </p>
+      <div class="mt-6">
+        <Button href="/am/about" variant="ghost">ስለ እኛ የበለጠ</Button>
+      </div>
+    </div>
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        [
+          ['ተግባራዊ', 'በንድፈ ሀሳብ ሳይሆን በተግባር እንማራለን።'],
+          ['የአካባቢ', 'ከምናገለግላቸው ማህበረሰቦች ጋር አብሮ የተገነባ።'],
+          ['ታማኝ', 'የሰራውንም ያልሰራውንም እንገልጻለን።'],
+          ['ዘላቂ', 'ከድጋፋችን በላይ የሚቆዩ ድርጅቶችን እንገነባለን።'],
+        ].map(([title, text]) => (
+          <li class="rounded-[var(--radius-card)] border border-border p-5">
+            <h3 class="font-bold text-ink">{title}</h3>
+            <p class="mt-1 text-sm text-ink-soft">{text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <!-- Newsletter -->
+  <Section tone="soft">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="text-2xl font-bold sm:text-3xl">መጀመሪያ ይስሙ</h2>
+      <p class="mt-3 text-ink-soft">
+        ስለ አዲስ ኮርሶች፣ ዝግጅቶች እና ዕድሎች ለመረዳት የFIKRA የኢሜይል ዝርዝርን ይቀላቀሉ።
+      </p>
+      <div class="mt-8 text-left">
+        <NewsletterForm lang="am" />
+      </div>
+    </div>
+  </Section>
+
+  <CTASection lang="am" />
+</BaseLayout>

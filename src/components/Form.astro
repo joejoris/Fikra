@@ -1,4 +1,6 @@
 ---
+import { useTranslations, localizePath, type Lang } from '../i18n/ui';
+
 interface Props {
   name: string;
   submitLabel?: string;
@@ -10,11 +12,12 @@ interface Props {
   description?: string;
   /** Show a file upload field (CV, pitch deck) posting multipart to the endpoint. */
   allowFile?: boolean;
+  lang?: Lang;
 }
 
 const {
   name,
-  submitLabel = 'Send',
+  submitLabel,
   showMessage = true,
   interestOptions,
   presetProgram,
@@ -22,9 +25,14 @@ const {
   heading,
   description,
   allowFile = false,
+  lang = 'en',
 } = Astro.props;
 
+const t = useTranslations(lang);
 const id = (field: string) => `${name}-${field}`;
+
+const privacyHref = localizePath('/privacy', lang);
+const consentParts = t('form.consent').split('{privacyLink}');
 ---
 
 <form
@@ -35,6 +43,9 @@ const id = (field: string) => `${name}-${field}`;
   method="post"
   enctype={allowFile ? 'multipart/form-data' : undefined}
   data-multipart={allowFile ? '' : undefined}
+  data-msg-sending={t('form.sending')}
+  data-msg-thanks={t('form.thanks')}
+  data-msg-error={t('form.error')}
 >
   {heading && <h3 class="text-lg font-bold text-ink">{heading}</h3>}
   {description && <p class="text-sm text-ink-soft">{description}</p>}
@@ -51,7 +62,7 @@ const id = (field: string) => `${name}-${field}`;
 
   <div class="grid gap-5 sm:grid-cols-2">
     <div>
-      <label class="block text-sm font-semibold text-ink" for={id('name')}>Full name</label>
+      <label class="block text-sm font-semibold text-ink" for={id('name')}>{t('form.name')}</label>
       <input
         class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
         id={id('name')}
@@ -62,7 +73,7 @@ const id = (field: string) => `${name}-${field}`;
       />
     </div>
     <div>
-      <label class="block text-sm font-semibold text-ink" for={id('email')}>Email</label>
+      <label class="block text-sm font-semibold text-ink" for={id('email')}>{t('form.email')}</label>
       <input
         class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
         id={id('email')}
@@ -78,7 +89,8 @@ const id = (field: string) => `${name}-${field}`;
     showOrg && (
       <div>
         <label class="block text-sm font-semibold text-ink" for={id('organisation')}>
-          Organisation <span class="font-normal text-muted">(if relevant)</span>
+          {t('form.organisation')}{' '}
+          <span class="font-normal text-muted">{t('form.organisationHint')}</span>
         </label>
         <input
           class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
@@ -94,7 +106,8 @@ const id = (field: string) => `${name}-${field}`;
   <div class="grid gap-5 sm:grid-cols-2">
     <div>
       <label class="block text-sm font-semibold text-ink" for={id('phone')}>
-        Phone <span class="font-normal text-muted">(optional)</span>
+        {t('form.phone')}{' '}
+        <span class="font-normal text-muted">{t('form.phoneHint')}</span>
       </label>
       <input
         class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
@@ -108,7 +121,7 @@ const id = (field: string) => `${name}-${field}`;
       interestOptions && (
         <div>
           <label class="block text-sm font-semibold text-ink" for={id('interest')}>
-            I'm interested in
+            {t('form.interest')}
           </label>
           <select
             class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
@@ -116,7 +129,7 @@ const id = (field: string) => `${name}-${field}`;
             name="interest"
             required
           >
-            <option value="">Please choose…</option>
+            <option value="">{t('form.choose')}</option>
             {interestOptions.map((opt) => (
               <option value={opt.value}>{opt.label}</option>
             ))}
@@ -130,7 +143,7 @@ const id = (field: string) => `${name}-${field}`;
     showMessage && (
       <div>
         <label class="block text-sm font-semibold text-ink" for={id('message')}>
-          Your message
+          {t('form.message')}
         </label>
         <textarea
           class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
@@ -147,7 +160,7 @@ const id = (field: string) => `${name}-${field}`;
     allowFile && (
       <div>
         <label class="block text-sm font-semibold text-ink" for={id('attachment')}>
-          Attachment <span class="font-normal text-muted">(optional)</span>
+          {t('form.attachment')} <span class="font-normal text-muted">({t('form.optional')})</span>
         </label>
         <input
           class="mt-1 block w-full text-sm text-ink-soft file:mr-3 file:rounded-lg file:border-0 file:bg-primary-soft file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary"
@@ -157,9 +170,7 @@ const id = (field: string) => `${name}-${field}`;
           multiple
           accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg"
         />
-        <p class="mt-1 text-xs text-muted">
-          A CV, pitch deck or similar. PDF or Word, up to 8&nbsp;MB each (max 2 files).
-        </p>
+        <p class="mt-1 text-xs text-muted">{t('form.attachmentHint')}</p>
       </div>
     )
   }
@@ -174,8 +185,7 @@ const id = (field: string) => `${name}-${field}`;
       required
     />
     <label class="text-sm text-ink-soft" for={id('consent')}>
-      I agree that FIKRA may store these details to respond to my enquiry. See our
-      <a class="text-primary underline" href="/privacy">privacy policy</a>.
+      {consentParts[0]}<a class="text-primary underline" href={privacyHref}>{t('form.privacy')}</a>{consentParts[1] ?? ''}
     </label>
   </div>
 
@@ -185,7 +195,7 @@ const id = (field: string) => `${name}-${field}`;
       type="submit"
       data-submit
     >
-      {submitLabel}
+      {submitLabel ?? t('form.send')}
     </button>
     <p class="text-sm text-muted" data-status role="status" aria-live="polite"></p>
   </div>

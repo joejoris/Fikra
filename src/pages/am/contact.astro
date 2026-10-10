@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import PageHero from '../../components/PageHero.astro';
+import Form from '../../components/Form.astro';
+import { SITE } from '../../lib/site';
+---
+
+<BaseLayout
+  title="አግኙን"
+  description="ከFIKRA ጋር ይገናኙ።"
+  lang="am"
+>
+  <Section>
+    <PageHero
+      eyebrow="አግኙን"
+      title="ይገናኙን"
+      intro="ጥያቄዎች፣ ሀሳቦች፣ አጋርነት ወይም አስተያየት — ከእርስዎ መስማት እንፈልጋለን።"
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="grid gap-12 lg:grid-cols-[1fr_1.2fr]">
+      <div>
+        <h2 class="text-lg font-bold">በቀጥታ ያግኙን</h2>
+        <dl class="mt-5 space-y-4 text-sm">
+          <div>
+            <dt class="font-semibold text-ink">ኢሜይል</dt>
+            <dd><a class="text-primary underline" href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+          </div>
+          <div>
+            <dt class="font-semibold text-ink">ስልክ</dt>
+            <dd class="text-ink-soft">{SITE.phone}</dd>
+          </div>
+          <div>
+            <dt class="font-semibold text-ink">አድራሻ</dt>
+            <dd class="not-italic text-ink-soft">
+              {SITE.address.line1}<br />
+              {SITE.address.city}{SITE.address.region && `, ${SITE.address.region}`}<br />
+              {SITE.address.country}
+            </dd>
+          </div>
+        </dl>
+        <p class="mt-8 text-sm text-muted">በጥቂት የሥራ ቀናት ውስጥ ምላሽ ለመስጠት እንጥራለን።</p>
+      </div>
+
+      <div class="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <Form
+          name="contact"
+          lang="am"
+          submitLabel="መልእክት ላክ"
+          showMessage
+          heading="መልእክት ይላኩልን"
+        />
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
