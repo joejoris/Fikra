@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "typecheck": "tsc --noEmit",
     "sync": "astro sync",
     "cms": "decap-server"
   },

@@ -13,11 +13,21 @@
  * the endpoint returns 503 rather than silently dropping the address.
  */
 
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  run(): Promise<unknown>;
+}
+
+interface D1Database {
+  prepare(sql: string): D1PreparedStatement;
+}
+
 interface Env {
   RESEND_API_KEY?: string;
   RESEND_AUDIENCE_ID?: string;
   CONTACT_FROM_EMAIL?: string;
   TURNSTILE_SECRET_KEY?: string;
+  DB?: D1Database;
 }
 
 interface Ctx {
@@ -125,6 +135,19 @@ export async function onRequestPost(context: Ctx): Promise<Response> {
   if (!addRes.ok && addRes.status !== 409) {
     console.error('subscribe: add failed', addRes.status, await addRes.text());
     return json({ ok: false, error: 'Could not sign you up. Please try again.' }, 502);
+  }
+
+  // Keep a local record too (best effort).
+  if (env.DB) {
+    try {
+      await env.DB.prepare(
+        `INSERT OR IGNORE INTO subscribers (email, first_name) VALUES (?, ?)`,
+      )
+        .bind(email, firstName || null)
+        .run();
+    } catch (error) {
+      console.error('subscribe: db insert failed', error);
+    }
   }
 
   // Welcome email (best effort — never fail the signup because of it).

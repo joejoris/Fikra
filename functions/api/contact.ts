@@ -26,12 +26,22 @@ interface R2Bucket {
   ): Promise<unknown>;
 }
 
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  run(): Promise<unknown>;
+}
+
+interface D1Database {
+  prepare(sql: string): D1PreparedStatement;
+}
+
 interface Env {
   RESEND_API_KEY?: string;
   CONTACT_TO_EMAIL?: string;
   CONTACT_FROM_EMAIL?: string;
   TURNSTILE_SECRET_KEY?: string;
   FILES?: R2Bucket;
+  DB?: D1Database;
 }
 
 interface Ctx {
@@ -211,7 +221,7 @@ export async function onRequestPost(context: Ctx): Promise<Response> {
   ].filter(Boolean);
 
   const attachments: { filename: string; content: string }[] = [];
-  const fileLinks: string[] = [];
+  const fileRecords: { name: string; url: string | null }[] = [];
 
   if (files.length > 0) {
     if (env.FILES) {
@@ -222,7 +232,7 @@ export async function onRequestPost(context: Ctx): Promise<Response> {
         await env.FILES.put(key, await file.arrayBuffer(), {
           httpMetadata: { contentType: file.type || 'application/octet-stream' },
         });
-        fileLinks.push(`${file.name}: ${origin}/api/files/${key}`);
+        fileRecords.push({ name: file.name, url: `${origin}/api/files/${key}` });
       }
     } else {
       // No object storage configured — attach the files to the email instead.
@@ -231,13 +241,20 @@ export async function onRequestPost(context: Ctx): Promise<Response> {
           filename: file.name,
           content: await toBase64(file),
         });
+        fileRecords.push({ name: file.name, url: null });
       }
     }
   }
 
   const bodyLines = lines.slice();
-  if (fileLinks.length > 0) {
-    bodyLines.push('', 'Attachments:', ...fileLinks.map((link) => `- ${link}`));
+  if (fileRecords.length > 0) {
+    bodyLines.push(
+      '',
+      'Attachments:',
+      ...fileRecords.map((record) =>
+        record.url ? `- ${record.name}: ${record.url}` : `- ${record.name} (attached)`,
+      ),
+    );
   }
 
   const res = await fetch('https://api.resend.com/emails', {
@@ -259,6 +276,31 @@ export async function onRequestPost(context: Ctx): Promise<Response> {
   if (!res.ok) {
     console.error('contact: send failed', res.status, await res.text());
     return json({ ok: false, error: 'Could not send your message. Please try again.' }, 502);
+  }
+
+  // Record the submission for the inbox (best effort — never fail the request).
+  if (env.DB) {
+    try {
+      await env.DB.prepare(
+        `INSERT INTO submissions
+           (form_name, name, email, phone, organisation, interest, program, message, files)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+        .bind(
+          formName,
+          name,
+          email,
+          phone || null,
+          organisation || null,
+          interest || null,
+          program || null,
+          message || null,
+          fileRecords.length > 0 ? JSON.stringify(fileRecords) : null,
+        )
+        .run();
+    } catch (error) {
+      console.error('contact: db insert failed', error);
+    }
   }
 
   // Acknowledge to the submitter (best effort — never fail the request for this).
