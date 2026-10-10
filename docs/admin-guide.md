@@ -11,19 +11,36 @@ how to code to publish news, add a program, or update the team page.
 | **Programs** | The Programs page and each program's own page |
 | **Impact stories** | The Impact page and the homepage |
 | **Team** | The Team page |
+| **FAQ** | The FAQ page |
+| **Events** | The Events page and the `.ics` calendar feed |
+| **Documents** | The Documents & reports page (upload the PDF, then set the file) |
 
 Everything else (organisation address, phone, donation link, homepage wording)
 is set in a configuration file by whoever maintains the site.
 
 ## Drafts
 
-News posts and impact stories have a **Draft** switch.
+News posts, impact stories, FAQ entries, events and documents have a **Draft**
+switch.
 
 - **Draft on** → the item is saved but hidden from the live website.
 - **Draft off** → the item is published.
 
 Use drafts freely. Nothing shows on the public site until you turn the switch
 off.
+
+## Documents
+
+To publish a document: upload its PDF (Admin → Documents → choose a file), set
+the category, and turn **Draft** off. The CMS stores the file in
+`public/documents/` and links it on the Documents page.
+
+## The submissions inbox
+
+Every contact and membership form is emailed to the FIKRA inbox and also saved at
+`https://<your-domain>/inbox`. Sign in with the password your site maintainer
+sets. From there you can read submissions and mark each one **Handled** or
+**New**. Files attached to applications appear as links in the inbox.
 
 ## How publishing works
 

@@ -23,17 +23,25 @@ npm run check      # type-check Astro + TypeScript
 ```
 public/
   admin/            Decap CMS (the staff editing interface)
+  documents/        Downloadable PDFs (constitution, reports, policies)
   favicon.svg, og-default.svg, robots.txt
 src/
   components/       Reusable UI pieces (Header, Footer, cards, Form…)
-  content/          Editable content (programs, news, impact, team)
+  content/          Editable content (programs, news, impact, team, faq, events, documents)
   content.config.ts Content schemas — the rules each entry must follow
+  i18n/ui.ts        Translations and language helpers (English + Amharic)
   layouts/          BaseLayout (head, SEO, header, footer)
   lib/site.ts       Organisation details, nav, stats, donation settings
-  pages/            One file per page/route
+  pages/            One file per page/route (Amharic pages live in pages/am/)
   scripts/forms.ts  Client-side form handling
   styles/global.css Design tokens + base styles
-functions/api/      Cloudflare Pages Function that receives form submissions
+functions/
+  api/contact.ts    Form submissions (email + optional D1/R2)
+  api/subscribe.ts  Newsletter sign-ups (Resend Audiences)
+  api/files/[key].ts Serves uploaded files from R2
+  inbox.ts          Private submissions inbox (/inbox)
+schema/             D1 database schema (submissions inbox)
+wrangler.toml       Local Pages runtime + binding configuration
 docs/               Admin guide, launch checklist, FIKRA input checklist
 ```
 
@@ -59,9 +67,12 @@ These are tracked in [docs/fikra-inputs.md](docs/fikra-inputs.md). At minimum:
   `Sitemap:` in `public/robots.txt`.
 - **Organisation details:** `src/lib/site.ts` (name, address, email, phone,
   registration number, social links, stats).
-- **Donation:** set `DONATION.configured` / `provider` / `url` in
-  `src/lib/site.ts` when a payment link exists.
-- **Team, programs, news, stories:** replace placeholder `[CONFIRM]` content.
+- **Donation:** add one or more giving methods to `DONATION.methods` in
+  `src/lib/site.ts` when a payment link or bank account exists.
+- **Amharic:** review `src/i18n/ui.ts` and `src/pages/am/` with an Amharic
+  speaker; extend `TRANSLATED_PATHS` as more pages are translated.
+- **Team, programs, news, stories, FAQ, events, documents:** replace placeholder
+  `[CONFIRM]` content.
 - **Social image:** replace `public/og-default.svg` with a 1200×630 PNG/JPG.
 - **Forms:** configure email delivery (see below).
 
@@ -76,13 +87,41 @@ dashboard (and in `.env` for local testing):
 | `RESEND_API_KEY` | API key for [Resend](https://resend.com) (or swap the provider) |
 | `CONTACT_TO_EMAIL` | Inbox that receives submissions |
 | `CONTACT_FROM_EMAIL` | Verified sender address |
+| `RESEND_AUDIENCE_ID` | Resend Audience for newsletter sign-ups |
+| `INBOX_PASSWORD` | Password for the private `/inbox` page |
 | `TURNSTILE_SECRET_KEY` | Optional — Cloudflare Turnstile spam protection |
 | `PUBLIC_FORM_ENDPOINT` | Where the browser posts (default `/api/contact`) |
 | `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN` | Optional cookie-free analytics |
 
 Until `RESEND_API_KEY` is set, the endpoint returns a clear "not fully set up"
-message rather than silently discarding submissions. **Test a real submission,
-including the spam folder, before launch.**
+message rather than silently discarding submissions. Every valid submission also
+gets an automatic acknowledgement email. **Test a real submission, including the
+spam folder, before launch.**
+
+Optional bindings (see `wrangler.toml`):
+
+| Binding | Type | Enables |
+|---|---|---|
+| `DB` | D1 database | The `/inbox` submissions list (see `schema/submissions.sql`) |
+| `FILES` | R2 bucket | Storing CVs/pitch decks. Without it, uploads are emailed instead |
+
+### Newsletter
+
+The footer and homepage sign-up forms post to `/api/subscribe`, which adds the
+address to a Resend Audience (`RESEND_AUDIENCE_ID`) and sends a welcome email.
+
+### Submissions inbox
+
+Every form submission is emailed *and* recorded in D1 when the `DB` binding is
+present. Staff can review them at `/inbox`, protected by `INBOX_PASSWORD`. For a
+real deployment, put `/inbox` and `/api/files` behind Cloudflare Access instead
+of sharing a password.
+
+### File uploads
+
+The membership form accepts up to two files (PDF/Word/PowerPoint/image, 8 MB
+each). With the `FILES` R2 binding they are stored and linked from the email;
+without it they are attached to the notification email.
 
 ### Testing forms locally
 
@@ -98,6 +137,35 @@ npx wrangler pages dev dist
 Set the environment variables above in a `.dev.vars` file (same format as
 `.env`) so the function can send mail. `PUBLIC_FORM_ENDPOINT` is only used by the
 browser and defaults to `/api/contact`, which wrangler serves.
+
+To exercise the newsletter, inbox and uploads locally, create the D1 database and
+apply the schema, then uncomment the bindings in `wrangler.toml`:
+
+```bash
+npx wrangler d1 create fikra-submissions
+npx wrangler d1 execute fikra-submissions --local --file=./schema/submissions.sql
+npx wrangler pages dev dist
+```
+
+### Additional features
+
+- **Event calendar** (`/events`) with an `.ics` feed and "add to Google Calendar"
+  links, plus event structured data.
+- **FAQ** (`/faq`) with FAQPage structured data.
+- **Search** (`/search`) — a small client-side index at `/search-index.json`.
+- **RSS** at `/rss.xml` and NGO JSON-LD on every page.
+- **Document downloads** (`/documents`) for governance documents and reports.
+- **Newsletter**, **submissions inbox** and **file uploads** (above).
+- **Amharic** (`/am/`) — homepage, about and contact translated; a language
+  switcher appears in the header and footer.
+
+### Internationalisation
+
+English is the source of truth. Amharic strings live in `src/i18n/ui.ts` and the
+translated pages in `src/pages/am/`. To add a page, translate it under
+`src/pages/am/` and add its path to `TRANSLATED_PATHS` so the language switcher
+links to it. The Amharic copy was machine-drafted and **must be reviewed by an
+Amharic speaker at FIKRA** before launch.
 
 ## Deployment
 

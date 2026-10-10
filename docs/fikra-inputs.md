@@ -31,6 +31,13 @@ points are fine.
 - [ ] At least one real news item for launch.
 - [ ] Impact stories: real, consented accounts — or leave them as drafts.
 - [ ] Confirmation of who monitors the inbox that form submissions go to.
+- [ ] Newsletter: go-ahead to collect email addresses, and who will send updates.
+- [ ] Documents to publish: constitution, strategic plan, annual reports, policies
+      (PDFs), and in which categories.
+- [ ] Amharic: who at FIKRA will review the translation before launch.
+- [ ] FAQ: any answers only FIKRA can give (cost, location, eligibility).
+- [ ] Events: any confirmed dates, venues and registration links to publish.
+- [ ] Uploads: is R2 file storage wanted, or are email attachments enough?
 
 ## For the organisational documents
 
@@ -50,6 +57,9 @@ points are fine.
 - [ ] Hosting (e.g. Cloudflare Pages)
 - [ ] Analytics
 - [ ] Email sending provider (e.g. Resend) and the receiving inbox
+- [ ] Resend Audience (for newsletter sign-ups)
+- [ ] Cloudflare D1 database (submissions inbox) — `npx wrangler d1 create`
+- [ ] Cloudflare R2 bucket (file uploads) — optional
 
 ## Review gates
 

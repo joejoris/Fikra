@@ -23,20 +23,37 @@ marked.
 - [ ] `Sitemap:` URL in `public/robots.txt` set to the real domain.
 - [ ] `src/lib/site.ts` updated: legal name, address, email, phone, social links,
       registration number.
-- [ ] Donation settings updated (or left clearly as "coming soon").
+- [ ] Donation methods added in `src/lib/site.ts` (or left clearly as "coming
+      soon").
 - [ ] `public/og-default.svg` replaced with a 1200×630 PNG/JPG.
+- [ ] Amharic (if launching it) reviewed by an Amharic speaker; the language
+      switcher and `/am/` pages checked.
 
 ## Forms and email
 
 - [ ] `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` set in hosting.
+- [ ] Newsletter: `RESEND_AUDIENCE_ID` set and a test sign-up confirmed.
+- [ ] Submissions inbox: D1 database created, schema applied, `DB` bound, strong
+      `INBOX_PASSWORD` set, and `/inbox` tested.
+- [ ] Uploads: decide between R2 (`FILES` binding) and email attachments; test a
+      file upload end-to-end, including a large file and a disallowed type.
 - [ ] SPF/DKIM configured for the sending domain (or mail may go to spam).
 - [ ] Each form tested end-to-end: contact, volunteer, partner, member, program
-      interest.
+      interest, newsletter.
 - [ ] Confirmation that submissions arrive in the FIKRA inbox — **check the spam
       folder too**.
 - [ ] Honeypot confirmed to work; rate limiting confirmed to respond with 429
       after repeated submissions.
 - [ ] Optional: Turnstile enabled if spam becomes a problem.
+
+## Other features
+
+- [ ] Documents page: each published document opens correctly and the file names
+      are sensible.
+- [ ] Events page: dates are correct, and the `.ics` feed and "add to Google
+      Calendar" links work.
+- [ ] Search returns sensible results; RSS feed validates.
+- [ ] `/inbox` and `/api/files` are protected (Cloudflare Access recommended).
 
 ## Deployment
 
