@@ -33,6 +33,7 @@ async function submit(form: HTMLFormElement) {
   const button = form.querySelector<HTMLButtonElement>('[data-submit]');
   const endpoint = form.getAttribute('action') || '/api/contact';
   const inline = form.dataset.success === 'inline';
+  const multipart = form.hasAttribute('data-multipart') || !!form.querySelector('input[type="file"]');
 
   const payload = collect(form);
 
@@ -57,11 +58,17 @@ async function submit(form: HTMLFormElement) {
   }
 
   try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    const res = multipart
+      ? await fetch(endpoint, {
+          method: 'POST',
+          headers: { accept: 'application/json' },
+          body: new FormData(form),
+        })
+      : await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
     if (!res.ok) {
       throw new Error(`Request failed with ${res.status}`);
