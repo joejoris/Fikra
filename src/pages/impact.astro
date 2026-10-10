@@ -3,9 +3,7 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import PageHero from '../components/PageHero.astro';
-import Stat from '../components/Stat.astro';
 import CTASection from '../components/CTASection.astro';
-import { STATS } from '../lib/site';
 
 const stories = (
   await getCollection('impact', ({ data }) =>
@@ -111,15 +109,6 @@ const rendered = await Promise.all(
     <p class="mt-8 text-sm text-muted">
       The outcomes above describe the goals of FIKRA's model. They will be
       confirmed and refined with FIKRA before launch.
-    </p>
-  </Section>
-
-  <Section tone="soft">
-    <div class="grid gap-8 sm:grid-cols-3">
-      {STATS.map((stat) => <Stat value={stat.value} label={stat.label} />)}
-    </div>
-    <p class="mt-8 text-sm text-muted">
-      Figures to be confirmed with FIKRA before launch.
     </p>
   </Section>
 
