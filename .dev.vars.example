@@ -1,0 +1,5 @@
+# Local secrets for `wrangler pages dev` (see README). Never commit this file.
+RESEND_API_KEY=
+CONTACT_TO_EMAIL=
+CONTACT_FROM_EMAIL=
+TURNSTILE_SECRET_KEY=

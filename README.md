@@ -84,6 +84,21 @@ Until `RESEND_API_KEY` is set, the endpoint returns a clear "not fully set up"
 message rather than silently discarding submissions. **Test a real submission,
 including the spam folder, before launch.**
 
+### Testing forms locally
+
+`npm run preview` serves the static site only — it does not run the
+`functions/` handler. To test form submissions end-to-end locally, build first
+and run the Pages runtime:
+
+```bash
+npm run build
+npx wrangler pages dev dist
+```
+
+Set the environment variables above in a `.dev.vars` file (same format as
+`.env`) so the function can send mail. `PUBLIC_FORM_ENDPOINT` is only used by the
+browser and defaults to `/api/contact`, which wrangler serves.
+
 ## Deployment
 
 The site is designed for Cloudflare Pages (free tier):
