@@ -1,7 +1,6 @@
 backend:
   name: github
-  # [CONFIRM] Point this at the repo FIKRA owns (see docs/admin-guide.md).
-  repo: FIKRA/fikra-website
+  repo: joejoris/Fikra
   branch: main
   # Enables editing on your own machine with `npm run cms`.
   local_backend: true
