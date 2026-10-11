@@ -13,7 +13,7 @@ const Tag = href ? 'a' : 'div';
   {...href ? { href } : {}}
 >
   <div
-    class="h-full rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)] transition group-hover:border-primary/40 group-hover:shadow-md"
+    class="h-full rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-[0_18px_36px_-18px_rgba(11,31,51,0.35)]"
   >
     <slot />
   </div>

@@ -9,7 +9,7 @@ interface Props {
 const { quote, name, role, location } = Astro.props;
 ---
 
-<figure class="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
+<figure class="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_-18px_rgba(11,31,51,0.35)]">
   <div aria-hidden="true" class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent"></div>
   <span aria-hidden="true" class="text-4xl font-bold leading-none text-primary/30">“</span>
   <blockquote class="mt-1 flex-1 text-ink-soft">{quote}</blockquote>

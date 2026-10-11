@@ -3,9 +3,10 @@ interface Props {
   class?: string;
   size?: number;
   showWordmark?: boolean;
+  wordmarkClass?: string;
 }
 
-const { class: className = '', size = 32, showWordmark = true } = Astro.props;
+const { class: className = '', size = 32, showWordmark = true, wordmarkClass = 'text-ink' } = Astro.props;
 ---
 
 <span class:list={['inline-flex items-center gap-2', className]}>
@@ -31,7 +32,7 @@ const { class: className = '', size = 32, showWordmark = true } = Astro.props;
   </svg>
   {
     showWordmark && (
-      <span class="font-bold tracking-tight text-ink text-lg">FIKRA</span>
+      <span class:list={['font-bold tracking-tight text-lg', wordmarkClass]}>FIKRA</span>
     )
   }
 </span>
