@@ -70,6 +70,11 @@ export const DONATION: {
   amountParam: string;
   currency: string;
   note: string;
+  /**
+   * Where a link provider sends donors after a successful payment.
+   * Point the provider's redirect/return URL at this page.
+   */
+  thanksUrl: string;
 } = {
   methods: [
     // Uncomment and fill in once a provider and/or bank account is confirmed:
@@ -105,6 +110,7 @@ export const DONATION: {
   amountParam: 'amount',
   currency: '',
   note: 'Online giving is being set up. In the meantime, contact us to give.',
+  thanksUrl: '/donate/thanks',
 };
 
 export const NAV_LINKS = [
@@ -122,6 +128,7 @@ export const FOOTER_LINKS = {
     { label: 'Events', href: '/events' },
     { label: 'Team', href: '/team' },
     { label: 'News', href: '/news' },
+    { label: 'Newsletter', href: '/newsletter' },
   ],
   engage: [
     { label: 'Get Involved', href: '/get-involved' },

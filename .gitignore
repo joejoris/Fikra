@@ -2,6 +2,9 @@
 dist/
 .astro/
 
+# Generated Open Graph images (rebuilt before every build via `npm run og`)
+public/og/*.png
+
 # Dependencies
 node_modules/
 

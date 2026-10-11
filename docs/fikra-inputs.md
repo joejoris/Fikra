@@ -35,6 +35,9 @@ points are fine.
       (PDFs), and in which categories.
 - [ ] FAQ: any answers only FIKRA can give (cost, location, eligibility).
 - [ ] Events: any confirmed dates, venues and registration links to publish.
+- [ ] Testimonials: 2–3 short consented quotes from founders, mentors or partners.
+- [ ] First newsletter edition: the text of one past update for the archive.
+- [ ] Donation: once a provider is chosen, set its return URL to `/donate/thanks`.
 - [ ] Uploads: is R2 file storage wanted, or are email attachments enough?
 
 ## For the organisational documents

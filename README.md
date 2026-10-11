@@ -25,18 +25,24 @@ public/
   admin/            Decap CMS (the staff editing interface)
   documents/        Downloadable PDFs (constitution, reports, policies)
   favicon.svg, og-default.svg, robots.txt
+  _headers          Security headers (Cloudflare Pages)
+  _redirects        Redirect rules (Cloudflare Pages)
+  manifest.webmanifest, sw.js  PWA-lite: installable shell + offline support
 src/
   components/       Reusable UI pieces (Header, Footer, cards, Form…)
-  content/          Editable content (programs, news, impact, team, faq, events, documents)
+  content/          Editable content (programs, news, impact, team, faq, events, documents, newsletters, testimonials)
   content.config.ts Content schemas — the rules each entry must follow
   layouts/          BaseLayout (head, SEO, header, footer)
   lib/site.ts       Organisation details, nav, stats, donation settings
   pages/            One file per page/route
   scripts/forms.ts  Client-side form handling
   styles/global.css Design tokens + base styles
+scripts/
+  generate-og.mjs   Per-page OG images, rebuilt before every build
 functions/
   api/contact.ts    Form submissions (email + optional D1/R2)
   api/subscribe.ts  Newsletter sign-ups (Resend Audiences)
+  api/rsvp.ts       Event registrations (notification + confirmation email + inbox)
   api/files/[key].ts Serves uploaded files from R2
   inbox.ts          Private submissions inbox (/inbox)
 schema/             D1 database schema (submissions inbox)
@@ -88,7 +94,8 @@ dashboard (and in `.env` for local testing):
 | `INBOX_PASSWORD` | Password for the private `/inbox` page |
 | `TURNSTILE_SECRET_KEY` | Optional — Cloudflare Turnstile spam protection |
 | `PUBLIC_FORM_ENDPOINT` | Where the browser posts (default `/api/contact`) |
-| `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN` | Optional cookie-free analytics |
+| `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN` | Optional cookie-free analytics (Plausible-style) |
+| `PUBLIC_CF_WEB_ANALYTICS_TOKEN` | Optional — Cloudflare Web Analytics beacon token (free, cookieless) |
 
 Until `RESEND_API_KEY` is set, the endpoint returns a clear "not fully set up"
 message rather than silently discarding submissions. Every valid submission also
@@ -106,13 +113,23 @@ Optional bindings (see `wrangler.toml`):
 
 The footer and homepage sign-up forms post to `/api/subscribe`, which adds the
 address to a Resend Audience (`RESEND_AUDIENCE_ID`) and sends a welcome email.
+Past editions live in `src/content/newsletters/` and are listed on the public
+archive at `/newsletter`.
+
+### Event RSVP
+
+Events without an external registration link show a built-in RSVP form posting
+to `/api/rsvp`. FIKRA gets a notification email, the attendee gets a
+confirmation email, and the registration lands in the inbox with source `rsvp`.
 
 ### Submissions inbox
 
 Every form submission is emailed *and* recorded in D1 when the `DB` binding is
-present. Staff can review them at `/inbox`, protected by `INBOX_PASSWORD`. For a
-real deployment, put `/inbox` and `/api/files` behind Cloudflare Access instead
-of sharing a password.
+present. Staff can review them at `/inbox`, protected by `INBOX_PASSWORD`. The
+inbox can be filtered by source (contact, volunteer, partner, member, rsvp)
+with per-source counts, and the whole list can be downloaded with **Export
+CSV** for backups. For a real deployment, put `/inbox` and `/api/files` behind
+Cloudflare Access instead of sharing a password.
 
 ### File uploads
 
@@ -147,11 +164,24 @@ npx wrangler pages dev dist
 ### Additional features
 
 - **Event calendar** (`/events`) with an `.ics` feed and "add to Google Calendar"
-  links, plus event structured data.
+  links, plus event structured data — and a built-in RSVP form per event.
 - **FAQ** (`/faq`) with FAQPage structured data.
 - **Search** (`/search`) — a small client-side index at `/search-index.json`.
 - **RSS** at `/rss.xml` and NGO JSON-LD on every page.
 - **Document downloads** (`/documents`) for governance documents and reports.
+- **Newsletter archive** (`/newsletter`) of past editions.
+- **Testimonials** collection, shown on the home and impact pages when present.
+- **Per-page share images**: `npm run build` auto-generates OG PNGs for news
+  and program pages (`scripts/generate-og.mjs`); pages fall back to
+  `og-default.svg` if generation is skipped.
+- **Donation thank-you page** (`/donate/thanks`) — point the giving provider's
+  return URL at `DONATION.thanksUrl`.
+- **Security headers + redirects** via `public/_headers` and `public/_redirects`
+  (Cloudflare Pages).
+- **Cookie-free analytics**: Cloudflare Web Analytics beacon via
+  `PUBLIC_CF_WEB_ANALYTICS_TOKEN`, or a Plausible-style script via
+  `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN`.
+- **PWA-lite**: web manifest plus a small offline-first service worker.
 - **Newsletter**, **submissions inbox** and **file uploads** (above).
 
 ## Deployment

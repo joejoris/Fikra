@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Button from '../components/Button.astro';
 import NewsCard from '../components/NewsCard.astro';
+import TestimonialCard from '../components/TestimonialCard.astro';
 import CTASection from '../components/CTASection.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
 
@@ -24,6 +25,12 @@ const stories = (
 const team = (await getCollection('team')).sort(
   (a, b) => a.data.order - b.data.order,
 );
+
+const testimonials = (
+  await getCollection('testimonials', ({ data }) =>
+    import.meta.env.PROD ? data.draft !== true : true,
+  )
+).sort((a, b) => a.data.order - b.data.order);
 
 const initials = (name: string) =>
   name
@@ -277,6 +284,28 @@ const values = [
     </ul>
   </Section>
 
+  <!-- Testimonials -->
+  {
+    testimonials.length > 0 && (
+      <Section tone="soft">
+        <div class="max-w-2xl">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Voices</p>
+          <h2 class="mt-2 text-2xl font-bold sm:text-3xl">What people say</h2>
+        </div>
+        <div class="mt-10 grid gap-6 md:grid-cols-3">
+          {testimonials.slice(0, 3).map((t) => (
+            <TestimonialCard
+              quote={t.data.quote}
+              name={t.data.name}
+              role={t.data.role}
+              location={t.data.location}
+            />
+          ))}
+        </div>
+      </Section>
+    )
+  }
+
   <!-- News -->
   {
     news.length > 0 && (
@@ -296,7 +325,7 @@ const values = [
   }
 
   <!-- Newsletter -->
-  <Section>
+  <Section id="newsletter">
     <div class="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-bg to-primary-soft p-8 shadow-[var(--shadow-card)] sm:p-12">
       <div aria-hidden="true" class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl"></div>
       <div class="relative grid gap-8 lg:grid-cols-2 lg:items-center">
@@ -305,7 +334,7 @@ const values = [
           <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Be first to hear</h2>
           <p class="mt-3 text-ink-soft">
             Join the FIKRA mailing list for new cohorts, events and
-            opportunities.
+            opportunities. <a class="text-primary underline" href="/newsletter">Browse past editions →</a>
           </p>
           <ul class="mt-6 space-y-2 text-sm text-ink-soft">
             {

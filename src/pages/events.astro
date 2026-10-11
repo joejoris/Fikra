@@ -102,6 +102,119 @@ const googleCalendarUrl = (event: (typeof events)[number]) => {
                     )}
                   </div>
                 </div>
+                {!event.data.registrationUrl && (
+                  <details class="mt-5 rounded-xl bg-soft p-4">
+                    <summary class="cursor-pointer text-sm font-semibold text-primary">
+                      Register for this event
+                    </summary>
+                    <form
+                      class="mt-4 space-y-4"
+                      data-form
+                      novalidate
+                      action="/api/rsvp"
+                      method="post"
+                      data-success="inline"
+                      data-success-message="You are registered — check your email for confirmation."
+                    >
+                      <input type="hidden" name="event_slug" value={event.id} />
+                      <input type="hidden" name="event_title" value={event.data.title} />
+                      <input type="hidden" name="_loadedAt" value="" data-loaded-at />
+
+                      {/* Honeypot: hidden from humans, tempting to bots. */}
+                      <div class="hidden" aria-hidden="true">
+                        <label for={`rsvp-${event.id}-gotcha`}>Leave this field empty</label>
+                        <input
+                          id={`rsvp-${event.id}-gotcha`}
+                          type="text"
+                          name="_gotcha"
+                          tabindex="-1"
+                          autocomplete="off"
+                        />
+                      </div>
+
+                      <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label
+                            class="block text-sm font-semibold text-ink"
+                            for={`rsvp-${event.id}-name`}
+                          >
+                            Full name
+                          </label>
+                          <input
+                            class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+                            id={`rsvp-${event.id}-name`}
+                            name="name"
+                            type="text"
+                            autocomplete="name"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label
+                            class="block text-sm font-semibold text-ink"
+                            for={`rsvp-${event.id}-email`}
+                          >
+                            Email
+                          </label>
+                          <input
+                            class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+                            id={`rsvp-${event.id}-email`}
+                            name="email"
+                            type="email"
+                            autocomplete="email"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          class="block text-sm font-semibold text-ink"
+                          for={`rsvp-${event.id}-guests`}
+                        >
+                          Attendees <span class="font-normal text-muted">(including you)</span>
+                        </label>
+                        <input
+                          class="mt-1 w-32 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+                          id={`rsvp-${event.id}-guests`}
+                          name="guests"
+                          type="number"
+                          min="1"
+                          max="20"
+                          value="1"
+                          required
+                        />
+                      </div>
+
+                      <div class="flex items-start gap-3">
+                        <input
+                          class="mt-1 h-4 w-4 rounded border-border"
+                          id={`rsvp-${event.id}-consent`}
+                          name="consent"
+                          type="checkbox"
+                          value="yes"
+                          required
+                        />
+                        <label class="text-sm text-ink-soft" for={`rsvp-${event.id}-consent`}>
+                          I agree that FIKRA may store these details to manage my
+                          registration. See our
+                          <a class="text-primary underline" href="/privacy">privacy policy</a>.
+                        </label>
+                      </div>
+
+                      <div class="flex items-center gap-4">
+                        <button
+                          class="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
+                          type="submit"
+                          data-submit
+                        >
+                          Register
+                        </button>
+                        <p class="text-sm text-muted" data-status role="status" aria-live="polite"></p>
+                      </div>
+                    </form>
+                  </details>
+                )}
               </li>
             ))}
           </ul>
@@ -117,3 +230,8 @@ const googleCalendarUrl = (event: (typeof events)[number]) => {
 
   <CTASection />
 </BaseLayout>
+
+<script>
+  import { initForms } from '../scripts/forms';
+  initForms();
+</script>

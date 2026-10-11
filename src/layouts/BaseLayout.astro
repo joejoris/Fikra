@@ -28,6 +28,7 @@ const ogImage = new URL(image, Astro.site ?? SITE.url).href;
 
 const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC;
 const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
+const cfAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 
 const socialUrls = Object.values(SITE.social).filter(Boolean);
 const structuredData = {
@@ -63,6 +64,7 @@ const structuredData = {
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#0e6e6e" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="alternate" type="application/rss+xml" title="FIKRA news" href="/rss.xml" />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
 
@@ -86,6 +88,15 @@ const structuredData = {
         src={analyticsSrc}
       ></script>
     )}
+
+    {cfAnalyticsToken && (
+      <script
+        is:inline
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: cfAnalyticsToken })}
+      ></script>
+    )}
   </head>
   <body class="min-h-screen flex flex-col">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -96,5 +107,21 @@ const structuredData = {
     <Footer />
     <WhatsAppButton />
     <BackToTop />
+
+    {
+      import.meta.env.PROD && (
+        <script is:inline>
+          // Lite offline support: register the service worker on production only,
+          // so local dev never serves stale cached pages.
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/sw.js').catch(() => {
+                /* optional — the site works fine with or without it */
+              });
+            });
+          }
+        </script>
+      )
+    }
   </body>
 </html>

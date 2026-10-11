@@ -37,7 +37,7 @@ marked.
       file upload end-to-end, including a large file and a disallowed type.
 - [ ] SPF/DKIM configured for the sending domain (or mail may go to spam).
 - [ ] Each form tested end-to-end: contact, volunteer, partner, member, program
-      interest, newsletter.
+      interest, newsletter, event RSVP (notification + confirmation emails).
 - [ ] Confirmation that submissions arrive in the FIKRA inbox — **check the spam
       folder too**.
 - [ ] Honeypot confirmed to work; rate limiting confirmed to respond with 429
@@ -49,7 +49,11 @@ marked.
 - [ ] Documents page: each published document opens correctly and the file names
       are sensible.
 - [ ] Events page: dates are correct, and the `.ics` feed and "add to Google
-      Calendar" links work.
+      Calendar" links work. A test RSVP arrives in the inbox with source `rsvp`.
+- [ ] Inbox: source filter and **Export CSV** tested; a backup routine agreed.
+- [ ] Donation: provider return URL points at `/donate/thanks`; thank-you page checked.
+- [ ] Analytics: `PUBLIC_CF_WEB_ANALYTICS_TOKEN` set and page views arriving.
+- [ ] Security headers: spot-check response headers on the live domain.
 - [ ] Search returns sensible results; RSS feed validates.
 - [ ] `/inbox` and `/api/files` are protected (Cloudflare Access recommended).
 

@@ -95,4 +95,36 @@ const documents = defineCollection({
   }),
 });
 
-export const collections = { programs, news, impact, team, faq, events, documents };
+const newsletters = defineCollection({
+  loader: glob({ base: './src/content/newsletters', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    pubDate: z.coerce.date(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+const testimonials = defineCollection({
+  loader: glob({ base: './src/content/testimonials', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    quote: z.string(),
+    name: z.string(),
+    role: z.string(),
+    location: z.string().optional(),
+    order: z.number().default(99),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = {
+  programs,
+  news,
+  impact,
+  team,
+  faq,
+  events,
+  documents,
+  newsletters,
+  testimonials,
+};

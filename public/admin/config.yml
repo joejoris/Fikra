@@ -129,7 +129,7 @@ collections:
       - { name: endDate, label: End date (optional), widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, required: false, picker_utc: true }
       - { name: startTime, label: Start time (optional), widget: string, required: false, hint: 'e.g. 17:00' }
       - { name: location, label: Location, widget: string, required: false }
-      - { name: registrationUrl, label: Registration link, widget: string, required: false }
+      - { name: registrationUrl, label: Registration link, widget: string, required: false, hint: 'Leave empty to use the built-in RSVP form on the events page instead.' }
       - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
       - { name: draft, label: Draft (hidden from the live site), widget: boolean, default: true }
       - { name: body, label: Details, widget: markdown }
@@ -164,3 +164,38 @@ collections:
       - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
       - { name: draft, label: Draft (hidden from the live site), widget: boolean, default: true }
       - { name: body, label: Notes, widget: markdown, required: false }
+
+  - name: newsletters
+    label: Newsletter editions
+    label_singular: Newsletter edition
+    folder: src/content/newsletters
+    create: true
+    slug: '{{slug}}'
+    extension: md
+    format: frontmatter
+    summary: '{{title}} — {{pubDate | date("DD MMM YYYY")}}'
+    sortable_fields: [pubDate, title]
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: summary, label: Summary, widget: text, hint: 'One line, shown in the archive list.' }
+      - { name: pubDate, label: Date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, picker_utc: true }
+      - { name: draft, label: Draft (hidden from the live site), widget: boolean, default: true }
+      - { name: body, label: Edition content, widget: markdown }
+
+  - name: testimonials
+    label: Testimonials
+    label_singular: Testimonial
+    folder: src/content/testimonials
+    create: true
+    extension: md
+    format: frontmatter
+    summary: '{{name}} — {{role}}'
+    sortable_fields: [order, name]
+    fields:
+      - { name: quote, label: Quote, widget: text }
+      - { name: name, label: Name, widget: string }
+      - { name: role, label: Role, widget: string, hint: 'e.g. Founder, programme graduate, mentor' }
+      - { name: location, label: Location, widget: string, required: false }
+      - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
+      - { name: draft, label: Draft (hidden from the live site), widget: boolean, default: true }
+      - { name: body, label: Notes (not shown on the site), widget: markdown, required: false }

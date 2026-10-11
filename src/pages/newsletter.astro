@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import CTASection from '../components/CTASection.astro';
+
+const editions = (
+  await getCollection('newsletters', ({ data }) =>
+    import.meta.env.PROD ? data.draft !== true : true,
+  )
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const rendered = await Promise.all(
+  editions.map(async (edition) => ({ edition, ...(await render(edition)) })),
+);
+
+const fmt = (date: Date) =>
+  date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+<BaseLayout
+  title="Newsletter"
+  description="Past editions of the FIKRA newsletter — founder stories, programme news and ways to help."
+>
+  <Section>
+    <PageHero
+      eyebrow="Newsletter"
+      title="Past editions"
+      intro="Founder stories, programme news and ways to help — the same email our subscribers get, kept here to browse."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="mx-auto max-w-2xl">
+      <div class="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <h2 class="text-lg font-bold">Get the next edition by email</h2>
+        <div class="mt-4">
+          <NewsletterForm />
+        </div>
+      </div>
+
+      <div class="mt-12 space-y-12">
+        {
+          rendered.length > 0 ? (
+            rendered.map(({ edition, Content }) => (
+              <article>
+                <p class="text-sm font-semibold uppercase tracking-wide text-primary">
+                  <time datetime={edition.data.pubDate.toISOString()}>
+                    {fmt(edition.data.pubDate)}
+                  </time>
+                </p>
+                <h2 class="mt-2 text-2xl font-bold">{edition.data.title}</h2>
+                <p class="mt-2 text-ink-soft">{edition.data.summary}</p>
+                <div class="prose mt-4">
+                  <Content />
+                </div>
+              </article>
+            ))
+          ) : (
+            <p class="text-ink-soft">
+              No editions published yet —
+              <a class="text-primary underline" href="/#newsletter">subscribe</a>
+              and you will get the first one by email.
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </Section>
+
+  <CTASection />
+</BaseLayout>

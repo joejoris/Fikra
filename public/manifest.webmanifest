@@ -1,0 +1,25 @@
+{
+  "name": "FIKRA — from idea to enterprise",
+  "short_name": "FIKRA",
+  "description": "FIKRA supports young people to turn ideas into sustainable enterprises.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f5f0",
+  "theme_color": "#0e6e6e",
+  "categories": ["education", "nonprofit"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/og-default.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

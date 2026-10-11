@@ -3,10 +3,17 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import PageHero from '../components/PageHero.astro';
+import TestimonialCard from '../components/TestimonialCard.astro';
 import CTASection from '../components/CTASection.astro';
 
 const stories = (
   await getCollection('impact', ({ data }) =>
+    import.meta.env.PROD ? data.draft !== true : true,
+  )
+).sort((a, b) => a.data.order - b.data.order);
+
+const testimonials = (
+  await getCollection('testimonials', ({ data }) =>
     import.meta.env.PROD ? data.draft !== true : true,
   )
 ).sort((a, b) => a.data.order - b.data.order);
@@ -243,6 +250,29 @@ const rendered = await Promise.all(
       </div>
     </div>
   </Section>
+
+  {
+    testimonials.length > 0 && (
+      <Section>
+        <div class="max-w-2xl">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">
+            In their words
+          </p>
+          <h2 class="mt-2 text-2xl font-bold sm:text-3xl">What people say</h2>
+        </div>
+        <div class="mt-10 grid gap-6 md:grid-cols-2">
+          {testimonials.map((t) => (
+            <TestimonialCard
+              quote={t.data.quote}
+              name={t.data.name}
+              role={t.data.role}
+              location={t.data.location}
+            />
+          ))}
+        </div>
+      </Section>
+    )
+  }
 
   <Section tone="white">
     <h2 class="text-2xl font-bold sm:text-3xl">Stories</h2>

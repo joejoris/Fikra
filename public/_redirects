@@ -1,0 +1,11 @@
+# ---------------------------------------------------------------------------
+# Cloudflare Pages redirects (https://developers.cloudflare.com/pages/configuration/redirects/)
+#
+# Syntax:  <from>  <to>  <status>
+#
+# Examples (uncomment and adapt once real paths exist):
+#   /old-news/2024/*   /news/  301
+#   /donate/thanks     /donate/thanks
+#
+# No redirects are needed right now — the site routes match their files.
+# ---------------------------------------------------------------------------

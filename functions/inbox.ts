@@ -134,6 +134,11 @@ const STYLES = `
   .login input { width: 100%; padding: 10px; border: 1px solid #cfd8d4; border-radius: 8px; font: inherit; }
   .login button { width: 100%; margin-top: 12px; padding: 10px; }
   .error { color: #b42318; font-size: 14px; margin-top: 10px; }
+  .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; font-size: 14px; }
+  .toolbar select { padding: 8px 10px; border: 1px solid #cfd8d4; border-radius: 8px; font: inherit; background: #fff; }
+  .counts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; font-size: 13px; }
+  .counts .count { background: #fff; border: 1px solid #dfe5e2; border-radius: 999px; padding: 4px 10px; }
+  .counts .count b { color: #0e6e6e; }
 `;
 
 function layout(title: string, bodyContent: string): string {
@@ -223,7 +228,65 @@ function submissionCard(row: Submission): string {
   </article>`;
 }
 
-async function listPage(env: Env): Promise<Response> {
+function csvCell(value: unknown): string {
+  const text = String(value ?? '');
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+/** Stream every submission as a CSV download (backup/export for the team). */
+async function exportCsv(env: Env): Promise<Response> {
+  if (!env.DB) return html('Database not configured', 503);
+
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM submissions ORDER BY created_at ASC`,
+  ).all<Submission>();
+
+  const header = [
+    'id',
+    'created_at',
+    'form_name',
+    'status',
+    'name',
+    'email',
+    'phone',
+    'organisation',
+    'interest',
+    'program',
+    'message',
+    'files',
+  ];
+  const rows = results.map((row) =>
+    [
+      row.id,
+      row.created_at,
+      row.form_name,
+      row.status,
+      row.name,
+      row.email,
+      row.phone,
+      row.organisation,
+      row.interest,
+      row.program,
+      row.message,
+      row.files,
+    ]
+      .map(csvCell)
+      .join(','),
+  );
+
+  const content = '\uFEFF' + [header.join(','), ...rows].join('\r\n');
+  const stamp = new Date().toISOString().slice(0, 10);
+  return new Response(content, {
+    status: 200,
+    headers: {
+      'content-type': 'text/csv; charset=utf-8',
+      'content-disposition': `attachment; filename="fikra-submissions-${stamp}.csv"`,
+      'cache-control': 'no-store',
+    },
+  });
+}
+
+async function listPage(env: Env, formName: string | null): Promise<Response> {
   if (!env.DB) {
     return html(
       layout(
@@ -237,17 +300,55 @@ async function listPage(env: Env): Promise<Response> {
     );
   }
 
-  const { results } = await env.DB.prepare(
-    `SELECT * FROM submissions ORDER BY created_at DESC LIMIT 200`,
-  ).all<Submission>();
+  const statement = formName
+    ? env.DB.prepare(
+        `SELECT * FROM submissions WHERE form_name = ? ORDER BY created_at DESC LIMIT 200`,
+      ).bind(formName)
+    : env.DB.prepare(`SELECT * FROM submissions ORDER BY created_at DESC LIMIT 200`);
+  const { results } = await statement.all<Submission>();
+
+  const { results: formCounts } = await env.DB.prepare(
+    `SELECT form_name, COUNT(*) AS count FROM submissions GROUP BY form_name ORDER BY form_name`,
+  ).all<{ form_name: string; count: number }>();
 
   const newCount = results.filter((row) => row.status !== 'handled').length;
 
+  const option = (value: string, count: number) =>
+    `<option value="${escapeHtml(value)}"${formName === value ? ' selected' : ''}>${
+      escapeHtml(value)
+    } (${count})</option>`;
+
   const body = `<header>
       <div><h1>FIKRA inbox</h1><div class="meta">${results.length} shown · ${newCount} to handle</div></div>
-      <a href="/inbox?logout=1">Sign out</a>
+      <div class="row">
+        <a href="/inbox${formName ? `?form=${encodeURIComponent(formName)}&` : '?'}export=csv">Export CSV</a>
+        <a href="/inbox?logout=1">Sign out</a>
+      </div>
     </header>
     <main>
+      <div class="counts">
+        <span class="count">To handle: <b>${newCount}</b></span>
+        ${formCounts
+          .map(
+            (row) =>
+              `<a class="count" style="text-decoration:none;color:inherit" href="/inbox?form=${encodeURIComponent(
+                row.form_name,
+              )}">${escapeHtml(row.form_name)}: <b>${row.count}</b></a>`,
+          )
+          .join('')}
+      </div>
+      <form class="toolbar" method="get" action="/inbox">
+        <label for="form-filter">Source</label>
+        <select id="form-filter" name="form" onchange="this.form.submit()">
+          <option value="">All sources</option>
+          ${formCounts.map((row) => option(row.form_name, row.count)).join('')}
+        </select>
+        ${
+          formName
+            ? `<a href="/inbox" style="font-size:13px">Clear filter</a>`
+            : ''
+        }
+      </form>
       ${
         results.length
           ? results.map(submissionCard).join('')
@@ -285,7 +386,12 @@ export async function onRequestGet(context: Ctx): Promise<Response> {
     return html(loginPage());
   }
 
-  return listPage(env);
+  if (url.searchParams.get('export') === 'csv') {
+    return exportCsv(env);
+  }
+
+  const formName = (url.searchParams.get('form') || '').trim() || null;
+  return listPage(env, formName);
 }
 
 export async function onRequestPost(context: Ctx): Promise<Response> {

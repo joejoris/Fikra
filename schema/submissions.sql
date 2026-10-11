@@ -22,6 +22,9 @@ CREATE TABLE IF NOT EXISTS submissions (
   status TEXT NOT NULL DEFAULT 'new'        -- 'new' | 'handled'
 );
 
+-- RSVPs from the events page reuse this table with form_name = 'rsvp':
+--   program  = the event slug, message = event title + attendee count.
+
 CREATE INDEX IF NOT EXISTS idx_submissions_created ON submissions (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions (status);
 

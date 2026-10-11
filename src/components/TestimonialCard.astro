@@ -1,0 +1,22 @@
+---
+interface Props {
+  quote: string;
+  name: string;
+  role: string;
+  location?: string;
+}
+
+const { quote, name, role, location } = Astro.props;
+---
+
+<figure class="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
+  <div aria-hidden="true" class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent"></div>
+  <span aria-hidden="true" class="text-4xl font-bold leading-none text-primary/30">“</span>
+  <blockquote class="mt-1 flex-1 text-ink-soft">{quote}</blockquote>
+  <figcaption class="mt-5">
+    <p class="font-bold text-ink">{name}</p>
+    <p class="text-sm text-muted">
+      {role}{location && ` · ${location}`}
+    </p>
+  </figcaption>
+</figure>

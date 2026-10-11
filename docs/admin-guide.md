@@ -12,16 +12,18 @@ how to code to publish news, add a program, or update the team page.
 | **Impact stories** | The Impact page and the homepage |
 | **Team** | The Team page |
 | **FAQ** | The FAQ page |
-| **Events** | The Events page and the `.ics` calendar feed |
+| **Events** | The Events page and the `.ics` calendar feed. Leave the registration link empty to use the built-in RSVP form |
 | **Documents** | The Documents & reports page (upload the PDF, then set the file) |
+| **Newsletter editions** | The newsletter archive page (`/newsletter`) |
+| **Testimonials** | Short quotes shown on the home and impact pages |
 
 Everything else (organisation address, phone, donation link, homepage wording)
 is set in a configuration file by whoever maintains the site.
 
 ## Drafts
 
-News posts, impact stories, FAQ entries, events and documents have a **Draft**
-switch.
+News posts, impact stories, FAQ entries, events, documents, newsletter editions
+and testimonials have a **Draft** switch.
 
 - **Draft on** → the item is saved but hidden from the live website.
 - **Draft off** → the item is published.
@@ -40,7 +42,10 @@ the category, and turn **Draft** off. The CMS stores the file in
 Every contact and membership form is emailed to the FIKRA inbox and also saved at
 `https://<your-domain>/inbox`. Sign in with the password your site maintainer
 sets. From there you can read submissions and mark each one **Handled** or
-**New**. Files attached to applications appear as links in the inbox.
+**New**. Use the **Source** filter to see only volunteer, partner, member, RSVP
+or contact leads. Files attached to applications appear as links in the inbox.
+**Export CSV** downloads the whole list as a spreadsheet — do this regularly so
+you always have a backup outside the database.
 
 ## How publishing works
 

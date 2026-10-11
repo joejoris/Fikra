@@ -1,5 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import Form from '../../components/Form.astro';
@@ -22,9 +24,15 @@ const statusLabels: Record<string, string> = {
   'coming-soon': 'Coming soon',
   closed: 'Closed',
 };
+
+// Per-program OG image is generated before the build (see `npm run og`);
+// fall back to the default share image when the generator did not run.
+const generatedOg = `/og/programs-${program.id.replace(/\//g, '-')}.png`;
+const ogImage = program.data.cover
+  ?? (existsSync(join(process.cwd(), 'public', generatedOg)) ? generatedOg : undefined);
 ---
 
-<BaseLayout title={title} description={summary}>
+<BaseLayout title={title} description={summary} image={ogImage}>
   <Section>
     <p class="mb-4">
       <a class="text-sm font-medium text-primary hover:underline" href="/programs">

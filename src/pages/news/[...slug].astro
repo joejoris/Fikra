@@ -1,5 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import CTASection from '../../components/CTASection.astro';
@@ -17,6 +19,12 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 
+// Per-post OG image is generated before the build (see `npm run og`);
+// fall back to the default share image when the generator did not run.
+const generatedOg = `/og/news-${post.id.replace(/\//g, '-')}.png`;
+const ogImage = post.data.cover
+  ?? (existsSync(join(process.cwd(), 'public', generatedOg)) ? generatedOg : undefined);
+
 const date = post.data.pubDate.toLocaleDateString('en-GB', {
   day: 'numeric',
   month: 'long',
@@ -25,7 +33,7 @@ const date = post.data.pubDate.toLocaleDateString('en-GB', {
 });
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description} ogType="article">
+<BaseLayout title={post.data.title} description={post.data.description} ogType="article" image={ogImage}>
   <Section>
     <div class="mx-auto max-w-2xl">
       <p class="mb-4">

@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Button from '../../components/Button.astro';
+import { SITE } from '../../lib/site';
+---
+
+<BaseLayout
+  title="Thank you for your gift"
+  description="Thank you for supporting young founders through FIKRA."
+  noindex
+>
+  <Section>
+    <div class="mx-auto max-w-2xl text-center">
+      <p class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-2xl text-primary" aria-hidden="true">
+        ✓
+      </p>
+      <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Thank you for your gift</h1>
+      <p class="mt-4 text-lg text-ink-soft">
+        Your support helps a young founder turn an idea into income — training,
+        mentoring and the everyday costs of getting a business off the ground.
+      </p>
+    </div>
+  </Section>
+
+  <Section tone="white">
+    <div class="mx-auto max-w-2xl">
+      <h2 class="text-2xl font-bold">What happens next</h2>
+      <ol class="mt-4 list-decimal space-y-3 pl-6 text-ink-soft">
+        <li>
+          You should receive a payment receipt from our giving provider shortly.
+          Keep it for your records.
+        </li>
+        <li>
+          FIKRA reports on progress against its strategic plan, so you can see
+          what gifts like yours make possible.
+        </li>
+        <li>
+          If anything looks wrong — a duplicate charge, a missing receipt —
+          email us and we will sort it out.
+        </li>
+      </ol>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <Button href="/impact">See the impact</Button>
+        <Button href="/newsletter" variant="outline">Follow our newsletter</Button>
+      </div>
+      <p class="mt-6 text-sm text-muted">
+        Questions about your gift?
+        <a class="text-primary underline" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+    </div>
+  </Section>
+</BaseLayout>
