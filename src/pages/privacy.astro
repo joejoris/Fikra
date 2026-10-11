@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import PageHero from '../components/PageHero.astro';
+import { SITE } from '../lib/site';
 ---
 
 <BaseLayout
@@ -56,14 +57,14 @@ import PageHero from '../components/PageHero.astro';
       <h2>Your choices</h2>
       <p>
         You can ask us to show you the information we hold about you, correct
-        it, or delete it. To do so,
-        <a href="/contact">contact us</a>.
+        it, or delete it. To do so, email
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
       </p>
 
       <h2>Contact</h2>
       <p>
-        Questions about this policy can be sent via our
-        <a href="/contact">contact page</a>.
+        Questions about this policy can be sent to
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
       </p>
     </div>
   </Section>

@@ -18,6 +18,9 @@ const columns = [
       <div>
         <Logo />
         <p class="mt-4 max-w-xs text-sm text-ink-soft">{SITE.description}</p>
+        <p class="mt-3 text-sm text-muted">
+          <a class="hover:text-primary" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </p>
       </div>
 
       {

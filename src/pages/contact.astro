@@ -24,6 +24,10 @@ import { SITE } from '../lib/site';
         <h2 class="text-lg font-bold">Reach us directly</h2>
         <dl class="mt-5 space-y-4 text-sm">
           <div>
+            <dt class="font-semibold text-ink">Email</dt>
+            <dd><a class="text-primary underline" href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+          </div>
+          <div>
             <dt class="font-semibold text-ink">Phone</dt>
             <dd class="text-ink-soft">{SITE.phone}</dd>
           </div>

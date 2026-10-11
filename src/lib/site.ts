@@ -14,7 +14,7 @@ export const SITE = {
   // Replace with the real domain before launch (also update astro.config.mjs).
   url: 'https://fikra.example.org',
   locale: 'en',
-  email: '', // Intentionally blank until FIKRA confirms a public address.
+  email: 'fikrainnovator@gmail.com', // Public address, shown on the site.
   phone: '+000 000 0000', // [CONFIRM]
   address: {
     // Intentionally blank until FIKRA confirms a public address.
