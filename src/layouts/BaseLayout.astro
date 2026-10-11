@@ -38,15 +38,6 @@ const structuredData = {
   legalName: SITE.legalName,
   url: SITE.url,
   description: SITE.description,
-  email: SITE.email,
-  telephone: SITE.phone,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: SITE.address.line1,
-    addressLocality: SITE.address.city,
-    addressRegion: SITE.address.region,
-    addressCountry: SITE.address.country,
-  },
   sameAs: socialUrls,
 };
 ---

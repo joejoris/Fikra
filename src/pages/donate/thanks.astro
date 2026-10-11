@@ -2,7 +2,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import Button from '../../components/Button.astro';
-import { SITE } from '../../lib/site';
 ---
 
 <BaseLayout
@@ -46,7 +45,7 @@ import { SITE } from '../../lib/site';
       </div>
       <p class="mt-6 text-sm text-muted">
         Questions about your gift?
-        <a class="text-primary underline" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        <a class="text-primary underline" href="/contact">Contact us</a> and we will help.
       </p>
     </div>
   </Section>

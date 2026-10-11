@@ -14,13 +14,14 @@ export const SITE = {
   // Replace with the real domain before launch (also update astro.config.mjs).
   url: 'https://fikra.example.org',
   locale: 'en',
-  email: 'info@fikra.example.org', // [CONFIRM]
+  email: '', // Intentionally blank until FIKRA confirms a public address.
   phone: '+000 000 0000', // [CONFIRM]
   address: {
-    line1: '[CONFIRM street address]',
-    city: '[CONFIRM city]',
-    region: '[CONFIRM region]',
-    country: '[CONFIRM country]',
+    // Intentionally blank until FIKRA confirms a public address.
+    line1: '',
+    city: '',
+    region: '',
+    country: '',
   },
   // Social links — remove any that do not exist. Empty strings are hidden.
   social: {
