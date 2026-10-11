@@ -1,0 +1,74 @@
+---
+interface Props {
+  title: string;
+  path: string;
+}
+
+import { SITE } from '../lib/site';
+
+const { title, path } = Astro.props;
+const url = new URL(path, SITE.url).href;
+
+const links = [
+  {
+    label: 'WhatsApp',
+    href: `https://wa.me/?text=${encodeURIComponent(`${title} — ${url}`)}`,
+  },
+  {
+    label: 'X',
+    href: `https://x.com/intent/post?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,
+  },
+  {
+    label: 'Facebook',
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+  },
+  {
+    label: 'LinkedIn',
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+  },
+];
+---
+
+<div class="mt-10 flex flex-wrap items-center gap-2 border-t border-border pt-6">
+  <span class="mr-1 text-sm font-semibold text-ink">Share</span>
+  {links.map((link) => (
+    <a
+      class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-ink-soft transition hover:border-primary/40 hover:text-primary"
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {link.label}
+    </a>
+  ))}
+  <button
+    type="button"
+    data-copy-link={url}
+    class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-ink-soft transition hover:border-primary/40 hover:text-primary"
+  >
+    Copy link
+  </button>
+  <span class="hidden text-sm text-primary" data-copy-feedback role="status">
+    Copied!
+  </span>
+</div>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-copy-link]');
+  if (button) {
+    button.addEventListener('click', async () => {
+      const url = button.dataset.copyLink ?? window.location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        // Clipboard API unavailable (older browsers, non-secure context):
+        // fall back to a prompt the visitor can copy from.
+        window.prompt('Copy this link:', url);
+        return;
+      }
+      const feedback = button.parentElement?.querySelector('[data-copy-feedback]');
+      feedback?.classList.remove('hidden');
+      window.setTimeout(() => feedback?.classList.add('hidden'), 2000);
+    });
+  }
+</script>

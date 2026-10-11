@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import CTASection from '../../components/CTASection.astro';
+import ShareButtons from '../../components/ShareButtons.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('news', ({ data }) =>
@@ -48,6 +49,7 @@ const date = post.data.pubDate.toLocaleDateString('en-GB', {
       <div class="prose mt-8">
         <Content />
       </div>
+      <ShareButtons title={post.data.title} path={`/news/${post.id}`} />
     </div>
   </Section>
 

@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import Form from '../../components/Form.astro';
+import ShareButtons from '../../components/ShareButtons.astro';
 import CTASection from '../../components/CTASection.astro';
 
 export async function getStaticPaths() {
@@ -50,6 +51,7 @@ const ogImage = program.data.cover
         <div class="prose mt-10">
           <Content />
         </div>
+        <ShareButtons title={title} path={`/programs/${program.id}`} />
       </div>
 
       <aside class="lg:sticky lg:top-24 lg:self-start">

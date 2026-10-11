@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import { SITE } from '../lib/site';
+---
+
+<BaseLayout
+  title="Accessibility"
+  description="FIKRA's commitment to an accessible website, what we have done, and how to report a problem."
+>
+  <Section>
+    <PageHero
+      eyebrow="Access for everyone"
+      title="Accessibility statement"
+      intro="FIKRA wants everyone — including people using screen readers, keyboards and other assistive technology — to be able to use this website."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="prose mx-auto max-w-2xl">
+      <h2>What we have done</h2>
+      <p>This website is built to work for as many people as possible:</p>
+      <ul>
+        <li>Pages use proper headings, landmarks and labels so screen readers can navigate them.</li>
+        <li>Everything can be operated with a keyboard alone, with a visible focus indicator.</li>
+        <li>There is a skip link to jump straight to the main content.</li>
+        <li>Motion and animation respect the <code>prefers-reduced-motion</code> setting.</li>
+        <li>Text uses system fonts that stay sharp when enlarged, with strong colour contrast.</li>
+        <li>The site works without JavaScript: forms submit normally and all content is readable.</li>
+      </ul>
+
+      <h2>How we check</h2>
+      <p>
+        We test new pages with keyboard-only navigation and automated
+        accessibility checks before they are published. If you use assistive
+        technology and something does not work, we want to know — your report
+        helps us fix it for everyone.
+      </p>
+
+      <h2>Report a problem</h2>
+      <p>
+        Email us at
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        describing the page and the barrier you hit. We aim to reply within a
+        few working days.
+      </p>
+    </div>
+  </Section>
+</BaseLayout>

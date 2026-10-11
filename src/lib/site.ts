@@ -114,6 +114,15 @@ export const DONATION: {
   thanksUrl: '/donate/thanks',
 };
 
+/**
+ * Site-wide announcement bar shown above the header on every page.
+ * Leave `text` empty to hide the bar entirely.
+ */
+export const ANNOUNCEMENT: { text: string; href: string } = {
+  text: '',
+  href: '/get-involved#member',
+};
+
 export const NAV_LINKS = [
   { label: 'About', href: '/about' },
   { label: 'Impact', href: '/impact' },
@@ -144,6 +153,7 @@ export const FOOTER_LINKS = {
     { label: 'Documents', href: '/documents' },
     { label: 'Search', href: '/search' },
     { label: 'Privacy policy', href: '/privacy' },
+    { label: 'Accessibility', href: '/accessibility' },
   ],
 } as const;
 

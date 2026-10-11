@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "npm run og && astro build",
+    "build": "npm run og && npm run icons && astro build",
     "og": "node scripts/generate-og.mjs",
+    "icons": "node scripts/generate-icons.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "typecheck": "tsc --noEmit",

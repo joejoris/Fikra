@@ -9,6 +9,7 @@ interface Props {
 
 import { SITE } from '../lib/site';
 import Header from '../components/Header.astro';
+import AnnouncementBar from '../components/AnnouncementBar.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import BackToTop from '../components/BackToTop.astro';
@@ -54,6 +55,9 @@ const structuredData = {
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-180.png" />
     <meta name="theme-color" content="#0e6e6e" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="alternate" type="application/rss+xml" title="FIKRA news" href="/rss.xml" />
@@ -91,6 +95,7 @@ const structuredData = {
   </head>
   <body class="min-h-screen flex flex-col">
     <a class="skip-link" href="#main">Skip to content</a>
+    <AnnouncementBar />
     <Header />
     <main id="main" class="flex-1">
       <slot />

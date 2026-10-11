@@ -39,6 +39,7 @@ src/
   styles/global.css Design tokens + base styles
 scripts/
   generate-og.mjs   Per-page OG images, rebuilt before every build
+  generate-icons.mjs  PNG favicons + app icons, rebuilt before every build
 functions/
   api/contact.ts    Form submissions (email + optional D1/R2)
   api/subscribe.ts  Newsletter sign-ups (Resend Audiences)
@@ -182,6 +183,12 @@ npx wrangler pages dev dist
   `PUBLIC_CF_WEB_ANALYTICS_TOKEN`, or a Plausible-style script via
   `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN`.
 - **PWA-lite**: web manifest plus a small offline-first service worker.
+- **Announcement bar**: set `ANNOUNCEMENT` in `src/lib/site.ts` to show a
+  dismissible banner on every page; empty text hides it.
+- **Share buttons** on news and program pages, plus a copy-link button.
+- **Favicon pack**: PNG icons (including Apple touch icon) generated from the
+  SVG before every build.
+- **Accessibility statement** at `/accessibility`, linked from the footer.
 - **Newsletter**, **submissions inbox** and **file uploads** (above).
 
 ## Deployment

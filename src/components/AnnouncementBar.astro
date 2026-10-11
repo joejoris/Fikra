@@ -1,0 +1,46 @@
+---
+import { ANNOUNCEMENT } from '../lib/site';
+
+const text = ANNOUNCEMENT.text.trim();
+---
+
+{
+  text && (
+    <div data-announcement class="bg-primary-dark text-white">
+      <div class="mx-auto flex w-full max-w-6xl items-center justify-center gap-3 px-5 py-2 text-center text-sm sm:px-8">
+        <a
+          class="font-medium underline-offset-2 hover:underline"
+          href={ANNOUNCEMENT.href}
+        >
+          {text}
+        </a>
+        <button
+          type="button"
+          data-dismiss-announcement
+          aria-label="Dismiss announcement"
+          class="rounded px-1 text-white/80 hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  )
+}
+
+<script>
+  const bar = document.querySelector('[data-announcement]');
+  if (bar) {
+    const text = bar.querySelector('a')?.textContent ?? '';
+    // Hide for this session if the visitor already dismissed this message.
+    if (sessionStorage.getItem('fikra-announcement') === text) {
+      bar.remove();
+    } else {
+      bar
+        .querySelector('[data-dismiss-announcement]')
+        ?.addEventListener('click', () => {
+          sessionStorage.setItem('fikra-announcement', text);
+          bar.remove();
+        });
+    }
+  }
+</script>

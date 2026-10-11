@@ -5,6 +5,9 @@ dist/
 # Generated Open Graph images (rebuilt before every build via `npm run og`)
 public/og/*.png
 
+# Generated PNG icons (rebuilt before every build via `npm run icons`)
+public/icons/*.png
+
 # Dependencies
 node_modules/
 
