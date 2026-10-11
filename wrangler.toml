@@ -9,10 +9,14 @@ compatibility_date = "2026-10-01"
 pages_build_output_dir = "dist"
 
 # Submissions inbox database (see schema/submissions.sql).
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "fikra-submissions"
-# database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+# The ID below is a local-only placeholder so `wrangler pages dev` and
+# `wrangler d1 execute --local` work without logging in. After `wrangler login`,
+# run `npx wrangler d1 create fikra-submissions` and replace database_id with
+# the real one (for both local `.dev.vars`-style work and production).
+[[d1_databases]]
+binding = "DB"
+database_name = "fikra-submissions"
+database_id = "4074ad54-5ccc-4319-8f65-2a5fa0b4776c"
 
 # Uploaded CVs / pitch decks (optional — without it, files are emailed instead).
 # [[r2_buckets]]

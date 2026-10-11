@@ -17,6 +17,9 @@ node_modules/
 .env.*.local
 .dev.vars
 
+# Wrangler local state (D1 data, dev sessions)
+.wrangler/
+
 # Editor / OS
 .vscode/*
 !.vscode/extensions.json

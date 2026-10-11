@@ -142,7 +142,8 @@ without it they are attached to the notification email.
 
 `npm run preview` serves the static site only — it does not run the
 `functions/` handler. To test form submissions end-to-end locally, build first
-and run the Pages runtime:
+and run the Pages runtime (wrangler ships as a devDependency, and local mode
+needs no Cloudflare login):
 
 ```bash
 npm run build
