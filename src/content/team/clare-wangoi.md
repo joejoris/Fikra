@@ -1,6 +1,6 @@
 ---
 name: 'Clare Wangoi'
-role: 'Finance & Operations Lead'
-bio: 'Oversees FIKRA''s finances, reporting and day-to-day operations, keeping the organisation accountable and well run.'
-order: 3
+role: 'Secretary'
+bio: 'Serves as FIKRA''s secretary, keeping the organisation''s records, meetings and governance in order.'
+order: 7
 ---
