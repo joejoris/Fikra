@@ -272,9 +272,18 @@ const values = [
       {
         team.map((member) => (
           <li class="flex items-center gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)] transition hover:border-primary/40">
-            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-lg font-bold text-white shadow-[0_4px_12px_-4px_rgba(14,110,110,0.7)]">
-              {initials(member.data.name)}
-            </span>
+            {member.data.photo ? (
+              <img
+                class="h-14 w-14 shrink-0 rounded-full object-cover object-top"
+                src={member.data.photo}
+                alt={`Photo of ${member.data.name}`}
+                loading="lazy"
+              />
+            ) : (
+              <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-lg font-bold text-white shadow-[0_4px_12px_-4px_rgba(14,110,110,0.7)]">
+                {initials(member.data.name)}
+              </span>
+            )}
             <span>
               <span class="block font-bold text-ink">{member.data.name}</span>
               <span class="mt-0.5 block text-sm text-ink-soft">{member.data.role}</span>

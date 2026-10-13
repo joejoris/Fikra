@@ -37,9 +37,18 @@ const initials = (name: string) =>
       {
         team.map((member) => (
           <article>
-            <div class="flex h-40 items-center justify-center rounded-[var(--radius-card)] bg-primary-soft text-3xl font-bold text-primary">
-              {initials(member.data.name)}
-            </div>
+            {member.data.photo ? (
+              <img
+                class="h-40 w-full rounded-[var(--radius-card)] object-cover object-top"
+                src={member.data.photo}
+                alt={`Photo of ${member.data.name}`}
+                loading="lazy"
+              />
+            ) : (
+              <div class="flex h-40 items-center justify-center rounded-[var(--radius-card)] bg-primary-soft text-3xl font-bold text-primary">
+                {initials(member.data.name)}
+              </div>
+            )}
             <h2 class="mt-4 text-lg font-bold text-ink">{member.data.name}</h2>
             <p class="text-sm font-medium text-primary">{member.data.role}</p>
             <p class="mt-2 text-sm text-ink-soft">{member.data.bio}</p>
