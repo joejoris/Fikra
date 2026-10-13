@@ -25,8 +25,6 @@ public/
   admin/            Decap CMS (the staff editing interface)
   documents/        Downloadable PDFs (constitution, reports, policies)
   favicon.svg, og-default.svg, robots.txt
-  _headers          Security headers (Cloudflare Pages)
-  _redirects        Redirect rules (Cloudflare Pages)
   manifest.webmanifest, sw.js  PWA-lite: installable shell + offline support
 src/
   components/       Reusable UI pieces (Header, Footer, cards, Form…)
@@ -40,14 +38,11 @@ src/
 scripts/
   generate-og.mjs   Per-page OG images, rebuilt before every build
   generate-icons.mjs  PNG favicons + app icons, rebuilt before every build
-functions/
-  api/contact.ts    Form submissions (email + optional D1/R2)
-  api/subscribe.ts  Newsletter sign-ups (Resend Audiences)
-  api/rsvp.ts       Event registrations (notification + confirmation email + inbox)
-  api/files/[key].ts Serves uploaded files from R2
-  inbox.ts          Private submissions inbox (/inbox)
-schema/             D1 database schema (submissions inbox)
-wrangler.toml       Local Pages runtime + binding configuration
+server/             Node API + inbox, served on the same origin as the site
+  index.js          Express app (static dist + API + security headers)
+  db.js             MongoDB (MONGODB_URI) or local SQLite (./data/app.db)
+  routes/           contact, subscribe, rsvp, inbox, files
+render.yaml         Render blueprint: web service + env vars (MongoDB Atlas)
 docs/               Admin guide, launch checklist, FIKRA input checklist
 ```
 
@@ -82,12 +77,14 @@ These are tracked in [docs/fikra-inputs.md](docs/fikra-inputs.md). At minimum:
 
 ## Forms and email delivery
 
-Forms POST to `/api/contact`, handled by `functions/api/contact.ts`. To make
-them deliver mail you must set these environment variables in the hosting
-dashboard (and in `.env` for local testing):
+Forms POST to `/api/contact`, handled by the Node server (`server/`), which
+runs on the same origin as the site. To make them deliver mail you must set
+these environment variables in the hosting dashboard (and in `.dev.vars` for
+local testing):
 
 | Variable | Purpose |
 |---|---|
+| `MONGODB_URI` | MongoDB Atlas connection string (leave unset for local SQLite) |
 | `RESEND_API_KEY` | API key for [Resend](https://resend.com) (or swap the provider) |
 | `CONTACT_TO_EMAIL` | Inbox that receives submissions |
 | `CONTACT_FROM_EMAIL` | Verified sender address |
@@ -103,12 +100,8 @@ message rather than silently discarding submissions. Every valid submission also
 gets an automatic acknowledgement email. **Test a real submission, including the
 spam folder, before launch.**
 
-Optional bindings (see `wrangler.toml`):
-
-| Binding | Type | Enables |
-|---|---|---|
-| `DB` | D1 database | The `/inbox` submissions list (see `schema/submissions.sql`) |
-| `FILES` | R2 bucket | Storing CVs/pitch decks. Without it, uploads are emailed instead |
+Submissions are stored in MongoDB in production (`MONGODB_URI`) and in a local
+SQLite file (`./data/app.db`, gitignored) when it is unset.
 
 ### Newsletter
 
@@ -125,43 +118,33 @@ confirmation email, and the registration lands in the inbox with source `rsvp`.
 
 ### Submissions inbox
 
-Every form submission is emailed *and* recorded in D1 when the `DB` binding is
-present. Staff can review them at `/inbox`, protected by `INBOX_PASSWORD`. The
+Every form submission is emailed *and* recorded in the database. Staff can
+review them at `/inbox`, protected by `INBOX_PASSWORD`. The
 inbox can be filtered by source (contact, volunteer, partner, member, rsvp)
 with per-source counts, and the whole list can be downloaded with **Export
-CSV** for backups. For a real deployment, put `/inbox` and `/api/files` behind
-Cloudflare Access instead of sharing a password.
+CSV** for backups.
 
 ### File uploads
 
 The membership form accepts up to two files (PDF/Word/PowerPoint/image, 8 MB
-each). With the `FILES` R2 binding they are stored and linked from the email;
-without it they are attached to the notification email.
+each). Files are stored in the database, attached to the notification email,
+and downloadable from the inbox (login required).
 
 ### Testing forms locally
 
-`npm run preview` serves the static site only — it does not run the
-`functions/` handler. To test form submissions end-to-end locally, build first
-and run the Pages runtime (wrangler ships as a devDependency, and local mode
-needs no Cloudflare login):
+`npm run preview` serves the static site only — it does not run the API.
+To test everything end-to-end locally (no accounts needed — SQLite + 503 mail
+stubs), build first and run the Node server, which serves `dist/` and the API
+on one origin:
 
 ```bash
 npm run build
-npx wrangler pages dev dist
+npm run server
 ```
 
-Set the environment variables above in a `.dev.vars` file (same format as
-`.env`) so the function can send mail. `PUBLIC_FORM_ENDPOINT` is only used by the
-browser and defaults to `/api/contact`, which wrangler serves.
-
-To exercise the newsletter, inbox and uploads locally, create the D1 database and
-apply the schema, then uncomment the bindings in `wrangler.toml`:
-
-```bash
-npx wrangler d1 create fikra-submissions
-npx wrangler d1 execute fikra-submissions --local --file=./schema/submissions.sql
-npx wrangler pages dev dist
-```
+Copy `.dev.vars.example` to `.dev.vars` and fill in values to send real mail
+locally. `PUBLIC_FORM_ENDPOINT` is only used by the browser and defaults to
+`/api/contact`, which the server provides.
 
 ### Additional features
 
@@ -178,8 +161,8 @@ npx wrangler pages dev dist
   `og-default.svg` if generation is skipped.
 - **Donation thank-you page** (`/donate/thanks`) — point the giving provider's
   return URL at `DONATION.thanksUrl`.
-- **Security headers + redirects** via `public/_headers` and `public/_redirects`
-  (Cloudflare Pages).
+- **Security headers** (CSP, HSTS, clickjacking guards) set by the server on
+  every response.
 - **Cookie-free analytics**: Cloudflare Web Analytics beacon via
   `PUBLIC_CF_WEB_ANALYTICS_TOKEN`, or a Plausible-style script via
   `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN`.
@@ -194,14 +177,19 @@ npx wrangler pages dev dist
 
 ## Deployment
 
-The site is designed for Cloudflare Pages (free tier):
+The site runs on [Render](https://render.com) from `render.yaml` (Blueprint):
 
-- Build command: `npm run build`
-- Output directory: `dist`
-- `functions/` is deployed automatically as Pages Functions.
+- **Web service** `fikra` (Node): build `npm ci && npm run build`, start
+  `node server/index.js`, health check `/healthz`. Serves the static site and
+  the API on one origin.
+- **Database**: MongoDB Atlas free cluster — paste its connection string as
+  `MONGODB_URI` in the Render dashboard.
+- Set the remaining secrets (`RESEND_API_KEY`, `CONTACT_TO_EMAIL`,
+  `CONTACT_FROM_EMAIL`, `RESEND_AUDIENCE_ID`, `INBOX_PASSWORD`,
+  `TURNSTILE_SECRET_KEY`) in the dashboard.
 
-Vercel/Netlify work too, but the form function would need porting to that
-platform's function format.
+Note: Render's free web tier sleeps when idle, so the first request after a
+pause is slow — use a paid instance if that matters for launch.
 
 ## Accessibility and performance
 

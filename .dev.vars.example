@@ -1,5 +1,10 @@
-# Local secrets for `wrangler pages dev` (see README). Never commit this file.
+# Copy to `.dev.vars` for local `npm run server` work (see README).
+# Never commit `.dev.vars`.
+# MONGODB_URI=mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/fikra
 RESEND_API_KEY=
 CONTACT_TO_EMAIL=
 CONTACT_FROM_EMAIL=
+RESEND_AUDIENCE_ID=
+INBOX_PASSWORD=change-me
 TURNSTILE_SECRET_KEY=
+PORT=8788

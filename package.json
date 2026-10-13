@@ -6,10 +6,11 @@
   "description": "FIKRA website — static Astro site with a Git-backed CMS.",
   "scripts": {
     "dev": "astro dev",
-    "start": "astro dev",
+    "start": "node server/index.js",
     "build": "npm run og && npm run icons && astro build",
     "og": "node scripts/generate-og.mjs",
     "icons": "node scripts/generate-icons.mjs",
+    "server": "node server/index.js",
     "preview": "astro preview",
     "check": "astro check",
     "typecheck": "tsc --noEmit",
@@ -22,13 +23,15 @@
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.8",
+    "express": "^5.3.0",
+    "mongodb": "^7.7.0",
+    "multer": "^2.4.0",
     "satori": "^0.47.1",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "decap-server": "^3.3.0",
-    "typescript": "^5.9.3",
-    "wrangler": "^4.149.0"
+    "typescript": "^5.9.3"
   }
 }

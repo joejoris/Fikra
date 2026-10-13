@@ -31,10 +31,10 @@ marked.
 
 - [ ] `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` set in hosting.
 - [ ] Newsletter: `RESEND_AUDIENCE_ID` set and a test sign-up confirmed.
-- [ ] Submissions inbox: D1 database created, schema applied, `DB` bound, strong
-      `INBOX_PASSWORD` set, and `/inbox` tested.
-- [ ] Uploads: decide between R2 (`FILES` binding) and email attachments; test a
-      file upload end-to-end, including a large file and a disallowed type.
+- [ ] Submissions inbox: MongoDB Atlas cluster created, `MONGODB_URI` set,
+      strong `INBOX_PASSWORD` set, and `/inbox` tested.
+- [ ] Uploads: test a file upload end-to-end, including a large file and a
+      disallowed type; confirm the file downloads from the inbox.
 - [ ] SPF/DKIM configured for the sending domain (or mail may go to spam).
 - [ ] Each form tested end-to-end: contact, volunteer, partner, member, program
       interest, newsletter, event RSVP (notification + confirmation emails).
@@ -55,7 +55,8 @@ marked.
 - [ ] Analytics: `PUBLIC_CF_WEB_ANALYTICS_TOKEN` set and page views arriving.
 - [ ] Security headers: spot-check response headers on the live domain.
 - [ ] Search returns sensible results; RSS feed validates.
-- [ ] `/inbox` and `/api/files` are protected (Cloudflare Access recommended).
+- [ ] `/inbox` and `/api/files` require the inbox login (verified: logged-out
+      requests get 404).
 
 ## Deployment
 

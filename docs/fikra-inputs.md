@@ -38,7 +38,7 @@ points are fine.
 - [ ] Testimonials: 2–3 short consented quotes from founders, mentors or partners.
 - [ ] First newsletter edition: the text of one past update for the archive.
 - [ ] Donation: once a provider is chosen, set its return URL to `/donate/thanks`.
-- [ ] Uploads: is R2 file storage wanted, or are email attachments enough?
+- [ ] Uploads: attachments are stored in the database and emailed — no decision needed.
 
 ## For the organisational documents
 
@@ -55,12 +55,11 @@ points are fine.
 
 - [ ] Domain registrar
 - [ ] Git repository (GitHub organisation)
-- [ ] Hosting (e.g. Cloudflare Pages)
+- [ ] Hosting (Render blueprint in `render.yaml`)
 - [ ] Analytics
 - [ ] Email sending provider (e.g. Resend) and the receiving inbox
 - [ ] Resend Audience (for newsletter sign-ups)
-- [ ] Cloudflare D1 database (submissions inbox) — `npx wrangler d1 create`
-- [ ] Cloudflare R2 bucket (file uploads) — optional
+- [ ] MongoDB Atlas cluster (submissions inbox + uploads)
 
 ## Review gates
 

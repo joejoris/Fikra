@@ -17,8 +17,8 @@ node_modules/
 .env.*.local
 .dev.vars
 
-# Wrangler local state (D1 data, dev sessions)
-.wrangler/
+# Local SQLite data (used when MONGODB_URI is unset)
+data/
 
 # Editor / OS
 .vscode/*

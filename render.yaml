@@ -1,0 +1,36 @@
+# Render blueprint: one Node web service (static site + API on one origin).
+# The database is MongoDB Atlas (free M0 cluster): create it at
+# https://cloud.mongodb.com, allow Render's outbound IPs (or 0.0.0.0/0 for
+# simplicity), and paste the connection string as MONGODB_URI in the dashboard
+# (or via `render envs`). Apply this file via the Render dashboard
+# (New → Blueprint) pointing at this repo.
+#
+# Secrets marked `sync: false` must be set in the dashboard. Values mirror
+# .env.example.
+
+services:
+  - type: web
+    name: fikra
+    runtime: node
+    buildCommand: npm ci && npm run build
+    startCommand: node server/index.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: ~24
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CONTACT_TO_EMAIL
+        sync: false
+      - key: CONTACT_FROM_EMAIL
+        sync: false
+      - key: RESEND_AUDIENCE_ID
+        sync: false
+      - key: INBOX_PASSWORD
+        sync: false
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
