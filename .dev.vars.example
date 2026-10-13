@@ -1,6 +1,6 @@
 # Copy to `.dev.vars` for local `npm run server` work (see README).
 # Never commit `.dev.vars`.
-# MONGODB_URI=mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/fikra
+# DATABASE_URL=postgresql://postgres:PASSWORD@db.xxxxx.supabase.co:5432/postgres
 RESEND_API_KEY=
 CONTACT_TO_EMAIL=
 CONTACT_FROM_EMAIL=

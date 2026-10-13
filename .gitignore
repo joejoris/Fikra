@@ -17,7 +17,7 @@ node_modules/
 .env.*.local
 .dev.vars
 
-# Local SQLite data (used when MONGODB_URI is unset)
+# Local SQLite data (used when DATABASE_URL is unset)
 data/
 
 # Editor / OS

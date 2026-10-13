@@ -1,9 +1,8 @@
 # Render blueprint: one Node web service (static site + API on one origin).
-# The database is MongoDB Atlas (free M0 cluster): create it at
-# https://cloud.mongodb.com, allow Render's outbound IPs (or 0.0.0.0/0 for
-# simplicity), and paste the connection string as MONGODB_URI in the dashboard
-# (or via `render envs`). Apply this file via the Render dashboard
-# (New → Blueprint) pointing at this repo.
+# The database is Supabase Postgres (free tier): create a project at
+# https://supabase.com, copy its connection string (Settings → Database), and
+# paste it as DATABASE_URL in the dashboard (or via `render envs`). Apply this
+# file via the Render dashboard (New → Blueprint) pointing at this repo.
 #
 # Secrets marked `sync: false` must be set in the dashboard. Values mirror
 # .env.example.
@@ -18,7 +17,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: MONGODB_URI
+      - key: DATABASE_URL
         sync: false
       - key: RESEND_API_KEY
         sync: false

@@ -31,7 +31,7 @@ marked.
 
 - [ ] `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` set in hosting.
 - [ ] Newsletter: `RESEND_AUDIENCE_ID` set and a test sign-up confirmed.
-- [ ] Submissions inbox: MongoDB Atlas cluster created, `MONGODB_URI` set,
+- [ ] Submissions inbox: Supabase project created, `DATABASE_URL` set,
       strong `INBOX_PASSWORD` set, and `/inbox` tested.
 - [ ] Uploads: test a file upload end-to-end, including a large file and a
       disallowed type; confirm the file downloads from the inbox.

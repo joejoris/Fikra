@@ -59,7 +59,7 @@ points are fine.
 - [ ] Analytics
 - [ ] Email sending provider (e.g. Resend) and the receiving inbox
 - [ ] Resend Audience (for newsletter sign-ups)
-- [ ] MongoDB Atlas cluster (submissions inbox + uploads)
+- [ ] Supabase project (submissions inbox + uploads)
 
 ## Review gates
 

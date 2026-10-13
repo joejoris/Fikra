@@ -12,7 +12,7 @@
  *   GET/POST /inbox        private submissions inbox
  *
  * Env:
- *   PORT, SERVE_DIR (default ./dist), MONGODB_URI (MongoDB; else local SQLite),
+ *   PORT, SERVE_DIR (default ./dist), DATABASE_URL (Postgres; else local SQLite),
  *   RESEND_API_KEY, CONTACT_TO_EMAIL, CONTACT_FROM_EMAIL, RESEND_AUDIENCE_ID,
  *   INBOX_PASSWORD, TURNSTILE_SECRET_KEY
  */

@@ -40,9 +40,9 @@ scripts/
   generate-icons.mjs  PNG favicons + app icons, rebuilt before every build
 server/             Node API + inbox, served on the same origin as the site
   index.js          Express app (static dist + API + security headers)
-  db.js             MongoDB (MONGODB_URI) or local SQLite (./data/app.db)
+  db.js             Postgres (DATABASE_URL) or local SQLite (./data/app.db)
   routes/           contact, subscribe, rsvp, inbox, files
-render.yaml         Render blueprint: web service + env vars (MongoDB Atlas)
+render.yaml         Render blueprint: web service + env vars (Supabase Postgres)
 docs/               Admin guide, launch checklist, FIKRA input checklist
 ```
 
@@ -84,7 +84,7 @@ local testing):
 
 | Variable | Purpose |
 |---|---|
-| `MONGODB_URI` | MongoDB Atlas connection string (leave unset for local SQLite) |
+| `DATABASE_URL` | Supabase Postgres connection string (leave unset for local SQLite) |
 | `RESEND_API_KEY` | API key for [Resend](https://resend.com) (or swap the provider) |
 | `CONTACT_TO_EMAIL` | Inbox that receives submissions |
 | `CONTACT_FROM_EMAIL` | Verified sender address |
@@ -100,7 +100,7 @@ message rather than silently discarding submissions. Every valid submission also
 gets an automatic acknowledgement email. **Test a real submission, including the
 spam folder, before launch.**
 
-Submissions are stored in MongoDB in production (`MONGODB_URI`) and in a local
+Submissions are stored in Postgres in production (`DATABASE_URL`) and in a local
 SQLite file (`./data/app.db`, gitignored) when it is unset.
 
 ### Newsletter
@@ -182,8 +182,8 @@ The site runs on [Render](https://render.com) from `render.yaml` (Blueprint):
 - **Web service** `fikra` (Node): build `npm ci && npm run build`, start
   `node server/index.js`, health check `/healthz`. Serves the static site and
   the API on one origin.
-- **Database**: MongoDB Atlas free cluster — paste its connection string as
-  `MONGODB_URI` in the Render dashboard.
+- **Database**: Supabase Postgres (free tier) — paste its connection string as
+  `DATABASE_URL` in the Render dashboard.
 - Set the remaining secrets (`RESEND_API_KEY`, `CONTACT_TO_EMAIL`,
   `CONTACT_FROM_EMAIL`, `RESEND_AUDIENCE_ID`, `INBOX_PASSWORD`,
   `TURNSTILE_SECRET_KEY`) in the dashboard.
