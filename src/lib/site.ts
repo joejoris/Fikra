@@ -7,7 +7,7 @@
 
 export const SITE = {
   name: 'FIKRA',
-  legalName: 'FIKRA [CONFIRM full registered name]',
+  legalName: 'FIKRA',
   tagline: 'From idea to enterprise.',
   description:
     'FIKRA supports young people to turn ideas into sustainable enterprises through training, mentorship and access to opportunity.',
@@ -15,7 +15,7 @@ export const SITE = {
   url: 'https://fikra.example.org',
   locale: 'en',
   email: 'fikrainnovator@gmail.com', // Public address, shown on the site.
-  phone: '+000 000 0000', // [CONFIRM]
+  phone: '', // Set when FIKRA confirms a public phone number.
   address: {
     // Intentionally blank until FIKRA confirms a public address.
     line1: '',
@@ -34,8 +34,9 @@ export const SITE = {
   // WhatsApp number in international format, digits only (e.g. 254712345678).
   // Leave empty to hide the WhatsApp button entirely.
   whatsapp: '', // [CONFIRM]
-  // Registration / legal details shown in the footer and on the Donate page.
-  registrationNumber: '[CONFIRM registration number]', // [CONFIRM]
+  // Registration / legal details. Shown in the footer and on the Donate page
+  // once confirmed.
+  registrationNumber: '',
 } as const;
 
 /**
