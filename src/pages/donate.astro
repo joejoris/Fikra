@@ -218,14 +218,16 @@ const withAmount = (url: string, amount: number) => {
         const note = panel.querySelector('[data-paypal-currency-note]');
         if (note) note.textContent = ` (${status.currency || 'USD'})`;
 
-        const input = panel.querySelector('#paypal-amount');
+        const input = panel.querySelector<HTMLInputElement>('#paypal-amount');
         panel.querySelectorAll('[data-paypal-preset]').forEach((button) => {
           button.addEventListener('click', () => {
-            if (input) input.value = button.dataset.paypalPreset ?? '';
+            if (input && button instanceof HTMLElement) {
+              input.value = button.dataset.paypalPreset ?? '';
+            }
           });
         });
 
-        const submit = panel.querySelector('[data-paypal-submit]');
+        const submit = panel.querySelector<HTMLButtonElement>('[data-paypal-submit]');
         const feedback = panel.querySelector('[data-paypal-status]');
         submit?.addEventListener('click', async () => {
           if (feedback) {
