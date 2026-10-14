@@ -39,13 +39,13 @@ const initials = (name: string) =>
           <article>
             {member.data.photo ? (
               <img
-                class="h-40 w-full rounded-[var(--radius-card)] object-cover object-top"
+                class="aspect-square w-full rounded-[var(--radius-card)] object-cover object-top"
                 src={member.data.photo}
                 alt={`Photo of ${member.data.name}`}
                 loading="lazy"
               />
             ) : (
-              <div class="flex h-40 items-center justify-center rounded-[var(--radius-card)] bg-primary-soft text-3xl font-bold text-primary">
+              <div class="flex aspect-square items-center justify-center rounded-[var(--radius-card)] bg-primary-soft text-3xl font-bold text-primary">
                 {initials(member.data.name)}
               </div>
             )}
