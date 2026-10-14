@@ -27,6 +27,7 @@ import { rsvpRouter } from './routes/rsvp.js';
 import { inboxRouter } from './routes/inbox.js';
 import { filesRouter } from './routes/files.js';
 import { paypalRouter } from './routes/paypal.js';
+import { mpesaRouter } from './routes/mpesa.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -90,6 +91,7 @@ app.use(rsvpRouter);
 app.use(inboxRouter);
 app.use(filesRouter);
 app.use(paypalRouter);
+app.use(mpesaRouter);
 
 // Static site (built by `npm run build`). API routes above take precedence.
 // `dotfiles: 'allow'` so /.well-known/* (e.g. security.txt) is served.

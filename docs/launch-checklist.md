@@ -59,6 +59,11 @@ marked.
       (create → approve → capture → inbox record → thank-you email); webhook
       subscribed to `PAYMENT.CAPTURE.COMPLETED` and verified; only then switch
       `PAYPAL_MODE` to live and repeat with a small real gift.
+- [ ] M-Pesa: Daraja sandbox test (STK push → approve → callback → inbox
+      record) on the deployed URL; only then switch `MPESA_MODE` to live with
+      the production shortcode and passkey.
+- [ ] Donation goal: `DONATION.goal` in `src/lib/site.ts` set to a real,
+      agreed figure — or left at zero so the bar stays hidden.
 - [ ] Analytics: `PUBLIC_CF_WEB_ANALYTICS_TOKEN` set and page views arriving.
 - [ ] Security headers: spot-check response headers on the live domain.
 - [ ] Search returns sensible results; RSS feed validates.

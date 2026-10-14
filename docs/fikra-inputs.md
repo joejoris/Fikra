@@ -41,6 +41,10 @@ points are fine.
 - [ ] PayPal: business account created; REST API app credentials
       (`PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`); webhook added for
       `PAYMENT.CAPTURE.COMPLETED` (`PAYPAL_WEBHOOK_ID`); currency confirmed.
+- [ ] M-Pesa: Safaricom Daraja app created; consumer key + secret, shortcode
+      and passkey (`MPESA_*`); production shortcode confirmed for launch.
+- [ ] Donation goal: an agreed fundraising target + amount raised so far for
+      the thermometer — or leave it hidden.
 - [ ] Uploads: attachments are stored in the database and emailed — no decision needed.
 
 ## For the organisational documents

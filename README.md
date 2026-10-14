@@ -128,6 +128,22 @@ Online giving runs through PayPal's Orders API (`server/routes/paypal.js`):
 - Start in `PAYPAL_MODE=sandbox` with PayPal sandbox business + personal
   test accounts before touching live money.
 
+### Donations (M-Pesa)
+
+Kenyan donors can give through an M-Pesa STK push (`server/routes/mpesa.js`):
+
+- The donate page shows a **Give with M-Pesa** panel only when the server has
+  the Daraja credentials (`MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`,
+  `MPESA_SHORTCODE`, `MPESA_PASSKEY`); otherwise it stays hidden.
+- Donor enters a Safaricom number + KES amount → server sends the STK push →
+  donor approves with their M-Pesa PIN → the page polls
+  `/api/donate/mpesa/result` and lands on `/donate/thanks?status=success`.
+- Daraja's async callback (`/api/donate/mpesa/callback`) records completed
+  gifts in the inbox (`form_name` `donation`), idempotent by checkout ID.
+  Callbacks need a public HTTPS URL, so end-to-end testing happens on Render,
+  not localhost.
+- Start in `MPESA_MODE=sandbox` with Daraja test credentials before live money.
+
 ### Event RSVP
 
 Events without an external registration link show a built-in RSVP form posting

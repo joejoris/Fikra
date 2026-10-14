@@ -54,6 +54,30 @@ const withAmount = (url: string, amount: number) => {
       </div>
 
       <aside class="rounded-[var(--radius-card)] border border-border bg-bg p-6">
+        {DONATION.goal.target > 0 && (
+          <div class="mb-6 border-b border-border pb-6">
+            <div class="flex items-baseline justify-between gap-3 text-sm">
+              <span class="font-semibold text-ink">{DONATION.goal.label || 'Fundraising goal'}</span>
+              <span class="text-ink-soft">
+                {DONATION.goal.currency} {DONATION.goal.raised.toLocaleString('en-US')} of{' '}
+                {DONATION.goal.currency} {DONATION.goal.target.toLocaleString('en-US')}
+              </span>
+            </div>
+            <div
+              class="mt-3 h-3 overflow-hidden rounded-full bg-border"
+              role="progressbar"
+              aria-valuenow={Math.min(100, Math.round((DONATION.goal.raised / DONATION.goal.target) * 100))}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={DONATION.goal.label || 'Fundraising goal'}
+            >
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+                style={`width: ${Math.min(100, Math.round((DONATION.goal.raised / DONATION.goal.target) * 100))}%`}
+              ></div>
+            </div>
+          </div>
+        )}
         {
           hasMethods ? (
             <div>
@@ -183,6 +207,55 @@ const withAmount = (url: string, amount: number) => {
             <p class="mt-3 hidden text-sm text-red-600" data-paypal-status role="status" aria-live="polite"></p>
           </div>
         </div>
+
+        <div data-mpesa-panel class="mt-6 hidden border-t border-border pt-6">
+          <h2 class="text-lg font-bold">Give with M-Pesa</h2>
+          <p class="mt-2 text-sm text-ink-soft">
+            Enter your Safaricom number and amount — we send a payment prompt
+            to your phone and you approve it with your M-Pesa PIN.
+          </p>
+          <div class="mt-4 space-y-3">
+            <div>
+              <label class="block text-sm font-semibold text-ink" for="mpesa-phone">
+                M-Pesa phone number
+              </label>
+              <input
+                class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+                id="mpesa-phone"
+                name="phone"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="0712 345 678"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-ink" for="mpesa-amount">
+                Amount (KES)
+              </label>
+              <input
+                class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+                id="mpesa-amount"
+                name="amount"
+                type="number"
+                min="1"
+                max="500000"
+                step="1"
+                value="100"
+                required
+              />
+            </div>
+            <button
+              type="button"
+              data-mpesa-submit
+              class="inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-primary to-primary-dark px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60"
+            >
+              Send M-Pesa prompt
+            </button>
+            <p class="hidden text-sm text-ink-soft" data-mpesa-status role="status" aria-live="polite"></p>
+          </div>
+        </div>
       </aside>
     </div>
   </Section>
@@ -265,6 +338,97 @@ const withAmount = (url: string, amount: number) => {
       })
       .catch(() => {
         panel.remove();
+      });
+  }
+</script>
+
+<script>
+  // M-Pesa panel: only shown when the server has Daraja credentials configured.
+  const mpesaPanel = document.querySelector('[data-mpesa-panel]');
+  if (mpesaPanel) {
+    const setStatus = (message: string, isError: boolean) => {
+      const el = mpesaPanel.querySelector('[data-mpesa-status]');
+      if (!el) return;
+      el.textContent = message;
+      el.classList.remove('hidden');
+      el.classList.toggle('text-red-600', isError);
+    };
+
+    fetch('/api/donate/mpesa/status')
+      .then((res) => res.json())
+      .then((status) => {
+        if (!status || status.enabled !== true) {
+          mpesaPanel.remove();
+          return;
+        }
+        mpesaPanel.classList.remove('hidden');
+
+        const phoneInput = mpesaPanel.querySelector<HTMLInputElement>('#mpesa-phone');
+        const amountInput = mpesaPanel.querySelector<HTMLInputElement>('#mpesa-amount');
+        const submit = mpesaPanel.querySelector<HTMLButtonElement>('[data-mpesa-submit]');
+
+        const pollResult = (checkoutRequestId: string, attemptsLeft: number) => {
+          if (attemptsLeft <= 0) {
+            setStatus(
+              'We have not seen your payment yet. If you approved it on your phone, it will still be recorded — otherwise try again.',
+              true,
+            );
+            if (submit) {
+              submit.disabled = false;
+              submit.textContent = 'Send M-Pesa prompt';
+            }
+            return;
+          }
+          window.setTimeout(async () => {
+            try {
+              const res = await fetch(
+                `/api/donate/mpesa/result?id=${encodeURIComponent(checkoutRequestId)}`,
+              );
+              const data = await res.json();
+              if (data.completed === true) {
+                window.location.assign('/donate/thanks?status=success');
+                return;
+              }
+            } catch {
+              // Keep polling through transient errors.
+            }
+            pollResult(checkoutRequestId, attemptsLeft - 1);
+          }, 3000);
+        };
+
+        submit?.addEventListener('click', async () => {
+          const phone = phoneInput?.value ?? '';
+          const amount = Number(amountInput?.value);
+          if (submit) {
+            submit.disabled = true;
+            submit.textContent = 'Sending…';
+          }
+          try {
+            const res = await fetch('/api/donate/mpesa/stk', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ phone, amount }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.checkoutRequestId) {
+              throw new Error(data?.error || 'Could not send the prompt.');
+            }
+            setStatus('Prompt sent — check your phone and enter your M-Pesa PIN to complete the gift.', false);
+            pollResult(data.checkoutRequestId, 40);
+          } catch (error) {
+            setStatus(
+              error instanceof Error ? error.message : 'Could not send the prompt. Please try again.',
+              true,
+            );
+            if (submit) {
+              submit.disabled = false;
+              submit.textContent = 'Send M-Pesa prompt';
+            }
+          }
+        });
+      })
+      .catch(() => {
+        mpesaPanel.remove();
       });
   }
 </script>

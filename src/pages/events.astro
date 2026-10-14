@@ -17,6 +17,9 @@ startOfToday.setUTCHours(0, 0, 0, 0);
 const upcoming = events.filter(
   (event) => (event.data.endDate ?? event.data.startDate) >= startOfToday,
 );
+const past = events
+  .filter((event) => (event.data.endDate ?? event.data.startDate) < startOfToday)
+  .sort((a, b) => b.data.startDate.valueOf() - a.data.startDate.valueOf());
 
 const fmtLong = (date: Date) =>
   date.toLocaleDateString('en-GB', {
@@ -230,6 +233,34 @@ const googleCalendarUrl = (event: (typeof events)[number]) => {
       )
     }
   </Section>
+
+  {
+    past.length > 0 && (
+      <Section tone="soft">
+        <div class="max-w-2xl">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Archive</p>
+          <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Past events</h2>
+        </div>
+        <ul class="mt-10 grid gap-6 md:grid-cols-2">
+          {past.map((event) => (
+            <li class="rounded-[var(--radius-card)] border border-border bg-surface p-6 opacity-90">
+              <time
+                class="text-sm font-semibold uppercase tracking-wide text-muted"
+                datetime={event.data.startDate.toISOString()}
+              >
+                {fmtLong(event.data.startDate)}
+              </time>
+              <h3 class="mt-2 text-lg font-bold text-ink">{event.data.title}</h3>
+              <p class="mt-2 text-sm text-ink-soft">{event.data.summary}</p>
+              {event.data.location && (
+                <p class="mt-3 text-sm text-muted">{event.data.location}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Section>
+    )
+  }
 
   <CTASection />
 </BaseLayout>

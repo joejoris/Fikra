@@ -77,6 +77,11 @@ export const DONATION: {
    * Point the provider's redirect/return URL at this page.
    */
   thanksUrl: string;
+  /**
+   * Optional fundraising thermometer. Leave `target` at 0 to hide it.
+   * Update `raised` by hand whenever FIKRA totals donations.
+   */
+  goal: { target: number; raised: number; currency: string; label: string };
 } = {
   methods: [
     // Uncomment and fill in once a provider and/or bank account is confirmed:
@@ -113,6 +118,7 @@ export const DONATION: {
   currency: '',
   note: 'Online giving is being set up. In the meantime, contact us to give.',
   thanksUrl: '/donate/thanks',
+  goal: { target: 0, raised: 0, currency: '', label: '' },
 };
 
 /**
