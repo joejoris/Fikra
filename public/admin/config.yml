@@ -95,6 +95,7 @@ collections:
       - { name: bio, label: Short bio, widget: text }
       - { name: order, label: Sort order, widget: number, default: 99, value_type: int }
       - { name: photo, label: Photo, widget: image, required: false }
+      - { name: photoPosition, label: Photo focus point, widget: string, required: false, hint: 'Where to centre the crop, e.g. top or center 40%. Leave empty for top.' }
       - { name: email, label: Email, widget: string, required: false }
 
   - name: faq

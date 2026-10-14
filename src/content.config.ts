@@ -52,6 +52,7 @@ const team = defineCollection({
     bio: z.string(),
     order: z.number().default(99),
     photo: z.string().optional(),
+    photoPosition: z.string().optional(),
     email: z.string().optional(),
   }),
 });

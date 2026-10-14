@@ -39,7 +39,8 @@ const initials = (name: string) =>
           <article>
             {member.data.photo ? (
               <img
-                class="aspect-square w-full rounded-[var(--radius-card)] object-cover object-top"
+                class="aspect-square w-full rounded-[var(--radius-card)] object-cover"
+                style={{ objectPosition: member.data.photoPosition ?? 'top' }}
                 src={member.data.photo}
                 alt={`Photo of ${member.data.name}`}
                 loading="lazy"
