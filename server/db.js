@@ -95,6 +95,10 @@ export async function initDb(poolOverride = null) {
   if (poolOverride || process.env.DATABASE_URL) {
     mode = 'pg';
     pool = poolOverride ?? new Pool({ connectionString: process.env.DATABASE_URL });
+    // A dying idle client must never take the process down.
+    if (typeof pool.on === 'function') {
+      pool.on('error', (error) => console.error('db: idle pool client error', error));
+    }
     await pool.query(DDL_PG);
     console.log('db: connected to Postgres');
   } else {

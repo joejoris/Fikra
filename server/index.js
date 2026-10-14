@@ -118,7 +118,16 @@ app.use((err, req, res, next) => {
   return res.status(500).type('text').send('Something went wrong.');
 });
 
-await initDb();
+await (async () => {
+  try {
+    await initDb();
+  } catch (error) {
+    // Never crash the whole site for a database outage: pages still serve,
+    // API routes fail loudly (500) until the database recovers. Fix the
+    // DATABASE_URL / database status and redeploy or restart.
+    console.error('db: startup connection failed — serving without a database.', error);
+  }
+})();
 
 app.listen(PORT, () => {
   console.log(`fikra server listening on :${PORT} (serving ${SERVE_DIR})`);
