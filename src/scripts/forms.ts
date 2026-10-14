@@ -71,7 +71,18 @@ async function submit(form: HTMLFormElement) {
         });
 
     if (!res.ok) {
-      throw new Error(`Request failed with ${res.status}`);
+      // Surface the server's specific message (validation, rate limit,
+      // not-configured) instead of a generic failure where one exists.
+      let message = 'Sorry, something went wrong. Please try again, or email us directly.';
+      try {
+        const data = await res.json();
+        if (data && typeof data.error === 'string' && data.error.trim()) {
+          message = data.error.trim();
+        }
+      } catch {
+        // Non-JSON error page (proxy 502, etc.) — keep the generic message.
+      }
+      throw new Error(message);
     }
 
     if (inline) {
@@ -86,7 +97,9 @@ async function submit(form: HTMLFormElement) {
     setStatus(
       statusEl,
       'error',
-      'Sorry, something went wrong. Please try again, or email us directly.',
+      error instanceof Error && error.message
+        ? error.message
+        : 'Sorry, something went wrong. Please try again, or email us directly.',
     );
   } finally {
     if (button) {
