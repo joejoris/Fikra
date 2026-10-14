@@ -38,6 +38,9 @@ points are fine.
 - [ ] Testimonials: 2–3 short consented quotes from founders, mentors or partners.
 - [ ] First newsletter edition: the text of one past update for the archive.
 - [ ] Donation: once a provider is chosen, set its return URL to `/donate/thanks`.
+- [ ] PayPal: business account created; REST API app credentials
+      (`PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`); webhook added for
+      `PAYMENT.CAPTURE.COMPLETED` (`PAYPAL_WEBHOOK_ID`); currency confirmed.
 - [ ] Uploads: attachments are stored in the database and emailed — no decision needed.
 
 ## For the organisational documents

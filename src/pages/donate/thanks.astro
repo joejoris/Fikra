@@ -15,8 +15,8 @@ import { SITE } from '../../lib/site';
       <p class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-2xl text-primary" aria-hidden="true">
         ✓
       </p>
-      <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Thank you for your gift</h1>
-      <p class="mt-4 text-lg text-ink-soft">
+      <h1 class="mt-6 text-3xl font-bold sm:text-4xl" data-thanks-title>Thank you for your gift</h1>
+      <p class="mt-4 text-lg text-ink-soft" data-thanks-intro>
         Your support helps a young founder turn an idea into income — training,
         mentoring and the everyday costs of getting a business off the ground.
       </p>
@@ -51,3 +51,22 @@ import { SITE } from '../../lib/site';
     </div>
   </Section>
 </BaseLayout>
+
+<script>
+  // PayPal redirects here with ?status=success|cancelled|failed.
+  const status = new URLSearchParams(window.location.search).get('status');
+  if (status === 'cancelled' || status === 'failed') {
+    const title = document.querySelector('[data-thanks-title]');
+    const intro = document.querySelector('[data-thanks-intro]');
+    if (title) {
+      title.textContent =
+        status === 'cancelled' ? 'Payment cancelled' : 'Payment did not go through';
+    }
+    if (intro) {
+      intro.textContent =
+        status === 'cancelled'
+          ? 'No problem — nothing was charged. You can try again whenever you are ready.'
+          : 'Something went wrong and no money moved. Please try again, or contact us and we will help.';
+    }
+  }
+</script>

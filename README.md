@@ -110,6 +110,23 @@ address to a Resend Audience (`RESEND_AUDIENCE_ID`) and sends a welcome email.
 Past editions live in `src/content/newsletters/` and are listed on the public
 archive at `/newsletter`.
 
+### Donations (PayPal)
+
+Online giving runs through PayPal's Orders API (`server/routes/paypal.js`):
+
+- The donate page shows a **Give with PayPal** panel only when the server has
+  `PAYPAL_CLIENT_ID` + `PAYPAL_SECRET` set (checked live via
+  `/api/donate/paypal/status`); otherwise it stays hidden.
+- Donor picks an amount → server creates the order → donor approves on PayPal →
+  PayPal returns to `/donate/return` → server captures → donor lands on
+  `/donate/thanks?status=success` (or `cancelled`/`failed` variants).
+- Completed gifts are recorded in the submissions inbox (`form_name`
+  `donation`) and the donor gets a thank-you email. The
+  `PAYMENT.CAPTURE.COMPLETED` webhook (`/api/donate/paypal/webhook`, needs
+  `PAYPAL_WEBHOOK_ID`) records the same gift with dedupe, as a safety net.
+- Start in `PAYPAL_MODE=sandbox` with PayPal sandbox business + personal
+  test accounts before touching live money.
+
 ### Event RSVP
 
 Events without an external registration link show a built-in RSVP form posting

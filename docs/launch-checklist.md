@@ -52,6 +52,10 @@ marked.
       Calendar" links work. A test RSVP arrives in the inbox with source `rsvp`.
 - [ ] Inbox: source filter and **Export CSV** tested; a backup routine agreed.
 - [ ] Donation: provider return URL points at `/donate/thanks`; thank-you page checked.
+- [ ] PayPal: sandbox business + personal accounts used for a full test gift
+      (create → approve → capture → inbox record → thank-you email); webhook
+      subscribed to `PAYMENT.CAPTURE.COMPLETED` and verified; only then switch
+      `PAYPAL_MODE` to live and repeat with a small real gift.
 - [ ] Analytics: `PUBLIC_CF_WEB_ANALYTICS_TOKEN` set and page views arriving.
 - [ ] Security headers: spot-check response headers on the live domain.
 - [ ] Search returns sensible results; RSS feed validates.

@@ -183,6 +183,20 @@ export async function countByForm() {
     .all();
 }
 
+/** True when any submission message already contains the fragment (donation dedupe). */
+export async function submissionExists(fragment) {
+  if (mode === 'pg') {
+    const res = await pool.query("SELECT 1 FROM submissions WHERE message LIKE '%' || $1 || '%' LIMIT 1", [
+      fragment,
+    ]);
+    return res.rows.length > 0;
+  }
+  const row = sqlite
+    .prepare("SELECT 1 AS found FROM submissions WHERE message LIKE '%' || ? || '%' LIMIT 1")
+    .get(fragment);
+  return Boolean(row);
+}
+
 export async function setSubmissionStatus(id, status) {
   const n = Number(id);
   if (!Number.isInteger(n)) return;

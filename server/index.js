@@ -26,6 +26,7 @@ import { subscribeRouter } from './routes/subscribe.js';
 import { rsvpRouter } from './routes/rsvp.js';
 import { inboxRouter } from './routes/inbox.js';
 import { filesRouter } from './routes/files.js';
+import { paypalRouter } from './routes/paypal.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -88,6 +89,7 @@ app.use(subscribeRouter);
 app.use(rsvpRouter);
 app.use(inboxRouter);
 app.use(filesRouter);
+app.use(paypalRouter);
 
 // Static site (built by `npm run build`). API routes above take precedence.
 if (existsSync(SERVE_DIR)) {
