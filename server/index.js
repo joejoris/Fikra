@@ -73,8 +73,8 @@ app.use((req, res, next) => {
     'Content-Security-Policy',
     "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; " +
       "form-action 'self'; img-src 'self' data:; font-src 'self' data:; " +
-      "style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; " +
-      "connect-src 'self'",
+      "style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://challenges.cloudflare.com; " +
+      "connect-src 'self'; frame-src https://challenges.cloudflare.com",
   );
   next();
 });
@@ -92,8 +92,9 @@ app.use(filesRouter);
 app.use(paypalRouter);
 
 // Static site (built by `npm run build`). API routes above take precedence.
+// `dotfiles: 'allow'` so /.well-known/* (e.g. security.txt) is served.
 if (existsSync(SERVE_DIR)) {
-  app.use(express.static(SERVE_DIR, { index: 'index.html', extensions: ['html'] }));
+  app.use(express.static(SERVE_DIR, { index: 'index.html', extensions: ['html'], dotfiles: 'allow' }));
 } else {
   console.warn(`server: static dir not found (${SERVE_DIR}) — run npm run build first`);
 }

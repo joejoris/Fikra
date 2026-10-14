@@ -6,7 +6,7 @@
  */
 import { Router } from 'express';
 import multer from 'multer';
-import { asyncHandler, clean, createRateLimiter, isEmail, safeFileName, sendResend, verifyTurnstile } from '../lib.js';
+import { asyncHandler, clean, createRateLimiter, isEmail, safeFileName, sendResend, tooFast, verifyTurnstile } from '../lib.js';
 import { insertFile, insertSubmission, updateSubmissionFiles } from '../db.js';
 
 export const contactRouter = Router();
@@ -62,6 +62,11 @@ contactRouter.post(
     // Honeypot — bots fill hidden fields. Pretend success, send nothing.
     if (clean(data._gotcha)) {
       return json(res, { ok: true });
+    }
+
+    // Time-trap — instant submissions are bots.
+    if (tooFast(data._loadedAt)) {
+      return json(res, { ok: false, error: 'Please wait a moment and try again.' }, 400);
     }
 
     const name = clean(data.name);

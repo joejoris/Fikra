@@ -1,0 +1,18 @@
+---
+/**
+ * Cloudflare Turnstile spam widget. Renders nothing unless
+ * PUBLIC_TURNSTILE_SITE_KEY is set — pair it with TURNSTILE_SECRET_KEY
+ * server-side (setting the secret without this widget rejects every
+ * submission, since the token would be missing).
+ */
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+---
+
+{
+  siteKey && (
+    <div class="mt-1">
+      <div class="cf-turnstile" data-sitekey={siteKey}></div>
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    </div>
+  )
+}

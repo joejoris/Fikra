@@ -15,6 +15,8 @@ const {
 const name = 'newsletter';
 const id = (field: string) => `${name}-${field}`;
 const wide = layout === 'wide';
+
+import Turnstile from './Turnstile.astro';
 ---
 
 <form
@@ -81,6 +83,8 @@ const wide = layout === 'wide';
       <a class="text-primary underline" href="/privacy">privacy policy</a>.
     </label>
   </div>
+
+  <Turnstile />
 
   <p class="text-sm text-muted" data-status role="status" aria-live="polite"></p>
 </form>

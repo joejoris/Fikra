@@ -171,6 +171,20 @@ export async function listSubmissions(formName, limit = 200) {
   return rows.map((row) => ({ ...row, created_at: displayDate(row.created_at) }));
 }
 
+/** Submissions created since the start of the current month (UTC). */
+export async function countThisMonth() {
+  if (mode === 'pg') {
+    const res = await pool.query(
+      "SELECT COUNT(*) AS count FROM submissions WHERE created_at >= date_trunc('month', NOW())",
+    );
+    return Number(res.rows[0]?.count ?? 0);
+  }
+  const row = sqlite
+    .prepare("SELECT COUNT(*) AS count FROM submissions WHERE created_at >= date('now', 'start of month')")
+    .get();
+  return Number(row?.count ?? 0);
+}
+
 export async function countByForm() {
   if (mode === 'pg') {
     const res = await pool.query(

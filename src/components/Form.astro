@@ -25,6 +25,8 @@ const {
 } = Astro.props;
 
 const id = (field: string) => `${name}-${field}`;
+
+import Turnstile from './Turnstile.astro';
 ---
 
 <form
@@ -178,6 +180,8 @@ const id = (field: string) => `${name}-${field}`;
       <a class="text-primary underline" href="/privacy">privacy policy</a>.
     </label>
   </div>
+
+  <Turnstile />
 
   <div class="flex items-center gap-4">
     <button

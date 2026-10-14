@@ -90,7 +90,8 @@ local testing):
 | `CONTACT_FROM_EMAIL` | Verified sender address |
 | `RESEND_AUDIENCE_ID` | Resend Audience for newsletter sign-ups |
 | `INBOX_PASSWORD` | Password for the private `/inbox` page |
-| `TURNSTILE_SECRET_KEY` | Optional — Cloudflare Turnstile spam protection |
+| `TURNSTILE_SECRET_KEY` | Optional — Cloudflare Turnstile spam protection (set `PUBLIC_TURNSTILE_SITE_KEY` too, or forms break) |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Turnstile widget site key — renders the challenge on all forms |
 | `PUBLIC_FORM_ENDPOINT` | Where the browser posts (default `/api/contact`) |
 | `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN` | Optional cookie-free analytics (Plausible-style) |
 | `PUBLIC_CF_WEB_ANALYTICS_TOKEN` | Optional — Cloudflare Web Analytics beacon token (free, cookieless) |

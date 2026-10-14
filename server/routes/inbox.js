@@ -7,7 +7,7 @@
  */
 import { Router } from 'express';
 import { asyncHandler, getCookie, inboxToken } from '../lib.js';
-import { countByForm, listSubmissions, setSubmissionStatus } from '../db.js';
+import { countByForm, countThisMonth, listSubmissions, setSubmissionStatus } from '../db.js';
 
 export const inboxRouter = Router();
 
@@ -210,6 +210,7 @@ inboxRouter.get(
     const formName = String(req.query.form ?? '').trim() || null;
     const results = await listSubmissions(formName);
     const formCounts = await countByForm();
+    const monthCount = await countThisMonth();
     const newCount = results.filter((row) => row.status !== 'handled').length;
 
     const option = (value, count) =>
@@ -225,6 +226,7 @@ inboxRouter.get(
     <main>
       <div class="counts">
         <span class="count">To handle: <b>${newCount}</b></span>
+        <span class="count">This month: <b>${monthCount}</b></span>
         ${formCounts
           .map(
             (row) =>

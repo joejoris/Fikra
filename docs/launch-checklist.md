@@ -42,7 +42,10 @@ marked.
       folder too**.
 - [ ] Honeypot confirmed to work; rate limiting confirmed to respond with 429
       after repeated submissions.
-- [ ] Optional: Turnstile enabled if spam becomes a problem.
+- [ ] Instant bot submissions rejected by the time-trap (test: POST with a fresh
+      `_loadedAt` gets a 400).
+- [ ] Optional: Turnstile enabled if spam becomes a problem — set the site key
+      AND the secret together, and confirm the widget appears on the forms.
 
 ## Other features
 

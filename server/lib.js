@@ -21,6 +21,19 @@ export function isEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+/**
+ * Time-trap: the browser stamps `_loadedAt` when the page loads. Submissions
+ * stamped less than ~2s ago (or with a clock impossibly far in the future)
+ * are bots. A missing stamp means JavaScript is off — always allow those.
+ */
+export function tooFast(loadedAt) {
+  if (loadedAt == null || loadedAt === '') return false;
+  const stamped = Number(loadedAt);
+  if (!Number.isFinite(stamped)) return true;
+  const age = Date.now() - stamped;
+  return age < 2000 || age > 1000 * 60 * 60 * 24 * 30;
+}
+
 export function safeFileName(name) {
   return (
     String(name)

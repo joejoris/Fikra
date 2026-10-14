@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import PageHero from '../components/PageHero.astro';
+import Turnstile from '../components/Turnstile.astro';
 import CTASection from '../components/CTASection.astro';
 
 const events = (
@@ -201,6 +202,8 @@ const googleCalendarUrl = (event: (typeof events)[number]) => {
                           <a class="text-primary underline" href="/privacy">privacy policy</a>.
                         </label>
                       </div>
+
+                      <Turnstile />
 
                       <div class="flex items-center gap-4">
                         <button

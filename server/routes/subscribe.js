@@ -2,7 +2,7 @@
  * POST /api/subscribe — newsletter sign-ups (Resend Audience + welcome email).
  */
 import { Router } from 'express';
-import { asyncHandler, clean, createRateLimiter, isEmail, sendResend, verifyTurnstile } from '../lib.js';
+import { asyncHandler, clean, createRateLimiter, isEmail, sendResend, tooFast, verifyTurnstile } from '../lib.js';
 import { insertSubscriberIgnore } from '../db.js';
 
 export const subscribeRouter = Router();
@@ -26,6 +26,11 @@ subscribeRouter.post(
     // Honeypot.
     if (clean(data._gotcha)) {
       return json(res, { ok: true });
+    }
+
+    // Time-trap — instant submissions are bots.
+    if (tooFast(data._loadedAt)) {
+      return json(res, { ok: false, error: 'Please wait a moment and try again.' }, 400);
     }
 
     const email = clean(data.email);
