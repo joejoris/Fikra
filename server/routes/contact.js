@@ -6,7 +6,8 @@
  */
 import { Router } from 'express';
 import multer from 'multer';
-import { asyncHandler, clean, createRateLimiter, isEmail, safeFileName, sendResend, tooFast, verifyTurnstile } from '../lib.js';
+import { asyncHandler, clean, createRateLimiter, isEmail, safeFileName, tooFast, verifyTurnstile } from '../lib.js';
+import { mailProvider, sendMail } from '../mail.js';
 import { insertFile, insertSubmission, updateSubmissionFiles } from '../db.js';
 
 export const contactRouter = Router();
@@ -103,12 +104,12 @@ contactRouter.post(
       }
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
+    const provider = mailProvider();
     const to = process.env.CONTACT_TO_EMAIL;
     const from = process.env.CONTACT_FROM_EMAIL;
 
-    if (!apiKey || !to || !from) {
-      console.error('contact: email is not configured (missing RESEND_API_KEY / CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL)');
+    if (!provider || !to || !from) {
+      console.error('contact: email is not configured (no mail provider / CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL)');
       return json(res, { ok: false, error: 'This form is not fully set up yet. Please email us directly.' }, 503);
     }
 
@@ -134,7 +135,7 @@ contactRouter.post(
       bodyLines.push('', 'Attachments:', ...uploads.map((file) => `- ${file.originalname} (attached)`));
     }
 
-    const sent = await sendResend(apiKey, {
+    const sent = await sendMail({
       from,
       to: [to],
       reply_to: email,
@@ -180,7 +181,7 @@ contactRouter.post(
 
     // Acknowledge to the submitter (best effort).
     try {
-      await sendResend(apiKey, {
+      await sendMail({
         from,
         to: [email],
         reply_to: to,

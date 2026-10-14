@@ -64,8 +64,10 @@ points are fine.
 - [ ] Git repository (GitHub organisation)
 - [ ] Hosting (Render blueprint in `render.yaml`)
 - [ ] Analytics
-- [ ] Email sending provider (e.g. Resend) and the receiving inbox
-- [ ] Resend Audience (for newsletter sign-ups)
+- [ ] Email sending: either Resend (API key + audience) **or** Gmail
+      (address + App Password from Google Account → Security → 2-Step
+      Verification), plus the receiving inbox
+- [ ] Resend Audience (for newsletter sign-ups) — only if using Resend
 - [ ] Supabase project (submissions inbox + uploads)
 
 ## Review gates

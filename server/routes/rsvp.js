@@ -3,7 +3,8 @@
  * Notifies FIKRA, confirms to the attendee, records in the submissions inbox.
  */
 import { Router } from 'express';
-import { asyncHandler, clean, createRateLimiter, isEmail, sendResend, tooFast, verifyTurnstile } from '../lib.js';
+import { asyncHandler, clean, createRateLimiter, isEmail, tooFast, verifyTurnstile } from '../lib.js';
+import { mailProvider, sendMail } from '../mail.js';
 import { insertSubmission } from '../db.js';
 
 export const rsvpRouter = Router();
@@ -61,12 +62,12 @@ rsvpRouter.post(
       }
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
+    const provider = mailProvider();
     const to = process.env.CONTACT_TO_EMAIL;
     const from = process.env.CONTACT_FROM_EMAIL;
 
-    if (!apiKey || !to || !from) {
-      console.error('rsvp: email is not configured (missing RESEND_API_KEY / CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL)');
+    if (!provider || !to || !from) {
+      console.error('rsvp: email is not configured (no mail provider / CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL)');
       return json(
         res,
         { ok: false, error: 'Registration is not fully set up yet. Please contact us directly.' },
@@ -74,7 +75,7 @@ rsvpRouter.post(
       );
     }
 
-    const notify = await sendResend(apiKey, {
+    const notify = await sendMail({
       from,
       to: [to],
       reply_to: email,
@@ -112,7 +113,7 @@ rsvpRouter.post(
 
     // Confirmation email to the attendee (best effort).
     try {
-      await sendResend(apiKey, {
+      await sendMail({
         from,
         to: [email],
         reply_to: to,

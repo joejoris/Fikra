@@ -20,8 +20,8 @@ import {
   clean,
   createRateLimiter,
   isEmail,
-  sendResend,
 } from '../lib.js';
+import { mailProvider, sendMail } from '../mail.js';
 import { insertSubmission, submissionExists } from '../db.js';
 
 export const paypalRouter = Router();
@@ -244,9 +244,9 @@ paypalRouter.get(
     });
 
     // Thank-you email to the donor (best effort).
-    if (email && process.env.RESEND_API_KEY && process.env.CONTACT_FROM_EMAIL) {
+    if (email && mailProvider() && process.env.CONTACT_FROM_EMAIL) {
       try {
-        await sendResend(process.env.RESEND_API_KEY, {
+        await sendMail({
           from: process.env.CONTACT_FROM_EMAIL,
           to: [email],
           subject: 'Thank you for your gift — FIKRA',

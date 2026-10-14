@@ -29,8 +29,10 @@ marked.
 
 ## Forms and email
 
-- [ ] `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` set in hosting.
-- [ ] Newsletter: `RESEND_AUDIENCE_ID` set and a test sign-up confirmed.
+- [ ] `RESEND_API_KEY` **or** `GMAIL_USER` + `GMAIL_APP_PASSWORD`,
+      plus `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`, set in hosting.
+- [ ] Newsletter: with Resend, `RESEND_AUDIENCE_ID` set and a test sign-up
+      confirmed; with Gmail, a test sign-up confirmed (local subscribers table).
 - [ ] Submissions inbox: Supabase project created, `DATABASE_URL` set,
       strong `INBOX_PASSWORD` set, and `/inbox` tested.
 - [ ] Uploads: test a file upload end-to-end, including a large file and a

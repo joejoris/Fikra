@@ -85,7 +85,8 @@ local testing):
 | Variable | Purpose |
 |---|---|
 | `DATABASE_URL` | Supabase Postgres connection string (leave unset for local SQLite) |
-| `RESEND_API_KEY` | API key for [Resend](https://resend.com) (or swap the provider) |
+| `RESEND_API_KEY` | API key for [Resend](https://resend.com) — mail provider option 1 |
+| `GMAIL_USER` / `GMAIL_APP_PASSWORD` | Gmail address + App Password — mail provider option 2 (no Resend needed) |
 | `CONTACT_TO_EMAIL` | Inbox that receives submissions |
 | `CONTACT_FROM_EMAIL` | Verified sender address |
 | `RESEND_AUDIENCE_ID` | Resend Audience for newsletter sign-ups |
@@ -96,9 +97,10 @@ local testing):
 | `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN` | Optional cookie-free analytics (Plausible-style) |
 | `PUBLIC_CF_WEB_ANALYTICS_TOKEN` | Optional — Cloudflare Web Analytics beacon token (free, cookieless) |
 
-Until `RESEND_API_KEY` is set, the endpoint returns a clear "not fully set up"
-message rather than silently discarding submissions. Every valid submission also
-gets an automatic acknowledgement email. **Test a real submission, including the
+Until a mail provider is set (Resend key, or Gmail address + App Password),
+the endpoints return a clear "not fully set up" message rather than silently
+discarding submissions. Every valid submission also gets an automatic
+acknowledgement email. **Test a real submission, including the
 spam folder, before launch.**
 
 Submissions are stored in Postgres in production (`DATABASE_URL`) and in a local
@@ -106,10 +108,12 @@ SQLite file (`./data/app.db`, gitignored) when it is unset.
 
 ### Newsletter
 
-The footer and homepage sign-up forms post to `/api/subscribe`, which adds the
-address to a Resend Audience (`RESEND_AUDIENCE_ID`) and sends a welcome email.
-Past editions live in `src/content/newsletters/` and are listed on the public
-archive at `/newsletter`.
+The footer and homepage sign-up forms post to `/api/subscribe`. With Resend
+configured, the address joins a Resend Audience (`RESEND_AUDIENCE_ID`) and
+gets a welcome email; with Gmail configured, the signup is recorded locally
+(subscribers table, exportable via the inbox CSV) and gets the same welcome
+email. Past editions live in `src/content/newsletters/` and are listed on the
+public archive at `/newsletter`.
 
 ### Donations (PayPal)
 

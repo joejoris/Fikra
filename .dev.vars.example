@@ -1,11 +1,14 @@
 # Copy to `.dev.vars` for local `npm run server` work (see README).
 # Never commit `.dev.vars`.
 # DATABASE_URL=postgresql://postgres:PASSWORD@db.xxxxx.supabase.co:5432/postgres
-RESEND_API_KEY=
-CONTACT_TO_EMAIL=
-CONTACT_FROM_EMAIL=
-RESEND_AUDIENCE_ID=
-INBOX_PASSWORD=change-me
+# Outgoing mail — pick ONE provider (Resend or Gmail, see .env.example):
+# RESEND_API_KEY=
+# RESEND_AUDIENCE_ID=
+# GMAIL_USER=fikrainnovator@gmail.com
+# GMAIL_APP_PASSWORD=
+CONTACT_TO_EMAIL=fikrainnovator@gmail.com
+CONTACT_FROM_EMAIL="FIKRA Website <website@fikra.example.org>"
+INBOX_PASSWORD=fikra-local-inbox
 TURNSTILE_SECRET_KEY=
 PORT=8788
 # PAYPAL_CLIENT_ID=

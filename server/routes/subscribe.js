@@ -2,7 +2,8 @@
  * POST /api/subscribe — newsletter sign-ups (Resend Audience + welcome email).
  */
 import { Router } from 'express';
-import { asyncHandler, clean, createRateLimiter, isEmail, sendResend, tooFast, verifyTurnstile } from '../lib.js';
+import { asyncHandler, clean, createRateLimiter, isEmail, tooFast, verifyTurnstile } from '../lib.js';
+import { mailProvider, sendMail } from '../mail.js';
 import { insertSubscriberIgnore } from '../db.js';
 
 export const subscribeRouter = Router();
@@ -49,37 +50,40 @@ subscribeRouter.post(
       }
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
+    const provider = mailProvider();
     const audienceId = process.env.RESEND_AUDIENCE_ID;
 
-    if (!apiKey || !audienceId) {
-      console.error('subscribe: not configured (missing RESEND_API_KEY / RESEND_AUDIENCE_ID)');
+    if (!provider || (provider === 'resend' && !audienceId)) {
+      console.error('subscribe: not configured (no mail provider, or Resend without RESEND_AUDIENCE_ID)');
       return json(res, { ok: false, error: 'Sign-up is not fully set up yet. Please contact us directly.' }, 503);
     }
 
-    const addRes = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${apiKey}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        email,
-        first_name: firstName || undefined,
-        unsubscribed: false,
-      }),
-    });
+    // With Resend, join the audience list (409 = already on it, fine).
+    // With Gmail there is no external list — the local record below is the list.
+    if (provider === 'resend') {
+      const addRes = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          first_name: firstName || undefined,
+          unsubscribed: false,
+        }),
+      });
 
-    // 409 means the address is already on the list — treat as success.
-    if (!addRes.ok && addRes.status !== 409) {
-      let text = '';
-      try {
-        text = await addRes.text();
-      } catch {
-        text = '';
+      if (!addRes.ok && addRes.status !== 409) {
+        let text = '';
+        try {
+          text = await addRes.text();
+        } catch {
+          text = '';
+        }
+        console.error('subscribe: add failed', addRes.status, text);
+        return json(res, { ok: false, error: 'Could not sign you up. Please try again.' }, 502);
       }
-      console.error('subscribe: add failed', addRes.status, text);
-      return json(res, { ok: false, error: 'Could not sign you up. Please try again.' }, 502);
     }
 
     // Keep a local record too (best effort).
@@ -92,7 +96,7 @@ subscribeRouter.post(
     // Welcome email (best effort).
     if (process.env.CONTACT_FROM_EMAIL) {
       try {
-        await sendResend(apiKey, {
+        await sendMail({
           from: process.env.CONTACT_FROM_EMAIL,
           to: [email],
           subject: 'Thanks for signing up to FIKRA updates',
