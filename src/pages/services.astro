@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import CTASection from '../components/CTASection.astro';
+
+const services = [
+  {
+    title: 'Training',
+    text: 'Practical entrepreneurship training for first-time founders — planning, finance, sales and customer care you can use from day one.',
+    action: { label: 'Become a member', href: '/get-involved#member' },
+  },
+  {
+    title: 'Mentorship',
+    text: 'One-to-one matching with experienced mentors, plus peer circles where founders learn from each other and stay accountable.',
+    action: { label: 'Become a mentor', href: '/get-involved#volunteer' },
+  },
+  {
+    title: 'Workspace',
+    text: 'A place to work with reliable internet — the everyday basics that turn an idea into a working routine.',
+    action: { label: 'Talk to us', href: '/contact' },
+  },
+  {
+    title: 'Startup grants',
+    text: 'Small grants for founders reaching first revenue — timed to the moment a little capital unlocks a lot of growth.',
+    action: { label: 'Support our work', href: '/donate' },
+  },
+];
+---
+
+<BaseLayout
+  title="Services"
+  description="Training, mentorship, workspace and startup grants — the services FIKRA offers young founders."
+>
+  <Section>
+    <PageHero
+      eyebrow="Services"
+      title="What FIKRA offers"
+      intro="Four practical services that carry a young founder from first idea to a business that can stand on its own."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="grid gap-6 md:grid-cols-2">
+      {services.map((service) => (
+        <div class="flex flex-col rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_18px_36px_-18px_rgba(11,31,51,0.35)]">
+          <h2 class="text-xl font-bold text-ink">{service.title}</h2>
+          <p class="mt-2 flex-1 text-ink-soft">{service.text}</p>
+          <div class="mt-5">
+            <Button href={service.action.href} variant="outline" size="sm">
+              {service.action.label} →
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <CTASection />
+</BaseLayout>

@@ -133,6 +133,7 @@ export const ANNOUNCEMENT: { text: string; href: string } = {
 export const NAV_LINKS = [
   { label: 'About', href: '/about' },
   { label: 'Impact', href: '/impact' },
+  { label: 'Services', href: '/services' },
   { label: 'Events', href: '/events' },
   { label: 'Get Involved', href: '/get-involved' },
   { label: 'News', href: '/news' },
@@ -142,6 +143,7 @@ export const FOOTER_LINKS = {
   organisation: [
     { label: 'About', href: '/about' },
     { label: 'Impact', href: '/impact' },
+    { label: 'Services', href: '/services' },
     { label: 'Events', href: '/events' },
     { label: 'Team', href: '/team' },
     { label: 'News', href: '/news' },
