@@ -1,5 +1,10 @@
 /**
- * POST /api/subscribe — newsletter sign-ups (Resend Audience + welcome email).
+ * POST /api/subscribe — newsletter sign-ups.
+ *
+ * The address is always recorded locally first (the subscribers table is the
+ * list when no external provider is configured). With Resend configured it is
+ * also added to the audience. The welcome email is best effort. A sign-up is
+ * never rejected because of a mail/provider problem.
  */
 import { Router } from 'express';
 import { asyncHandler, clean, createRateLimiter, isEmail, tooFast, verifyTurnstile } from '../lib.js';
@@ -14,12 +19,16 @@ function json(res, body, status = 200) {
   return res.status(status).json(body);
 }
 
+function fallbackEmail() {
+  return process.env.CONTACT_TO_EMAIL || 'fikrainnovator@gmail.com';
+}
+
 subscribeRouter.post(
   '/api/subscribe',
   asyncHandler(async (req, res) => {
     const ip = req.ip ?? 'unknown';
     if (limited(ip)) {
-      return json(res, { ok: false, error: 'Too many requests. Please try later.' }, 429);
+      return json(res, { ok: false, error: 'Too many requests. Please try again in a few minutes.' }, 429);
     }
 
     const data = req.body && typeof req.body === 'object' ? req.body : {};
@@ -46,55 +55,64 @@ subscribeRouter.post(
       const token = clean(data['cf-turnstile-response']);
       const verified = token && (await verifyTurnstile(process.env.TURNSTILE_SECRET_KEY, token, ip));
       if (!verified) {
-        return json(res, { ok: false, error: token ? 'Verification failed.' : 'Verification required.' }, 400);
+        return json(res, { ok: false, error: token ? 'Verification failed. Please try again.' : 'Please complete the verification box.' }, 400);
       }
     }
 
-    const provider = mailProvider();
-    const audienceId = process.env.RESEND_AUDIENCE_ID;
-
-    if (!provider || (provider === 'resend' && !audienceId)) {
-      console.error('subscribe: not configured (no mail provider, or Resend without RESEND_AUDIENCE_ID)');
-      return json(res, { ok: false, error: 'Sign-up is not fully set up yet. Please contact us directly.' }, 503);
-    }
-
-    // With Resend, join the audience list (409 = already on it, fine).
-    // With Gmail there is no external list — the local record below is the list.
-    if (provider === 'resend') {
-      const addRes = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          first_name: firstName || undefined,
-          unsubscribed: false,
-        }),
-      });
-
-      if (!addRes.ok && addRes.status !== 409) {
-        let text = '';
-        try {
-          text = await addRes.text();
-        } catch {
-          text = '';
-        }
-        console.error('subscribe: add failed', addRes.status, text);
-        return json(res, { ok: false, error: 'Could not sign you up. Please try again.' }, 502);
-      }
-    }
-
-    // Keep a local record too (best effort).
+    // 1) Record locally first — with Gmail/no provider this table *is* the list.
+    let recorded = false;
     try {
       await insertSubscriberIgnore(email, firstName || null);
+      recorded = true;
     } catch (error) {
-      console.error('subscribe: db insert failed', error);
+      console.error('subscribe: could not save subscriber', error);
     }
 
-    // Welcome email (best effort).
-    if (process.env.CONTACT_FROM_EMAIL) {
+    // 2) Also add to the Resend audience when configured (best effort).
+    const provider = mailProvider();
+    const audienceId = process.env.RESEND_AUDIENCE_ID;
+    if (provider === 'resend' && audienceId) {
+      try {
+        const addRes = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            first_name: firstName || undefined,
+            unsubscribed: false,
+          }),
+        });
+        if (!addRes.ok && addRes.status !== 409) {
+          let text = '';
+          try {
+            text = await addRes.text();
+          } catch {
+            text = '';
+          }
+          console.error('subscribe: audience add failed', addRes.status, text);
+        }
+      } catch (error) {
+        console.error('subscribe: audience add error', error);
+      }
+    }
+
+    // The only true failure: we could not store the address at all.
+    if (!recorded) {
+      return json(
+        res,
+        {
+          ok: false,
+          error: `We could not save your sign-up just now. Please email us at ${fallbackEmail()} and we will add you.`,
+        },
+        502,
+      );
+    }
+
+    // 3) Welcome email (best effort).
+    if (provider && process.env.CONTACT_FROM_EMAIL) {
       try {
         await sendMail({
           from: process.env.CONTACT_FROM_EMAIL,

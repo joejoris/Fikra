@@ -3,6 +3,10 @@
  *
  * Files are stored in the database and attached to the notification email.
  * Same validation messages and limits as before.
+ *
+ * The submission is saved to the inbox *before* any email is attempted, so a
+ * mail problem (no provider configured, provider down, bad credentials) can
+ * never lose an enquiry or produce a dead-end error for the visitor.
  */
 import { Router } from 'express';
 import multer from 'multer';
@@ -35,6 +39,11 @@ function json(res, body, status = 200) {
   return res.status(status).json(body);
 }
 
+/** Public address visitors can write to if we truly cannot take their message. */
+function fallbackEmail() {
+  return process.env.CONTACT_TO_EMAIL || 'fikrainnovator@gmail.com';
+}
+
 contactRouter.post(
   '/api/contact',
   (req, res, next) => {
@@ -54,7 +63,7 @@ contactRouter.post(
   asyncHandler(async (req, res) => {
     const ip = req.ip ?? 'unknown';
     if (limited(ip)) {
-      return json(res, { ok: false, error: 'Too many submissions. Please try later.' }, 429);
+      return json(res, { ok: false, error: 'Too many submissions. Please try again in a few minutes.' }, 429);
     }
 
     const data = { ...(req.body ?? {}) };
@@ -100,7 +109,7 @@ contactRouter.post(
       const token = clean(data['cf-turnstile-response']);
       const verified = token && (await verifyTurnstile(process.env.TURNSTILE_SECRET_KEY, token, ip));
       if (!verified) {
-        return json(res, { ok: false, error: token ? 'Verification failed.' : 'Verification required.' }, 400);
+        return json(res, { ok: false, error: token ? 'Verification failed. Please try again.' : 'Please complete the verification box.' }, 400);
       }
     }
 
@@ -108,48 +117,9 @@ contactRouter.post(
     const to = process.env.CONTACT_TO_EMAIL;
     const from = process.env.CONTACT_FROM_EMAIL;
 
-    if (!provider || !to || !from) {
-      console.error('contact: email is not configured (no mail provider / CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL)');
-      return json(res, { ok: false, error: 'This form is not fully set up yet. Please email us directly.' }, 503);
-    }
-
-    const lines = [
-      `Form: ${formName}`,
-      `Name: ${name}`,
-      `Email: ${email}`,
-      phone && `Phone: ${phone}`,
-      organisation && `Organisation: ${organisation}`,
-      interest && `Interest: ${interest}`,
-      program && `Program: ${program}`,
-      '',
-      message || '(no message)',
-    ].filter(Boolean);
-
-    const attachments = uploads.map((file) => ({
-      filename: safeFileName(file.originalname),
-      content: file.buffer.toString('base64'),
-    }));
-
-    const bodyLines = lines.slice();
-    if (uploads.length > 0) {
-      bodyLines.push('', 'Attachments:', ...uploads.map((file) => `- ${file.originalname} (attached)`));
-    }
-
-    const sent = await sendMail({
-      from,
-      to: [to],
-      reply_to: email,
-      subject: `[FIKRA website] ${formName} — ${name}`,
-      text: bodyLines.join('\n'),
-      attachments: attachments.length > 0 ? attachments : undefined,
-    });
-
-    if (!sent.ok) {
-      console.error('contact: send failed', sent.status, sent.text);
-      return json(res, { ok: false, error: 'Could not send your message. Please try again.' }, 502);
-    }
-
-    // Record the submission for the inbox (best effort).
+    // 1) Save the submission first — the inbox is the source of truth, so a
+    //    mail failure below never loses the enquiry.
+    let recorded = false;
     try {
       const id = await insertSubmission({
         form_name: formName,
@@ -162,6 +132,7 @@ contactRouter.post(
         message: message || null,
         files: null,
       });
+      recorded = true;
       if (uploads.length > 0 && id != null) {
         const records = [];
         for (const file of uploads) {
@@ -176,31 +147,86 @@ contactRouter.post(
         await updateSubmissionFiles(id, JSON.stringify(records));
       }
     } catch (error) {
-      console.error('contact: db insert failed', error);
+      console.error('contact: could not save submission to inbox', error);
     }
 
-    // Acknowledge to the submitter (best effort).
-    try {
-      await sendMail({
+    // 2) Notify FIKRA (best effort — the visitor is never blocked by mail).
+    let notified = false;
+    if (provider && to && from) {
+      const lines = [
+        `Form: ${formName}`,
+        `Name: ${name}`,
+        `Email: ${email}`,
+        phone && `Phone: ${phone}`,
+        organisation && `Organisation: ${organisation}`,
+        interest && `Interest: ${interest}`,
+        program && `Program: ${program}`,
+        '',
+        message || '(no message)',
+      ].filter(Boolean);
+      if (uploads.length > 0) {
+        lines.push('', 'Attachments:', ...uploads.map((file) => `- ${file.originalname} (attached)`));
+      }
+      const sent = await sendMail({
         from,
-        to: [email],
-        reply_to: to,
-        subject: 'We received your message — FIKRA',
-        text: [
-          `Hello ${name},`,
-          '',
-          'Thank you for getting in touch with FIKRA. This is just to confirm that',
-          'your message has reached us, and we will reply as soon as we can.',
-          '',
-          'For your records, here is what you sent:',
-          '',
-          message || '(no message)',
-          '',
-          '— FIKRA',
-        ].join('\n'),
+        to: [to],
+        reply_to: email,
+        subject: `[FIKRA website] ${formName} — ${name}`,
+        text: lines.join('\n'),
+        attachments: uploads.length
+          ? uploads.map((file) => ({
+              filename: safeFileName(file.originalname),
+              content: file.buffer.toString('base64'),
+            }))
+          : undefined,
       });
-    } catch (error) {
-      console.error('contact: auto-reply failed', error);
+      notified = sent.ok;
+      if (!sent.ok) {
+        console.error('contact: notification email failed', sent.status, sent.text);
+      }
+    } else {
+      console.error(
+        'contact: email is not configured — submission saved to the inbox only ' +
+          '(set GMAIL_USER + GMAIL_APP_PASSWORD or RESEND_API_KEY)',
+      );
+    }
+
+    // The only genuine failure: we could not save it AND could not email it.
+    if (!recorded && !notified) {
+      return json(
+        res,
+        {
+          ok: false,
+          error: `We could not send your message just now. Please email us directly at ${fallbackEmail()} and we will get back to you.`,
+        },
+        502,
+      );
+    }
+
+    // 3) Acknowledge to the submitter (best effort).
+    if (provider && from) {
+      try {
+        await sendMail({
+          from,
+          to: [email],
+          reply_to: to || fallbackEmail(),
+          subject: 'We received your message — FIKRA',
+          text: [
+            `Hello ${name},`,
+            '',
+            'Thank you for getting in touch with FIKRA. This is just to confirm that',
+            'your message has reached us, and we will reply as soon as we can.',
+            '',
+            'For your records, here is what you sent:',
+            '',
+            message || '(no message)',
+            '',
+            '— FIKRA',
+          ].join('\n'),
+        });
+      } catch (error) {
+        console.error('contact: auto-reply failed', error);
+      }
     }
 
     return json(res, { ok: true });

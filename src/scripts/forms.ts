@@ -6,6 +6,7 @@
  */
 
 const THANKS_PATH = '/thanks';
+const CONTACT_EMAIL = 'fikrainnovator@gmail.com';
 
 type Status = 'idle' | 'sending' | 'success' | 'error';
 
@@ -26,6 +27,35 @@ function collect(form: HTMLFormElement): Record<string, string> {
     }
   }
   return payload;
+}
+
+/** POST with one retry when the connection itself fails (server restarting). */
+async function send(
+  endpoint: string,
+  form: HTMLFormElement,
+  payload: Record<string, string>,
+  multipart: boolean,
+): Promise<Response> {
+  const attempt = () =>
+    multipart
+      ? fetch(endpoint, {
+          method: 'POST',
+          headers: { accept: 'application/json' },
+          body: new FormData(form),
+        })
+      : fetch(endpoint, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+  try {
+    return await attempt();
+  } catch {
+    // A dropped connection or a cold start — wait briefly and try once more.
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return attempt();
+  }
 }
 
 async function submit(form: HTMLFormElement) {
@@ -58,29 +88,27 @@ async function submit(form: HTMLFormElement) {
   }
 
   try {
-    const res = multipart
-      ? await fetch(endpoint, {
-          method: 'POST',
-          headers: { accept: 'application/json' },
-          body: new FormData(form),
-        })
-      : await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', accept: 'application/json' },
-          body: JSON.stringify(payload),
-        });
+    let res: Response;
+    try {
+      res = await send(endpoint, form, payload, multipart);
+    } catch {
+      // fetch threw even after the retry — we never reached the server.
+      throw new Error(
+        `We could not reach the server. Please check your connection and try again, or email us at ${CONTACT_EMAIL}.`,
+      );
+    }
 
     if (!res.ok) {
-      // Surface the server's specific message (validation, rate limit,
-      // not-configured) instead of a generic failure where one exists.
-      let message = 'Sorry, something went wrong. Please try again, or email us directly.';
+      // Surface the server's specific message (validation, rate limit, etc.)
+      // instead of a generic failure where one exists.
+      let message = `We could not send this just now. Please try again in a moment, or email us at ${CONTACT_EMAIL}.`;
       try {
         const data = await res.json();
         if (data && typeof data.error === 'string' && data.error.trim()) {
           message = data.error.trim();
         }
       } catch {
-        // Non-JSON error page (proxy 502, etc.) — keep the generic message.
+        // Non-JSON error page (e.g. a proxy error) — keep the message above.
       }
       throw new Error(message);
     }
@@ -99,7 +127,7 @@ async function submit(form: HTMLFormElement) {
       'error',
       error instanceof Error && error.message
         ? error.message
-        : 'Sorry, something went wrong. Please try again, or email us directly.',
+        : `We could not send this just now. Please try again, or email us at ${CONTACT_EMAIL}.`,
     );
   } finally {
     if (button) {

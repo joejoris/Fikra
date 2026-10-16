@@ -83,6 +83,15 @@ function loginPage(error) {
   );
 }
 
+function dbUnavailable() {
+  return layout(
+    'Inbox',
+    `<header><h1>FIKRA inbox</h1></header><main><div class="empty">
+      The submissions database is unavailable right now. Please try again shortly.
+    </div></main>`,
+  );
+}
+
 function isAuthed(req) {
   const password = process.env.INBOX_PASSWORD;
   if (!password) return false;
@@ -186,7 +195,13 @@ inboxRouter.get(
     }
 
     if (req.query.export === 'csv') {
-      const rows = await listSubmissions(null, 100000);
+      let rows;
+      try {
+        rows = await listSubmissions(null, 100000);
+      } catch (error) {
+        console.error('inbox: csv export failed', error);
+        return res.status(503).send(dbUnavailable());
+      }
       const header = [
         'id', 'created_at', 'form_name', 'status', 'name', 'email',
         'phone', 'organisation', 'interest', 'program', 'message', 'files',
@@ -208,9 +223,17 @@ inboxRouter.get(
     }
 
     const formName = String(req.query.form ?? '').trim() || null;
-    const results = await listSubmissions(formName);
-    const formCounts = await countByForm();
-    const monthCount = await countThisMonth();
+    let results;
+    let formCounts;
+    let monthCount;
+    try {
+      results = await listSubmissions(formName);
+      formCounts = await countByForm();
+      monthCount = await countThisMonth();
+    } catch (error) {
+      console.error('inbox: could not load submissions', error);
+      return res.status(503).send(dbUnavailable());
+    }
     const newCount = results.filter((row) => row.status !== 'handled').length;
 
     const option = (value, count) =>
@@ -277,7 +300,12 @@ inboxRouter.post(
       return res.status(400).send('Bad request');
     }
 
-    await setSubmissionStatus(id, action);
+    try {
+      await setSubmissionStatus(id, action);
+    } catch (error) {
+      console.error('inbox: could not update status', error);
+      return res.status(503).send(dbUnavailable());
+    }
     return res.redirect('/inbox');
   }),
 );

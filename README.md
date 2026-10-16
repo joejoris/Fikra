@@ -97,11 +97,18 @@ local testing):
 | `PUBLIC_ANALYTICS_SRC` / `PUBLIC_ANALYTICS_DOMAIN` | Optional cookie-free analytics (Plausible-style) |
 | `PUBLIC_CF_WEB_ANALYTICS_TOKEN` | Optional — Cloudflare Web Analytics beacon token (free, cookieless) |
 
-Until a mail provider is set (Resend key, or Gmail address + App Password),
-the endpoints return a clear "not fully set up" message rather than silently
-discarding submissions. Every valid submission also gets an automatic
-acknowledgement email. **Test a real submission, including the
-spam folder, before launch.**
+Every valid submission is stored **before** any email is attempted, so a mail
+problem can never lose an enquiry or show the visitor a dead-end error:
+
+- **No mail provider set** — submissions (contact, RSVP) are saved to the inbox
+  and newsletter sign-ups to the subscribers table; the visitor still sees
+  success. Set a provider to also get notification and acknowledgement emails.
+- **Provider configured but failing** (bad key, provider outage) — the
+  submission is saved and the visitor still sees success; the error is logged.
+
+Every valid submission also gets an automatic acknowledgement email once a
+provider is set. **Test a real submission, including the spam folder, before
+launch.**
 
 Submissions are stored in Postgres in production (`DATABASE_URL`) and in a local
 SQLite file (`./data/app.db`, gitignored) when it is unset.
@@ -171,9 +178,9 @@ and downloadable from the inbox (login required).
 ### Testing forms locally
 
 `npm run preview` serves the static site only — it does not run the API.
-To test everything end-to-end locally (no accounts needed — SQLite + 503 mail
-stubs), build first and run the Node server, which serves `dist/` and the API
-on one origin:
+To test everything end-to-end locally (no accounts needed — SQLite, with mail
+calls skipped when no provider is set), build first and run the Node server,
+which serves `dist/` and the API on one origin:
 
 ```bash
 npm run build

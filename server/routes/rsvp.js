@@ -1,6 +1,8 @@
 /**
  * POST /api/rsvp — event registrations.
- * Notifies FIKRA, confirms to the attendee, records in the submissions inbox.
+ * The RSVP is recorded in the submissions inbox *before* any email is
+ * attempted, so a mail/provider problem can never lose a registration or
+ * block the attendee. Notification + confirmation emails are best effort.
  */
 import { Router } from 'express';
 import { asyncHandler, clean, createRateLimiter, isEmail, tooFast, verifyTurnstile } from '../lib.js';
@@ -16,12 +18,16 @@ function json(res, body, status = 200) {
   return res.status(status).json(body);
 }
 
+function fallbackEmail() {
+  return process.env.CONTACT_TO_EMAIL || 'fikrainnovator@gmail.com';
+}
+
 rsvpRouter.post(
   '/api/rsvp',
   asyncHandler(async (req, res) => {
     const ip = req.ip ?? 'unknown';
     if (limited(ip)) {
-      return json(res, { ok: false, error: 'Too many requests. Please try later.' }, 429);
+      return json(res, { ok: false, error: 'Too many requests. Please try again in a few minutes.' }, 429);
     }
 
     const data = req.body && typeof req.body === 'object' ? req.body : {};
@@ -58,7 +64,7 @@ rsvpRouter.post(
       const token = clean(data['cf-turnstile-response']);
       const verified = token && (await verifyTurnstile(process.env.TURNSTILE_SECRET_KEY, token, ip));
       if (!verified) {
-        return json(res, { ok: false, error: token ? 'Verification failed.' : 'Verification required.' }, 400);
+        return json(res, { ok: false, error: token ? 'Verification failed. Please try again.' : 'Please complete the verification box.' }, 400);
       }
     }
 
@@ -66,35 +72,8 @@ rsvpRouter.post(
     const to = process.env.CONTACT_TO_EMAIL;
     const from = process.env.CONTACT_FROM_EMAIL;
 
-    if (!provider || !to || !from) {
-      console.error('rsvp: email is not configured (no mail provider / CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL)');
-      return json(
-        res,
-        { ok: false, error: 'Registration is not fully set up yet. Please contact us directly.' },
-        503,
-      );
-    }
-
-    const notify = await sendMail({
-      from,
-      to: [to],
-      reply_to: email,
-      subject: `[FIKRA website] RSVP — ${eventTitle} — ${name}`,
-      text: [
-        `Event: ${eventTitle}`,
-        `Event code: ${eventSlug}`,
-        `Name: ${name}`,
-        `Email: ${email}`,
-        `Attendees (including this person): ${guests}`,
-      ].join('\n'),
-    });
-
-    if (!notify.ok) {
-      console.error('rsvp: notify failed', notify.status, notify.text);
-      return json(res, { ok: false, error: 'Could not register you. Please try again.' }, 502);
-    }
-
-    // Record the RSVP in the inbox (best effort).
+    // 1) Record the RSVP first (best effort, but before any email).
+    let recorded = false;
     try {
       await insertSubmission({
         form_name: 'rsvp',
@@ -107,32 +86,74 @@ rsvpRouter.post(
         message: `Event: ${eventTitle}\nAttendees: ${guests}`,
         files: null,
       });
+      recorded = true;
     } catch (error) {
-      console.error('rsvp: db insert failed', error);
+      console.error('rsvp: could not save registration to inbox', error);
     }
 
-    // Confirmation email to the attendee (best effort).
-    try {
-      await sendMail({
+    // 2) Notify FIKRA (best effort).
+    let notified = false;
+    if (provider && to && from) {
+      const notify = await sendMail({
         from,
-        to: [email],
-        reply_to: to,
-        subject: `You are registered: ${eventTitle} — FIKRA`,
+        to: [to],
+        reply_to: email,
+        subject: `[FIKRA website] RSVP — ${eventTitle} — ${name}`,
         text: [
-          `Hello ${name},`,
-          '',
-          `Thanks for registering for ${eventTitle}.`,
-          '',
-          `We have noted ${guests} ${guests === 1 ? 'attendee' : 'attendees'} (including you).`,
-          'If your plans change, please let us know so we can free your spot.',
-          '',
-          'We look forward to seeing you there.',
-          '',
-          '— FIKRA',
+          `Event: ${eventTitle}`,
+          `Event code: ${eventSlug}`,
+          `Name: ${name}`,
+          `Email: ${email}`,
+          `Attendees (including this person): ${guests}`,
         ].join('\n'),
       });
-    } catch (error) {
-      console.error('rsvp: confirmation email failed', error);
+      notified = notify.ok;
+      if (!notify.ok) {
+        console.error('rsvp: notification email failed', notify.status, notify.text);
+      }
+    } else {
+      console.error(
+        'rsvp: email is not configured — registration saved to the inbox only ' +
+          '(set GMAIL_USER + GMAIL_APP_PASSWORD or RESEND_API_KEY)',
+      );
+    }
+
+    // The only genuine failure: we could not record it AND could not email it.
+    if (!recorded && !notified) {
+      return json(
+        res,
+        {
+          ok: false,
+          error: `We could not register you just now. Please email us at ${fallbackEmail()} and we will add you to the list.`,
+        },
+        502,
+      );
+    }
+
+    // 3) Confirmation email to the attendee (best effort).
+    if (provider && from) {
+      try {
+        await sendMail({
+          from,
+          to: [email],
+          reply_to: to || fallbackEmail(),
+          subject: `You are registered: ${eventTitle} — FIKRA`,
+          text: [
+            `Hello ${name},`,
+            '',
+            `Thanks for registering for ${eventTitle}.`,
+            '',
+            `We have noted ${guests} ${guests === 1 ? 'attendee' : 'attendees'} (including you).`,
+            'If your plans change, please let us know so we can free your spot.',
+            '',
+            'We look forward to seeing you there.',
+            '',
+            '— FIKRA',
+          ].join('\n'),
+        });
+      } catch (error) {
+        console.error('rsvp: confirmation email failed', error);
+      }
     }
 
     return json(res, { ok: true });

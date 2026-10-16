@@ -13,8 +13,8 @@
  *
  * Env:
  *   PORT, SERVE_DIR (default ./dist), DATABASE_URL (Postgres; else local SQLite),
- *   RESEND_API_KEY, CONTACT_TO_EMAIL, CONTACT_FROM_EMAIL, RESEND_AUDIENCE_ID,
- *   INBOX_PASSWORD, TURNSTILE_SECRET_KEY
+ *   mail: GMAIL_USER + GMAIL_APP_PASSWORD, or RESEND_API_KEY (+ RESEND_AUDIENCE_ID),
+ *   plus CONTACT_TO_EMAIL, CONTACT_FROM_EMAIL, INBOX_PASSWORD, TURNSTILE_SECRET_KEY
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -30,6 +30,16 @@ import { paypalRouter } from './routes/paypal.js';
 import { mpesaRouter } from './routes/mpesa.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+// Never let a stray async error take the process down. On Render a crash means
+// every visitor gets a 502 Bad Gateway until the service restarts; logging and
+// carrying on keeps the site and its API answering.
+process.on('unhandledRejection', (reason) => {
+  console.error('server: unhandled promise rejection', reason);
+});
+process.on('uncaughtException', (error) => {
+  console.error('server: uncaught exception', error);
+});
 
 // Local development convenience: load .dev.vars (KEY=VALUE lines) when present.
 // Production (Render) provides real environment variables instead.
@@ -93,6 +103,12 @@ app.use(filesRouter);
 app.use(paypalRouter);
 app.use(mpesaRouter);
 
+// Unknown API route: always JSON, never the HTML 404 page (the browser forms
+// parse the response as JSON and would otherwise show a generic error).
+app.use('/api', (req, res) => {
+  res.status(404).json({ ok: false, error: 'This address is not available.' });
+});
+
 // Static site (built by `npm run build`). API routes above take precedence.
 // `dotfiles: 'allow'` so /.well-known/* (e.g. security.txt) is served.
 if (existsSync(SERVE_DIR)) {
@@ -111,11 +127,27 @@ app.use((req, res) => {
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
+  // Malformed JSON body from a client: a clear 400, not a generic 500.
+  if (err?.type === 'entity.parse.failed' || err instanceof SyntaxError) {
+    if (req.path.startsWith('/api/')) {
+      return res.status(400).json({ ok: false, error: 'Invalid request. Please try again.' });
+    }
+    return res.status(400).type('text').send('Bad request');
+  }
+  if (err?.type === 'entity.too.large') {
+    if (req.path.startsWith('/api/')) {
+      return res.status(413).json({ ok: false, error: 'That submission is too large.' });
+    }
+    return res.status(413).type('text').send('Too large');
+  }
+
   console.error('server: unhandled error', err);
   if (req.path.startsWith('/api/')) {
-    return res.status(500).json({ ok: false, error: 'Something went wrong. Please try again.' });
+    return res
+      .status(500)
+      .json({ ok: false, error: 'We hit a problem on our side. Please try again in a moment.' });
   }
-  return res.status(500).type('text').send('Something went wrong.');
+  return res.status(500).type('text').send('We hit a problem on our side. Please try again.');
 });
 
 await (async () => {
@@ -129,6 +161,9 @@ await (async () => {
   }
 })();
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`fikra server listening on :${PORT} (serving ${SERVE_DIR})`);
+});
+server.on('error', (error) => {
+  console.error(`server: could not listen on :${PORT}`, error);
 });

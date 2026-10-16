@@ -326,7 +326,9 @@ const withAmount = (url: string, amount: number) => {
           } catch (error) {
             if (feedback) {
               feedback.textContent =
-                error instanceof Error ? error.message : 'Could not start the payment. Please try again.';
+                error instanceof Error
+                  ? error.message
+                  : 'We could not start the payment just now. Please try again in a moment, or email us at fikrainnovator@gmail.com.';
               feedback.classList.remove('hidden');
             }
             if (submit) {
@@ -417,7 +419,9 @@ const withAmount = (url: string, amount: number) => {
             pollResult(data.checkoutRequestId, 40);
           } catch (error) {
             setStatus(
-              error instanceof Error ? error.message : 'Could not send the prompt. Please try again.',
+              error instanceof Error
+                ? error.message
+                : 'We could not send the M-Pesa prompt just now. Please try again in a moment, or email us at fikrainnovator@gmail.com.',
               true,
             );
             if (submit) {
