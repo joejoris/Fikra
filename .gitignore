@@ -11,6 +11,9 @@ public/icons/*.png
 # Dependencies
 node_modules/
 
+# Vercel
+.vercel
+
 # Secrets
 .env
 .env.local

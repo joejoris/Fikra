@@ -62,7 +62,7 @@ points are fine.
 
 - [ ] Domain registrar
 - [ ] Git repository (GitHub organisation)
-- [ ] Hosting (Render blueprint in `render.yaml`)
+- [ ] Hosting (Vercel — `vercel.json`; `render.yaml` is an optional alternative)
 - [ ] Analytics
 - [ ] Email sending: either Resend (API key + audience) **or** Gmail
       (address + App Password from Google Account → Security → 2-Step

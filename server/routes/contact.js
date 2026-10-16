@@ -17,7 +17,7 @@ import { insertFile, insertSubmission, updateSubmissionFiles } from '../db.js';
 export const contactRouter = Router();
 
 const MAX_FILES = 2;
-const MAX_FILE_BYTES = 8 * 1024 * 1024;
+const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = [
   'application/pdf',
   'application/msword',
@@ -50,7 +50,7 @@ contactRouter.post(
     upload.array('attachments', MAX_FILES + 1)(req, res, (err) => {
       if (err) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-          return json(res, { ok: false, error: 'An attached file is larger than 8 MB.' }, 400);
+          return json(res, { ok: false, error: 'An attached file is larger than 2 MB.' }, 400);
         }
         if (err.code === 'LIMIT_FILE_COUNT' || err.code === 'LIMIT_UNEXPECTED_FILE') {
           return json(res, { ok: false, error: `Please attach at most ${MAX_FILES} files.` }, 400);
@@ -98,7 +98,7 @@ contactRouter.post(
     }
     for (const file of uploads) {
       if (file.size > MAX_FILE_BYTES) {
-        return json(res, { ok: false, error: `"${file.originalname}" is larger than 8 MB.` }, 400);
+        return json(res, { ok: false, error: `"${file.originalname}" is larger than 2 MB.` }, 400);
       }
       if (file.mimetype && !ALLOWED_FILE_TYPES.includes(file.mimetype)) {
         return json(res, { ok: false, error: `"${file.originalname}" is not an accepted file type.` }, 400);

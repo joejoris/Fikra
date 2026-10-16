@@ -39,10 +39,14 @@ scripts/
   generate-og.mjs   Per-page OG images, rebuilt before every build
   generate-icons.mjs  PNG favicons + app icons, rebuilt before every build
 server/             Node API + inbox, served on the same origin as the site
-  index.js          Express app (static dist + API + security headers)
+  app.js            Express app (static dist + API + security headers)
+  index.js          Long-lived entry point (local dev / Render)
   db.js             Postgres (DATABASE_URL) or local SQLite (./data/app.db)
   routes/           contact, subscribe, rsvp, inbox, files
-render.yaml         Render blueprint: web service + env vars (Supabase Postgres)
+api/
+  index.js          Vercel serverless entry point (exports the Express app)
+vercel.json         Vercel config: build, rewrites to the function, security headers
+render.yaml         Optional Render blueprint (alternative host to Vercel)
 docs/               Admin guide, launch checklist, FIKRA input checklist
 ```
 
@@ -151,8 +155,8 @@ Kenyan donors can give through an M-Pesa STK push (`server/routes/mpesa.js`):
   `/api/donate/mpesa/result` and lands on `/donate/thanks?status=success`.
 - Daraja's async callback (`/api/donate/mpesa/callback`) records completed
   gifts in the inbox (`form_name` `donation`), idempotent by checkout ID.
-  Callbacks need a public HTTPS URL, so end-to-end testing happens on Render,
-  not localhost.
+  Callbacks need a public HTTPS URL, so end-to-end testing happens on the
+  deployed site (Vercel/Render), not localhost.
 - Start in `MPESA_MODE=sandbox` with Daraja test credentials before live money.
 
 ### Event RSVP
@@ -171,7 +175,7 @@ CSV** for backups.
 
 ### File uploads
 
-The membership form accepts up to two files (PDF/Word/PowerPoint/image, 8 MB
+The membership form accepts up to two files (PDF/Word/PowerPoint/image, 2 MB
 each). Files are stored in the database, attached to the notification email,
 and downloadable from the inbox (login required).
 
@@ -222,19 +226,27 @@ locally. `PUBLIC_FORM_ENDPOINT` is only used by the browser and defaults to
 
 ## Deployment
 
-The site runs on [Render](https://render.com) from `render.yaml` (Blueprint):
+The site runs on [Vercel](https://vercel.com): the static Astro build is served
+by the platform, and the API + inbox run as one serverless function
+(`api/index.js`, via `vercel.json` rewrites for `/api/*`, `/inbox` and
+`/donate/return`).
 
-- **Web service** `fikra` (Node): build `npm ci && npm run build`, start
-  `node server/index.js`, health check `/healthz`. Serves the static site and
-  the API on one origin.
-- **Database**: Supabase Postgres (free tier) — paste its connection string as
-  `DATABASE_URL` in the Render dashboard.
-- Set the remaining secrets (`RESEND_API_KEY`, `CONTACT_TO_EMAIL`,
-  `CONTACT_FROM_EMAIL`, `RESEND_AUDIENCE_ID`, `INBOX_PASSWORD`,
-  `TURNSTILE_SECRET_KEY`) in the dashboard.
+- **Import the repo** at Vercel; it will use `buildCommand: npm run build` and
+  `outputDirectory: dist` from `vercel.json`.
+- **Database (required)**: serverless functions have no persistent disk, so set
+  `DATABASE_URL` to a Supabase Postgres connection string. Prefer Supabase's
+  **transaction pooler** string (port `6543`) for serverless. Without it, form
+  and inbox data cannot be stored and visitors get an "email us directly"
+  message instead of a saved submission.
+- **Login page for Supabase**: if you use Supabase Auth elsewhere, ignore this —
+  the app only needs the raw Postgres connection string.
+- Set the remaining secrets in **Project → Settings → Environment Variables**
+  (`GMAIL_USER` + `GMAIL_APP_PASSWORD` **or** `RESEND_API_KEY` (+
+  `RESEND_AUDIENCE_ID`), `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`,
+  `INBOX_PASSWORD`, `TURNSTILE_SECRET_KEY`).
 
-Note: Render's free web tier sleeps when idle, so the first request after a
-pause is slow — use a paid instance if that matters for launch.
+`render.yaml` is kept as an optional alternative host (a long-lived web service
+running `node server/index.js`); Vercel does not use it.
 
 ## Accessibility and performance
 

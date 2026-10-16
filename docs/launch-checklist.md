@@ -33,10 +33,12 @@ marked.
       plus `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`, set in hosting.
 - [ ] Newsletter: with Resend, `RESEND_AUDIENCE_ID` set and a test sign-up
       confirmed; with Gmail, a test sign-up confirmed (local subscribers table).
-- [ ] Submissions inbox: Supabase project created, `DATABASE_URL` set,
-      strong `INBOX_PASSWORD` set, and `/inbox` tested.
-- [ ] Uploads: test a file upload end-to-end, including a large file and a
-      disallowed type; confirm the file downloads from the inbox.
+- [ ] Submissions inbox: Supabase project created, `DATABASE_URL` set (use the
+      transaction pooler string on Vercel), strong `INBOX_PASSWORD` set, and
+      `/inbox` tested. Without `DATABASE_URL` nothing is stored on Vercel.
+- [ ] Uploads: test a file upload end-to-end, including a file over 2 MB and a
+      disallowed type; confirm the file downloads from the inbox. (Vercel caps a
+      whole request at 4.5 MB, hence the 2 MB per-file limit.)
 - [ ] SPF/DKIM configured for the sending domain (or mail may go to spam).
 - [ ] Each form tested end-to-end: contact, volunteer, partner, member, program
       interest, newsletter, event RSVP (notification + confirmation emails).

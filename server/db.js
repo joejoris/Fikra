@@ -2,15 +2,18 @@
  * Storage for the FIKRA API server.
  *
  * Two backends behind one interface:
- * - Postgres when DATABASE_URL is set (Supabase, production on Render).
- * - Local SQLite file (./data/app.db) otherwise — no setup needed.
+ * - Postgres when DATABASE_URL is set (Supabase, used in production on Vercel/Render).
+ * - Local SQLite file (./data/app.db) otherwise — for local development only.
+ *
+ * Serverless note: Vercel/Render functions have no persistent disk, so
+ * DATABASE_URL is required there. `node:sqlite` is imported lazily so the
+ * module loads fine on runtimes where it is unavailable.
  *
  * SQL is written with `?` placeholders and translated to $1, $2… for pg.
  */
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DatabaseSync } from 'node:sqlite';
 import pg from 'pg';
 
 const { Pool } = pg;
@@ -20,6 +23,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 let mode = null; // 'pg' | 'sqlite'
 let pool = null;
 let sqlite = null;
+let initPromise = null;
 
 const DDL_PG = `
 CREATE TABLE IF NOT EXISTS submissions (
@@ -90,11 +94,22 @@ function pgSql(sql) {
   return sql.replace(/\?/g, () => `$${(i += 1)}`);
 }
 
-export async function initDb(poolOverride = null) {
-  if (mode) return mode;
+function poolConfig() {
+  const connectionString = process.env.DATABASE_URL;
+  const isLocal = /(?:localhost|127\.0\.0\.1)/.test(connectionString ?? '');
+  return {
+    connectionString,
+    // Serverless functions must not open a pool per instance; Supabase's
+    // transaction pooler (port 6543) is designed for this.
+    max: process.env.VERCEL ? 1 : 10,
+    ssl: isLocal ? undefined : { rejectUnauthorized: false },
+  };
+}
+
+async function doInit(poolOverride) {
   if (poolOverride || process.env.DATABASE_URL) {
     mode = 'pg';
-    pool = poolOverride ?? new Pool({ connectionString: process.env.DATABASE_URL });
+    pool = poolOverride ?? new Pool(poolConfig());
     // A dying idle client must never take the process down.
     if (typeof pool.on === 'function') {
       pool.on('error', (error) => console.error('db: idle pool client error', error));
@@ -102,6 +117,13 @@ export async function initDb(poolOverride = null) {
     await pool.query(DDL_PG);
     console.log('db: connected to Postgres');
   } else {
+    if (process.env.VERCEL) {
+      throw new Error(
+        'DATABASE_URL is required on Vercel — serverless functions have no persistent disk. ' +
+          'Set it to your Supabase Postgres connection string.',
+      );
+    }
+    const { DatabaseSync } = await import('node:sqlite');
     mode = 'sqlite';
     const dir = join(root, 'data');
     mkdirSync(dir, { recursive: true });
@@ -110,6 +132,23 @@ export async function initDb(poolOverride = null) {
     console.log('db: using local SQLite (./data/app.db)');
   }
   return mode;
+}
+
+/**
+ * Connect and ensure the schema exists. Safe to call on every request: it
+ * connects once per process and retries if a previous attempt failed (for
+ * example while Postgres was paused or the network blipped).
+ */
+export async function initDb(poolOverride = null) {
+  if (mode) return mode;
+  if (poolOverride) return doInit(poolOverride);
+  if (!initPromise) {
+    initPromise = doInit().catch((error) => {
+      initPromise = null; // allow a later request to retry
+      throw error;
+    });
+  }
+  return initPromise;
 }
 
 export function dbMode() {
@@ -124,6 +163,7 @@ function displayDate(value) {
 }
 
 export async function insertSubmission(fields) {
+  await initDb();
   const sql = `INSERT INTO submissions
      (form_name, name, email, phone, organisation, interest, program, message, files)
    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -147,6 +187,7 @@ export async function insertSubmission(fields) {
 }
 
 export async function insertSubscriberIgnore(email, firstName) {
+  await initDb();
   if (mode === 'pg') {
     await pool.query(
       'INSERT INTO subscribers (email, first_name) VALUES ($1, $2) ON CONFLICT (email) DO NOTHING',
@@ -158,6 +199,7 @@ export async function insertSubscriberIgnore(email, firstName) {
 }
 
 export async function listSubmissions(formName, limit = 200) {
+  await initDb();
   let rows;
   if (mode === 'pg') {
     const res = formName
@@ -177,6 +219,7 @@ export async function listSubmissions(formName, limit = 200) {
 
 /** Submissions created since the start of the current month (UTC). */
 export async function countThisMonth() {
+  await initDb();
   if (mode === 'pg') {
     const res = await pool.query(
       "SELECT COUNT(*) AS count FROM submissions WHERE created_at >= date_trunc('month', NOW())",
@@ -190,6 +233,7 @@ export async function countThisMonth() {
 }
 
 export async function countByForm() {
+  await initDb();
   if (mode === 'pg') {
     const res = await pool.query(
       'SELECT form_name, COUNT(*) AS count FROM submissions GROUP BY form_name ORDER BY form_name',
@@ -203,6 +247,7 @@ export async function countByForm() {
 
 /** True when any submission message already contains the fragment (donation dedupe). */
 export async function submissionExists(fragment) {
+  await initDb();
   if (mode === 'pg') {
     const res = await pool.query("SELECT 1 FROM submissions WHERE message LIKE '%' || $1 || '%' LIMIT 1", [
       fragment,
@@ -216,6 +261,7 @@ export async function submissionExists(fragment) {
 }
 
 export async function setSubmissionStatus(id, status) {
+  await initDb();
   const n = Number(id);
   if (!Number.isInteger(n)) return;
   if (mode === 'pg') {
@@ -226,6 +272,7 @@ export async function setSubmissionStatus(id, status) {
 }
 
 export async function updateSubmissionFiles(id, filesJson) {
+  await initDb();
   const n = Number(id);
   if (!Number.isInteger(n)) return;
   if (mode === 'pg') {
@@ -236,6 +283,7 @@ export async function updateSubmissionFiles(id, filesJson) {
 }
 
 export async function insertFile(submissionId, name, mime, bytes) {
+  await initDb();
   if (mode === 'pg') {
     const res = await pool.query(
       'INSERT INTO files (submission_id, name, mime, bytes) VALUES ($1, $2, $3, $4) RETURNING id',
@@ -250,6 +298,7 @@ export async function insertFile(submissionId, name, mime, bytes) {
 }
 
 export async function getFile(id) {
+  await initDb();
   const n = Number(id);
   if (!Number.isInteger(n)) return null;
   if (mode === 'pg') {

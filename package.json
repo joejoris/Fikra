@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22.5"
+    "node": "22.x"
   },
   "description": "FIKRA website — static Astro site with a Git-backed CMS.",
   "scripts": {
