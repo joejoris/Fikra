@@ -4,7 +4,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import PageHero from '../components/PageHero.astro';
 import TestimonialCard from '../components/TestimonialCard.astro';
+import StatStrip from '../components/StatStrip.astro';
 import CTASection from '../components/CTASection.astro';
+import { IMPACT_STATS } from '../lib/site';
 
 const stories = (
   await getCollection('impact', ({ data }) =>
@@ -37,6 +39,23 @@ const rendered = await Promise.all(
       intro="Numbers matter, but so do the people behind them. Here is what FIKRA's work has made possible so far."
     />
   </Section>
+
+  {
+    IMPACT_STATS.stats.length > 0 && (
+      <Section tone="soft">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">
+            By the numbers
+          </p>
+          <h2 class="mt-2 text-2xl font-bold sm:text-3xl">{IMPACT_STATS.heading}</h2>
+          <p class="mt-4 text-ink-soft">{IMPACT_STATS.note}</p>
+        </div>
+        <div class="mt-10">
+          <StatStrip stats={IMPACT_STATS.stats} />
+        </div>
+      </Section>
+    )
+  }
 
   <Section tone="white">
     <div class="mx-auto max-w-3xl text-center">

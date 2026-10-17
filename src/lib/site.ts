@@ -130,6 +130,35 @@ export const ANNOUNCEMENT: { text: string; href: string } = {
   href: '/get-involved#member',
 };
 
+/**
+ * "By the numbers" strip shown on the homepage and the Impact page.
+ *
+ * These are near-term GOALS, not results. Keep every figure honest and
+ * defensible, and replace each one with a verified result as it is reached.
+ * An empty `stats` array hides the section entirely.
+ */
+export interface ImpactStat {
+  value: string;
+  label: string;
+}
+
+export const IMPACT_STATS: {
+  heading: string;
+  note: string;
+  stats: ImpactStat[];
+} = {
+  heading: 'Our goals for the year ahead',
+  note: 'These are targets FIKRA is working towards, not results yet — we replace each figure with a verified number as it is reached.',
+  stats: [
+    { value: '150', label: 'Young founders trained' },
+    { value: '40', label: 'Businesses launched' },
+    { value: '3,000', label: 'Training hours delivered' },
+    { value: '25', label: 'Active mentors' },
+    { value: '80', label: 'Jobs created' },
+    { value: '5', label: 'Communities reached' },
+  ],
+};
+
 export const NAV_LINKS = [
   { label: 'About', href: '/about' },
   { label: 'Impact', href: '/impact' },

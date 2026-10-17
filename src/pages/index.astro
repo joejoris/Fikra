@@ -7,6 +7,8 @@ import NewsCard from '../components/NewsCard.astro';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import CTASection from '../components/CTASection.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
+import StatStrip from '../components/StatStrip.astro';
+import { IMPACT_STATS } from '../lib/site';
 
 const news = (
   await getCollection('news', ({ data }) =>
@@ -164,6 +166,24 @@ const values = [
       </div>
     </div>
   </div>
+
+  <!-- By the numbers -->
+  {
+    IMPACT_STATS.stats.length > 0 && (
+      <Section tone="white">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">
+            By the numbers
+          </p>
+          <h2 class="mt-2 text-2xl font-bold sm:text-3xl">{IMPACT_STATS.heading}</h2>
+          <p class="mt-4 text-ink-soft">{IMPACT_STATS.note}</p>
+        </div>
+        <div class="mt-10">
+          <StatStrip stats={IMPACT_STATS.stats} />
+        </div>
+      </Section>
+    )
+  }
 
   <!-- What changes for people -->
   <Section tone="soft">

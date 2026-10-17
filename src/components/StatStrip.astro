@@ -1,0 +1,32 @@
+---
+import type { ImpactStat } from '../lib/site';
+
+interface Props {
+  stats: ImpactStat[];
+  /** Preferred column count on large screens (2–4). */
+  columns?: 2 | 3 | 4;
+}
+
+const { stats, columns = 3 } = Astro.props;
+
+const grid: Record<number, string> = {
+  2: 'sm:grid-cols-2',
+  3: 'sm:grid-cols-2 lg:grid-cols-3',
+  4: 'sm:grid-cols-2 lg:grid-cols-4',
+};
+---
+
+{
+  stats.length > 0 && (
+    <div class={`grid gap-6 ${grid[columns] ?? grid[3]}`}>
+      {stats.map((stat) => (
+        <div class="rounded-[var(--radius-card)] border border-border bg-surface p-6 text-center shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:shadow-md">
+          <div class="text-4xl font-extrabold tracking-tight text-primary sm:text-5xl">
+            {stat.value}
+          </div>
+          <div class="mt-2 text-sm font-medium text-ink-soft">{stat.label}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
