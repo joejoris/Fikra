@@ -12,8 +12,8 @@ backend:
 media_folder: 'public/images/uploads'
 public_folder: '/images/uploads'
 
-site_url: https://fikra.example.org
-display_url: https://fikra.example.org
+site_url: https://fikra-gen-innovators.vercel.app
+display_url: https://fikra-gen-innovators.vercel.app
 logo_url: /favicon.svg
 
 collections:

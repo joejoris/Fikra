@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 // IMPORTANT: replace `site` with the real domain before launch.
 // It is used for canonical URLs, sitemap.xml and Open Graph tags.
 export default defineConfig({
-  site: 'https://fikra.example.org',
+  site: 'https://fikra-gen-innovators.vercel.app',
   output: 'static',
   integrations: [sitemap()],
   vite: {

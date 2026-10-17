@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fikra.example.org/sitemap-index.xml
+Sitemap: https://fikra-gen-innovators.vercel.app/sitemap-index.xml

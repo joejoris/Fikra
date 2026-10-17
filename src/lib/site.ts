@@ -12,7 +12,7 @@ export const SITE = {
   description:
     'FIKRA supports young people to turn ideas into sustainable enterprises through training, mentorship and access to opportunity.',
   // Replace with the real domain before launch (also update astro.config.mjs).
-  url: 'https://fikra.example.org',
+  url: 'https://fikra-gen-innovators.vercel.app',
   locale: 'en',
   email: 'fikrainnovator@gmail.com', // Public address, shown on the site.
   phone: '', // Set when FIKRA confirms a public phone number.
