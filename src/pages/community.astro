@@ -6,6 +6,7 @@ import AccountPanel from '../components/AccountPanel.astro';
 import CommunityBoard from '../components/CommunityBoard.astro';
 import Chat from '../components/Chat.astro';
 import Comments from '../components/Comments.astro';
+import DirectMessages from '../components/DirectMessages.astro';
 import CTASection from '../components/CTASection.astro';
 ---
 
@@ -37,6 +38,12 @@ import CTASection from '../components/CTASection.astro';
       shows immediately and is moderated. Do not share personal or sensitive
       information you would not want public.
     </p>
+  </Section>
+
+  <Section tone="white">
+    <div class="mx-auto max-w-4xl">
+      <DirectMessages />
+    </div>
   </Section>
 
   <Section>

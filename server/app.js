@@ -36,6 +36,7 @@ import { mpesaRouter } from './routes/mpesa.js';
 import { authRouter } from './routes/auth.js';
 import { communityRouter } from './routes/community.js';
 import { moderationRouter } from './routes/moderation.js';
+import { dmRouter } from './routes/dm.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -82,6 +83,7 @@ app.use(paypalRouter);
 app.use(mpesaRouter);
 app.use(authRouter);
 app.use(communityRouter);
+app.use(dmRouter);
 
 // Unknown API route: always JSON, never the HTML 404 page (the browser forms
 // parse the response as JSON and would otherwise show a generic error).

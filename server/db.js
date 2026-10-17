@@ -114,7 +114,16 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   body TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'visible'
 );
-CREATE INDEX IF NOT EXISTS idx_chat_messages_id ON chat_messages (id);`;
+CREATE INDEX IF NOT EXISTS idx_chat_messages_id ON chat_messages (id);
+CREATE TABLE IF NOT EXISTS dm_messages (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  from_member_id INTEGER NOT NULL,
+  to_member_id INTEGER NOT NULL,
+  body TEXT NOT NULL,
+  read_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_dm_pair ON dm_messages (from_member_id, to_member_id, id);`;
 
 const DDL_SQLITE = `
 CREATE TABLE IF NOT EXISTS submissions (
@@ -205,7 +214,16 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   body TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'visible'
 );
-CREATE INDEX IF NOT EXISTS idx_chat_messages_id ON chat_messages (id);`;
+CREATE INDEX IF NOT EXISTS idx_chat_messages_id ON chat_messages (id);
+CREATE TABLE IF NOT EXISTS dm_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  from_member_id INTEGER NOT NULL,
+  to_member_id INTEGER NOT NULL,
+  body TEXT NOT NULL,
+  read_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_dm_pair ON dm_messages (from_member_id, to_member_id, id);`;
 
 function pgSql(sql) {
   let i = 0;
@@ -755,4 +773,104 @@ export async function countCommunity() {
     visible: { comments: cv, topics: tv, replies: rv, chat: mv },
     pending: { comments: cp, topics: tp, replies: rp, chat: mp },
   };
+}
+
+// ---------------------------------------------------------------------------
+// Private direct messages (between signed-in members)
+// ---------------------------------------------------------------------------
+
+function maskEmail(email) {
+  const value = String(email ?? '');
+  const at = value.indexOf('@');
+  if (at <= 0) return '';
+  const name = value.slice(0, at);
+  return `${name.slice(0, 2)}${'*'.repeat(Math.max(1, name.length - 2))}${value.slice(at)}`;
+}
+
+/** Find other members to message (by name or email). Excludes yourself. */
+export async function searchMembers(query, excludeId) {
+  const like = `%${String(query ?? '').toLowerCase()}%`;
+  const items = await rows(
+    'SELECT id, name, email FROM members WHERE id <> ? AND (lower(name) LIKE ? OR lower(email) LIKE ?) ORDER BY name ASC LIMIT 20',
+    [Number(excludeId), like, like],
+  );
+  return items.map((m) => ({ id: Number(m.id), name: m.name, email: maskEmail(m.email) }));
+}
+
+/** People you have exchanged direct messages with, newest first. */
+export async function listDmConversations(memberId) {
+  const me = Number(memberId);
+  const convos = await rows(
+    `SELECT m.id AS other_id, m.name AS other_name, MAX(dm.created_at) AS last_at,
+       (SELECT x.body FROM dm_messages x
+          WHERE (x.from_member_id = ? AND x.to_member_id = m.id)
+             OR (x.to_member_id = ? AND x.from_member_id = m.id)
+          ORDER BY x.id DESC LIMIT 1) AS last_body
+     FROM dm_messages dm
+     JOIN members m ON m.id = CASE WHEN dm.from_member_id = ? THEN dm.to_member_id ELSE dm.from_member_id END
+     WHERE dm.from_member_id = ? OR dm.to_member_id = ?
+     GROUP BY m.id, m.name
+     ORDER BY last_at DESC
+     LIMIT 100`,
+    [me, me, me, me, me],
+  );
+  const unread = await rows(
+    'SELECT from_member_id, COUNT(*) AS n FROM dm_messages WHERE to_member_id = ? AND read_at IS NULL GROUP BY from_member_id',
+    [me],
+  );
+  const unreadMap = new Map(unread.map((r) => [Number(r.from_member_id), Number(r.n)]));
+  return convos.map((c) => ({
+    member_id: Number(c.other_id),
+    name: c.other_name,
+    last_at: displayDate(c.last_at),
+    last_body: c.last_body,
+    unread: unreadMap.get(Number(c.other_id)) ?? 0,
+  }));
+}
+
+export async function listDmThread(memberId, otherId) {
+  const me = Number(memberId);
+  const other = Number(otherId);
+  const items = await rows(
+    `SELECT id, created_at, from_member_id, body FROM dm_messages
+      WHERE (from_member_id = ? AND to_member_id = ?) OR (from_member_id = ? AND to_member_id = ?)
+      ORDER BY id ASC LIMIT 500`,
+    [me, other, other, me],
+  );
+  return items.map((r) => ({
+    id: Number(r.id),
+    created_at: displayDate(r.created_at),
+    mine: Number(r.from_member_id) === me,
+    body: r.body,
+  }));
+}
+
+export async function insertDm(fromId, toId, body) {
+  return insert('INSERT INTO dm_messages (from_member_id, to_member_id, body) VALUES (?, ?, ?)', [
+    Number(fromId),
+    Number(toId),
+    body,
+  ]);
+}
+
+export async function markDmRead(memberId, otherId) {
+  const me = Number(memberId);
+  const other = Number(otherId);
+  if (mode === 'pg') {
+    await pool.query(
+      'UPDATE dm_messages SET read_at = NOW() WHERE to_member_id = $1 AND from_member_id = $2 AND read_at IS NULL',
+      [me, other],
+    );
+  } else {
+    sqlite
+      .prepare("UPDATE dm_messages SET read_at = datetime('now') WHERE to_member_id = ? AND from_member_id = ? AND read_at IS NULL")
+      .run(me, other);
+  }
+}
+
+export async function countUnreadDm(memberId) {
+  const r = await row('SELECT COUNT(*) AS n FROM dm_messages WHERE to_member_id = ? AND read_at IS NULL', [
+    Number(memberId),
+  ]);
+  return Number(r?.n ?? 0);
 }

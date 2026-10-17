@@ -604,9 +604,188 @@ export async function initChat() {
   });
 }
 
+// --- Private direct messages (members only) ---------------------------------
+
+type DmConversation = { member_id: number; name: string; last_at: string; last_body: string; unread: number };
+type DmMessage = { id: number; created_at: string; mine: boolean; body: string };
+
+let dmsStarted = false;
+
+export async function initDms() {
+  const root = document.querySelector<HTMLElement>('[data-dms]');
+  if (!root || dmsStarted) return;
+  dmsStarted = true;
+
+  const signedOut = root.querySelector<HTMLElement>('[data-dm-signedout]');
+  const app = root.querySelector<HTMLElement>('[data-dm-app]');
+  const search = root.querySelector<HTMLInputElement>('[data-dm-search]');
+  const results = root.querySelector<HTMLElement>('[data-dm-results]');
+  const convoList = root.querySelector<HTMLElement>('[data-dm-conversations]');
+  const head = root.querySelector<HTMLElement>('[data-dm-head]');
+  const messageBox = root.querySelector<HTMLElement>('[data-dm-messages]');
+  const form = root.querySelector<HTMLFormElement>('[data-dm-form]');
+  const statusEl = root.querySelector<HTMLElement>('[data-dm-status]');
+
+  let current: { id: number; name: string } | null = null;
+  let lastMessageId = 0;
+
+  const bubble = (message: DmMessage) => {
+    const el = node(
+      'div',
+      message.mine
+        ? 'ml-8 rounded-lg bg-primary-soft px-3 py-2 text-sm text-ink'
+        : 'mr-8 rounded-lg bg-surface px-3 py-2 text-sm text-ink-soft',
+    );
+    el.append(node('p', 'whitespace-pre-wrap', message.body));
+    el.append(node('span', 'mt-1 block text-xs text-muted', `${message.created_at} UTC`));
+    return el;
+  };
+
+  const appendMessage = (message: DmMessage) => {
+    if (!messageBox || message.id <= lastMessageId) return;
+    lastMessageId = message.id;
+    messageBox.append(bubble(message));
+    messageBox.scrollTop = messageBox.scrollHeight;
+  };
+
+  const reflect = () => {
+    if (signedOut) signedOut.hidden = me != null;
+    if (app) app.hidden = me == null;
+  };
+
+  const loadConversations = async () => {
+    if (!convoList || !me) return;
+    try {
+      const data = await api<{ conversations: DmConversation[] }>('/api/dm/conversations');
+      convoList.textContent = '';
+      if (data.conversations.length === 0) {
+        convoList.append(node('p', 'text-xs text-muted', 'No conversations yet — search for someone.'));
+        return;
+      }
+      for (const convo of data.conversations) {
+        const btn = node(
+          'button',
+          'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-primary-soft',
+        );
+        btn.type = 'button';
+        btn.append(node('span', 'truncate', convo.name));
+        if (convo.unread > 0) {
+          btn.append(node('span', 'rounded-full bg-red-600 px-1.5 text-xs font-bold text-white', String(convo.unread)));
+        }
+        on(btn, 'click', () => openThread(convo.member_id, convo.name));
+        convoList.append(btn);
+      }
+    } catch {
+      /* ignore transient errors */
+    }
+  };
+
+  const openThread = async (memberId: number, name: string) => {
+    current = { id: memberId, name };
+    lastMessageId = 0;
+    if (head) head.textContent = name;
+    if (form) form.hidden = false;
+    if (messageBox) {
+      messageBox.textContent = '';
+      messageBox.append(node('p', 'text-sm text-muted', 'Loading…'));
+    }
+    try {
+      const data = await api<{ member: { id: number; name: string }; messages: DmMessage[] }>(`/api/dm/${memberId}`);
+      current = { id: memberId, name: data.member?.name ?? name };
+      if (head) head.textContent = current.name;
+      if (messageBox) messageBox.textContent = '';
+      for (const message of data.messages) {
+        lastMessageId = Math.max(lastMessageId, message.id);
+        messageBox?.append(bubble(message));
+      }
+      if (messageBox) messageBox.scrollTop = messageBox.scrollHeight;
+      void loadConversations();
+    } catch (error) {
+      if (messageBox) {
+        messageBox.textContent = '';
+        messageBox.append(node('p', 'text-sm text-muted', error instanceof Error ? error.message : 'Could not load.'));
+      }
+    }
+  };
+
+  await loadMe();
+  reflect();
+  document.addEventListener('fikra:auth', (event) => {
+    me = (event as CustomEvent<{ member: Member | null }>).detail?.member ?? null;
+    reflect();
+    if (me) void loadConversations();
+  });
+
+  let searchTimer = 0;
+  if (search) {
+    search.addEventListener('input', () => {
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(async () => {
+        const q = search.value.trim();
+        if (!results) return;
+        results.textContent = '';
+        if (q.length < 2) return;
+        try {
+          const data = await api<{ members: { id: number; name: string; email: string }[] }>(
+            `/api/dm/members?q=${encodeURIComponent(q)}`,
+          );
+          if (data.members.length === 0) {
+            results.append(node('p', 'text-xs text-muted', 'No members found.'));
+            return;
+          }
+          for (const member of data.members) {
+            const btn = node('button', 'block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-primary-soft');
+            btn.type = 'button';
+            btn.append(node('span', 'font-medium text-ink', member.name));
+            btn.append(node('span', 'ml-2 text-xs text-muted', member.email));
+            on(btn, 'click', () => {
+              if (search) search.value = '';
+              results.textContent = '';
+              void openThread(member.id, member.name);
+            });
+            results.append(btn);
+          }
+        } catch {
+          /* ignore */
+        }
+      }, 250);
+    });
+  }
+
+  if (form) {
+    on(form, 'submit', async () => {
+      if (!current || !form.reportValidity()) return;
+      const input = form.querySelector<HTMLTextAreaElement>('[name="body"]');
+      const data = Object.fromEntries(new FormData(form).entries());
+      if (input) input.value = '';
+      try {
+        const res = await api<{ message: DmMessage }>(`/api/dm/${current.id}`, data);
+        appendMessage(res.message);
+        setStatus(statusEl, '');
+        void loadConversations();
+      } catch (error) {
+        setStatus(statusEl, error instanceof Error ? error.message : 'Could not send.', 'error');
+      }
+    });
+  }
+
+  window.setInterval(async () => {
+    if (!me || !current || document.hidden) return;
+    try {
+      const data = await api<{ messages: DmMessage[] }>(`/api/dm/${current.id}`);
+      for (const message of data.messages) appendMessage(message);
+    } catch {
+      /* ignore */
+    }
+  }, 4000);
+
+  if (me) await loadConversations();
+}
+
 export function initCommunity() {
   void initAccount();
   void initComments();
   void initBoard();
   void initChat();
+  void initDms();
 }
