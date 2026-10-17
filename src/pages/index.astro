@@ -6,7 +6,6 @@ import Button from '../components/Button.astro';
 import NewsCard from '../components/NewsCard.astro';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import CTASection from '../components/CTASection.astro';
-import NewsletterForm from '../components/NewsletterForm.astro';
 import StatStrip from '../components/StatStrip.astro';
 import { IMPACT_STATS } from '../lib/site';
 
@@ -356,38 +355,6 @@ const values = [
       </Section>
     )
   }
-
-  <!-- Newsletter -->
-  <Section id="newsletter">
-    <div class="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-bg to-primary-soft p-8 shadow-[var(--shadow-card)] sm:p-12">
-      <div aria-hidden="true" class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl"></div>
-      <div class="relative grid gap-8 lg:grid-cols-2 lg:items-center">
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Newsletter</p>
-          <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Be first to hear</h2>
-          <p class="mt-3 text-ink-soft">
-            Join the FIKRA mailing list for new cohorts, events and
-            opportunities. <a class="text-primary underline" href="/newsletter">Browse past editions →</a>
-          </p>
-          <ul class="mt-6 space-y-2 text-sm text-ink-soft">
-            {
-              ['New cohorts and openings', 'Events and opportunities', 'A few emails a year — nothing more'].map((item) => (
-                <li class="flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" class="text-accent-dark">
-                    <path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                  </svg>
-                  {item}
-                </li>
-              ))
-            }
-          </ul>
-        </div>
-        <div class="rounded-2xl border border-border bg-surface p-6 shadow-[var(--shadow-card)] sm:p-8">
-          <NewsletterForm heading="Get updates" />
-        </div>
-      </div>
-    </div>
-  </Section>
 
   <CTASection />
 </BaseLayout>
