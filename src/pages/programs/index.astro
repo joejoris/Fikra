@@ -1,14 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import PageHero from '../../components/PageHero.astro';
-import ProgramCard from '../../components/ProgramCard.astro';
 import CTASection from '../../components/CTASection.astro';
-
-const programs = (await getCollection('programs')).sort(
-  (a, b) => a.data.order - b.data.order,
-);
 ---
 
 <BaseLayout
@@ -21,12 +15,6 @@ const programs = (await getCollection('programs')).sort(
       title="A path for every stage"
       intro="Whether you are testing your first idea or running a business that is already trading, there is a FIKRA programme that meets you where you are."
     />
-  </Section>
-
-  <Section tone="white">
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {programs.map((program) => <ProgramCard program={program} />)}
-    </div>
   </Section>
 
   <Section tone="soft">
