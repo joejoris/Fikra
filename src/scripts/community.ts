@@ -398,25 +398,93 @@ export async function initBoard() {
   await load();
 }
 
-// --- Live chat --------------------------------------------------------------
+// --- Live chat (one shared room, rendered inline and in the site-wide widget) -
+//
+// Chat is a single public room: everyone sees every message. We keep one poll
+// loop that feeds every chat list on the page, so the /community room and the
+// floating widget stay in sync without duplicate requests. New messages from
+// other people trigger a chime and a browser notification when the tab is in
+// the background or the widget is closed.
 
-export async function initChat() {
-  const root = document.querySelector<HTMLElement>('[data-chat]');
-  if (!root) return;
+let chatStarted = false;
+let chatLastId = 0;
+const chatLists: HTMLElement[] = [];
+let unreadCount = 0;
 
-  const list = root.querySelector<HTMLElement>('[data-chat-list]');
-  const form = root.querySelector<HTMLFormElement>('[data-chat-form]');
-  const statusEl = root.querySelector<HTMLElement>('[data-chat-status]');
-  let lastId = 0;
+function chatPanel(): HTMLElement | null {
+  return document.querySelector<HTMLElement>('[data-chat-panel]');
+}
 
-  await loadMe();
-  syncGuestFields(root);
-  watchAuth(root);
+/** True when a chat view is on screen (inline room, or the widget is open). */
+function chatVisible(): boolean {
+  const panel = chatPanel();
+  return panel ? !panel.hidden : document.documentElement.contains(document.querySelector('[data-chat]'));
+}
 
-  const append = (message: ChatMessage) => {
-    if (!list) return;
-    if (message.id <= lastId) return;
-    lastId = message.id;
+function nextChatCursor(): number | null {
+  return chatLastId > 0 ? chatLastId : null;
+}
+
+function ding() {
+  try {
+    const Ctx = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext })
+      .AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return;
+    const store = Ctx as unknown as { instance?: AudioContext };
+    const ctx = store.instance ?? new Ctx();
+    store.instance = ctx;
+    if (ctx.state === 'suspended') void ctx.resume();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 720;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.26);
+  } catch {
+    /* sound is a nicety */
+  }
+}
+
+function requestNotifyPermission() {
+  try {
+    if ('Notification' in window && Notification.permission === 'default') {
+      void Notification.requestPermission();
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+function alertNewMessage(message: ChatMessage) {
+  ding();
+  try {
+    if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+      const note = new Notification(`New message from ${message.author_name}`, {
+        body: message.body,
+        tag: 'fikra-chat',
+      });
+      note.onclick = () => window.focus();
+    }
+  } catch {
+    /* notifications are optional */
+  }
+}
+
+function showUnreadBadge() {
+  document.querySelectorAll<HTMLElement>('[data-chat-badge]').forEach((badge) => {
+    badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+    badge.hidden = unreadCount === 0;
+  });
+}
+
+function renderChatMessage(message: ChatMessage) {
+  for (const list of chatLists) {
     const row = node('div', 'text-sm');
     const head = node('div', 'flex items-center gap-2');
     head.append(node('span', 'font-semibold text-ink', message.author_name));
@@ -425,36 +493,115 @@ export async function initChat() {
     row.append(node('p', 'whitespace-pre-wrap text-ink-soft', message.body));
     list.append(row);
     list.scrollTop = list.scrollHeight;
-  };
+  }
+}
 
-  const poll = async (after: number | null) => {
-    try {
-      const data = await api<{ messages: ChatMessage[] }>(`/api/chat${after != null ? `?after=${after}` : ''}`);
-      if (after == null && list) list.textContent = '';
-      data.messages.forEach(append);
-    } catch {
-      /* stay quiet on transient errors */
+let chatPolling = false;
+async function pollChat(after: number | null) {
+  if (chatPolling) return;
+  chatPolling = true;
+  try {
+    const data = await api<{ messages: ChatMessage[] }>(`/api/chat${after != null ? `?after=${after}` : ''}`);
+    if (after == null) {
+      for (const list of chatLists) list.textContent = '';
+      chatLastId = 0;
     }
+    const fresh = data.messages.filter((message) => message.id > chatLastId);
+    for (const message of fresh) {
+      renderChatMessage(message);
+      chatLastId = Math.max(chatLastId, message.id);
+    }
+    // Only alert for genuinely new messages that arrived after the first load.
+    if (after != null && fresh.length > 0 && !chatVisible()) {
+      unreadCount += fresh.length;
+      showUnreadBadge();
+      alertNewMessage(fresh[fresh.length - 1]);
+    }
+  } catch {
+    /* stay quiet on transient network errors */
+  } finally {
+    chatPolling = false;
+  }
+}
+
+function scheduleChatPoll() {
+  const delay = !document.hidden && chatVisible() ? 2500 : document.hidden ? 15000 : 10000;
+  window.setTimeout(async () => {
+    await pollChat(nextChatCursor());
+    scheduleChatPoll();
+  }, delay);
+}
+
+function wireChatForm(form: HTMLFormElement, root: HTMLElement) {
+  const statusEl = root.querySelector<HTMLElement>('[data-chat-status]');
+  on(form, 'submit', async () => {
+    if (!form.reportValidity()) return;
+    const input = form.querySelector<HTMLInputElement | HTMLTextAreaElement>('[name="body"]');
+    const data = Object.fromEntries(new FormData(form).entries());
+    if (input) input.value = '';
+    try {
+      await api('/api/chat', data);
+      setStatus(statusEl, '');
+      await pollChat(nextChatCursor());
+    } catch (error) {
+      if (input) input.value = String(data.body ?? '');
+      setStatus(statusEl, error instanceof Error ? error.message : 'Could not send.', 'error');
+    }
+  });
+}
+
+function initChatWidget() {
+  const widget = document.querySelector<HTMLElement>('[data-chat-widget]');
+  if (!widget) return;
+  const toggle = widget.querySelector<HTMLElement>('[data-chat-toggle]');
+  const close = widget.querySelector<HTMLElement>('[data-chat-close]');
+  const panel = widget.querySelector<HTMLElement>('[data-chat-panel]');
+
+  const open = () => {
+    if (panel) panel.hidden = false;
+    unreadCount = 0;
+    showUnreadBadge();
+    requestNotifyPermission();
+    const list = panel?.querySelector<HTMLElement>('[data-chat-list]');
+    if (list) list.scrollTop = list.scrollHeight;
+    panel?.querySelector<HTMLElement>('[name="body"]')?.focus();
+    void pollChat(nextChatCursor());
+  };
+  const shut = () => {
+    if (panel) panel.hidden = true;
   };
 
-  if (form) {
-    on(form, 'submit', async () => {
-      if (!form.reportValidity()) return;
-      const data = Object.fromEntries(new FormData(form).entries());
-      const input = form.querySelector<HTMLInputElement | HTMLTextAreaElement>('[name="body"]');
-      if (input) input.value = '';
-      try {
-        await api('/api/chat', data);
-        setStatus(statusEl, '');
-        await poll(lastId);
-      } catch (error) {
-        setStatus(statusEl, error instanceof Error ? error.message : 'Could not send.', 'error');
-      }
-    });
+  if (toggle) on(toggle, 'click', () => (panel && panel.hidden ? open() : shut()));
+  if (close) on(close, 'click', shut);
+}
+
+export async function initChat() {
+  const roots = Array.from(document.querySelectorAll<HTMLElement>('[data-chat]'));
+  const widget = document.querySelector<HTMLElement>('[data-chat-widget]');
+  if (roots.length === 0 && !widget) return;
+  if (chatStarted) return;
+  chatStarted = true;
+
+  await loadMe();
+
+  for (const root of roots) {
+    const list = root.querySelector<HTMLElement>('[data-chat-list]');
+    if (list && !chatLists.includes(list)) chatLists.push(list);
+    const form = root.querySelector<HTMLFormElement>('[data-chat-form]');
+    if (form) wireChatForm(form, root);
+    syncGuestFields(root);
+    watchAuth(root);
   }
 
-  await poll(null);
-  window.setInterval(() => void poll(lastId), 5000);
+  initChatWidget();
+  showUnreadBadge();
+
+  await pollChat(null);
+  scheduleChatPoll();
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) void pollChat(nextChatCursor());
+  });
 }
 
 export function initCommunity() {

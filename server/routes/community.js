@@ -26,6 +26,7 @@ import {
   looksSpammy,
   tooFast,
 } from '../lib.js';
+import { mailProvider, sendMail } from '../mail.js';
 import {
   getMember,
   getTopic,
@@ -76,6 +77,39 @@ function rateLimit(res, limiter, req) {
     return fail(res, 429, 'Too many posts just now. Please slow down and try again in a few minutes.');
   }
   return null;
+}
+
+/**
+ * Email the site owner when a new chat message arrives (needs mail configured:
+ * GMAIL_USER + GMAIL_APP_PASSWORD, or RESEND_API_KEY). Best effort — a mail
+ * failure never blocks the message, which is already saved.
+ *
+ * Note: this sends one email per message. During a busy chat that can add up —
+ * disable it by removing CONTACT_TO_EMAIL if it becomes noisy.
+ */
+async function notifyChatByEmail(poster, body) {
+  const provider = mailProvider();
+  const to = process.env.CONTACT_TO_EMAIL;
+  const from = process.env.CONTACT_FROM_EMAIL;
+  if (!provider || !to || !from) return;
+  try {
+    const sent = await sendMail({
+      from,
+      to: [to],
+      reply_to: poster.author_email || undefined,
+      subject: `[FIKRA chat] ${poster.author_name}`,
+      text: [
+        `${poster.author_name} posted in the community chat:`,
+        '',
+        body,
+        '',
+        '— FIKRA website (community chat)',
+      ].join('\n'),
+    });
+    if (!sent.ok) console.error('community: chat notification email failed', sent.status, sent.text);
+  } catch (error) {
+    console.error('community: chat notification email error', error);
+  }
 }
 
 // --- Comments + likes -------------------------------------------------------
@@ -212,6 +246,7 @@ communityRouter.post(
 
     const id = await insertChat({ body, ...poster });
     if (id == null) return fail(res, 502, 'We could not send that just now. Please try again.');
+    await notifyChatByEmail(poster, body);
     return res.json({
       ok: true,
       message: {

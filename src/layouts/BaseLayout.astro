@@ -13,6 +13,7 @@ import AnnouncementBar from '../components/AnnouncementBar.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import BackToTop from '../components/BackToTop.astro';
+import ChatWidget from '../components/ChatWidget.astro';
 import '../styles/global.css';
 
 const {
@@ -26,6 +27,11 @@ const {
 const pageTitle = title.includes(SITE.name) ? title : `${title} — ${SITE.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
 const ogImage = new URL(image, Astro.site ?? SITE.url).href;
+
+// The floating chat widget appears everywhere except /community, which shows
+// the full inline chat room instead.
+const currentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const showChatWidget = currentPath !== '/community';
 
 const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC;
 const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
@@ -103,6 +109,7 @@ const structuredData = {
     <Footer />
     <WhatsAppButton />
     <BackToTop />
+    {showChatWidget && <ChatWidget />}
 
     <script is:inline>
       // Scroll-reveal: CSS hides [data-reveal] only once this runs, so
