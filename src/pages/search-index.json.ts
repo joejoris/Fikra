@@ -13,7 +13,6 @@ export const GET: APIRoute = async () => {
   const items: SearchItem[] = [
     { title: 'Home', url: '/', summary: 'From idea to enterprise.', type: 'Page' },
     { title: 'About FIKRA', url: '/about', summary: 'Our mission, vision and story.', type: 'Page' },
-    { title: 'Programs', url: '/programs', summary: 'Training, incubation and growth support for founders.', type: 'Page' },
     { title: 'Impact', url: '/impact', summary: 'What our work has changed.', type: 'Page' },
     { title: 'Team', url: '/team', summary: 'The people behind FIKRA.', type: 'Page' },
     { title: 'Events', url: '/events', summary: 'Information sessions, workshops and deadlines.', type: 'Page' },
@@ -25,17 +24,6 @@ export const GET: APIRoute = async () => {
     { title: 'Documents & reports', url: '/documents', summary: 'Governance documents, policies and annual reports.', type: 'Page' },
     { title: 'Privacy policy', url: '/privacy', summary: 'How we handle your information.', type: 'Page' },
   ];
-
-  const programs = await getCollection('programs');
-  for (const program of programs) {
-    items.push({
-      title: program.data.title,
-      url: `/programs/${program.id}`,
-      summary: program.data.summary,
-      tags: [program.data.audience, ...program.data.tags],
-      type: 'Program',
-    });
-  }
 
   const news = await getCollection('news', ({ data }) =>
     import.meta.env.PROD ? data.draft !== true : true,
