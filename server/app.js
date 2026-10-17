@@ -23,7 +23,7 @@
  *   plus CONTACT_TO_EMAIL, CONTACT_FROM_EMAIL, INBOX_PASSWORD, TURNSTILE_SECRET_KEY
  */
 import { existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { contactRouter } from './routes/contact.js';
@@ -40,7 +40,9 @@ import { dmRouter } from './routes/dm.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-export const SERVE_DIR = process.env.SERVE_DIR ?? join(root, 'dist');
+export const SERVE_DIR = process.env.SERVE_DIR
+  ? resolve(process.env.SERVE_DIR)
+  : join(root, 'dist');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -70,6 +72,14 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false }));
+
+// API responses must never be cached by the browser or an intermediary —
+// signed-in state, chat, comments and direct messages all live under /api,
+// and a stale cached copy makes features look broken.
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 
 app.get('/healthz', (req, res) => res.type('text').send('ok'));
 

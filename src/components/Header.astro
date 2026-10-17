@@ -144,3 +144,20 @@ const isActive = (href: string) => path === href || (href !== '/' && path.starts
     </details>
   </div>
 </header>
+
+<script>
+  // The mobile menu is a native <details>. Close it when a link is chosen, when
+  // the visitor taps outside it, or with Escape — otherwise it can stay open.
+  const menu = document.querySelector<HTMLDetailsElement>('header details');
+  if (menu) {
+    menu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) menu.open = false;
+    });
+    document.addEventListener('click', (event) => {
+      if (menu.open && !menu.contains(event.target as Node)) menu.open = false;
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') menu.open = false;
+    });
+  }
+</script>

@@ -141,7 +141,7 @@ const structuredData = {
           // so local dev never serves stale cached pages.
           if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-              navigator.serviceWorker.register('/sw.js').catch(() => {
+              navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {
                 /* optional — the site works fine with or without it */
               });
             });
