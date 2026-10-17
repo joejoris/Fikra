@@ -517,8 +517,8 @@ export async function listComments(page, viewer) {
 
 export async function insertComment(fields) {
   return insert(
-    'INSERT INTO comments (page, member_id, author_name, author_email, body) VALUES (?, ?, ?, ?, ?)',
-    [fields.page, fields.member_id ?? null, fields.author_name, fields.author_email ?? null, fields.body],
+    'INSERT INTO comments (page, member_id, author_name, author_email, body, status) VALUES (?, ?, ?, ?, ?, ?)',
+    [fields.page, fields.member_id ?? null, fields.author_name, fields.author_email ?? null, fields.body, fields.status ?? 'pending'],
   );
 }
 
@@ -572,8 +572,8 @@ export async function listTopics() {
 
 export async function insertTopic(fields) {
   return insert(
-    'INSERT INTO topics (title, body, member_id, author_name, author_email) VALUES (?, ?, ?, ?, ?)',
-    [fields.title, fields.body, fields.member_id ?? null, fields.author_name, fields.author_email ?? null],
+    'INSERT INTO topics (title, body, member_id, author_name, author_email, status) VALUES (?, ?, ?, ?, ?, ?)',
+    [fields.title, fields.body, fields.member_id ?? null, fields.author_name, fields.author_email ?? null, fields.status ?? 'pending'],
   );
 }
 
@@ -609,20 +609,12 @@ export async function getTopic(id) {
 export async function insertReply(topicId, fields) {
   const n = Number(topicId);
   if (!Number.isInteger(n)) return null;
-  const id = await insert(
-    'INSERT INTO topic_replies (topic_id, member_id, author_name, author_email, body) VALUES (?, ?, ?, ?, ?)',
-    [n, fields.member_id ?? null, fields.author_name, fields.author_email ?? null, fields.body],
+  // reply_count is incremented only when a reply becomes visible (see
+  // setCommunityStatus), so pending replies are not counted in the board.
+  return insert(
+    'INSERT INTO topic_replies (topic_id, member_id, author_name, author_email, body, status) VALUES (?, ?, ?, ?, ?, ?)',
+    [n, fields.member_id ?? null, fields.author_name, fields.author_email ?? null, fields.body, fields.status ?? 'pending'],
   );
-  if (id != null) {
-    if (mode === 'pg') {
-      await pool.query('UPDATE topics SET reply_count = reply_count + 1, last_activity = NOW() WHERE id = $1', [n]);
-    } else {
-      sqlite
-        .prepare("UPDATE topics SET reply_count = reply_count + 1, last_activity = datetime('now') WHERE id = ?")
-        .run(n);
-    }
-  }
-  return id;
 }
 
 export async function listChat(afterId = null) {
@@ -647,33 +639,46 @@ export async function listChat(afterId = null) {
 }
 
 export async function insertChat(fields) {
-  return insert('INSERT INTO chat_messages (member_id, author_name, author_email, body) VALUES (?, ?, ?, ?)', [
+  return insert('INSERT INTO chat_messages (member_id, author_name, author_email, body, status) VALUES (?, ?, ?, ?, ?)', [
     fields.member_id ?? null,
     fields.author_name,
     fields.author_email ?? null,
     fields.body,
+    fields.status ?? 'visible',
   ]);
 }
 
 // --- Moderation helpers (used by the /inbox community view) ---
 
-export async function listAllComments() {
-  const items = await rows('SELECT id, created_at, page, author_name, body, likes FROM comments ORDER BY id DESC LIMIT 500');
+export async function listAllComments(status = null) {
+  const cols = 'id, created_at, page, author_name, body, likes, status';
+  const items = status
+    ? await rows(`SELECT ${cols} FROM comments WHERE status = ? ORDER BY id DESC LIMIT 500`, [status])
+    : await rows(`SELECT ${cols} FROM comments ORDER BY id DESC LIMIT 500`);
   return items.map((r) => ({ ...r, created_at: displayDate(r.created_at) }));
 }
 
-export async function listAllTopics() {
-  const items = await rows('SELECT id, created_at, title, author_name, reply_count FROM topics ORDER BY id DESC LIMIT 500');
+export async function listAllTopics(status = null) {
+  const cols = 'id, created_at, title, author_name, reply_count, status';
+  const items = status
+    ? await rows(`SELECT ${cols} FROM topics WHERE status = ? ORDER BY id DESC LIMIT 500`, [status])
+    : await rows(`SELECT ${cols} FROM topics ORDER BY id DESC LIMIT 500`);
   return items.map((r) => ({ ...r, created_at: displayDate(r.created_at) }));
 }
 
-export async function listAllReplies() {
-  const items = await rows('SELECT id, created_at, topic_id, author_name, body FROM topic_replies ORDER BY id DESC LIMIT 500');
+export async function listAllReplies(status = null) {
+  const cols = 'id, created_at, topic_id, author_name, body, status';
+  const items = status
+    ? await rows(`SELECT ${cols} FROM topic_replies WHERE status = ? ORDER BY id DESC LIMIT 500`, [status])
+    : await rows(`SELECT ${cols} FROM topic_replies ORDER BY id DESC LIMIT 500`);
   return items.map((r) => ({ ...r, created_at: displayDate(r.created_at) }));
 }
 
-export async function listAllChatMessages() {
-  const items = await rows('SELECT id, created_at, author_name, body FROM chat_messages ORDER BY id DESC LIMIT 500');
+export async function listAllChatMessages(status = null) {
+  const cols = 'id, created_at, author_name, body, status';
+  const items = status
+    ? await rows(`SELECT ${cols} FROM chat_messages WHERE status = ? ORDER BY id DESC LIMIT 500`, [status])
+    : await rows(`SELECT ${cols} FROM chat_messages ORDER BY id DESC LIMIT 500`);
   return items.map((r) => ({ ...r, created_at: displayDate(r.created_at) }));
 }
 
@@ -697,30 +702,57 @@ export async function deleteCommunityItem(type, id) {
     await exec('DELETE FROM topic_replies WHERE topic_id = ?', [n]);
   }
   if (type === 'reply') {
-    const reply = await row('SELECT topic_id FROM topic_replies WHERE id = ? LIMIT 1', [n]);
-    if (reply && mode === 'pg') {
-      await pool.query('UPDATE topics SET reply_count = GREATEST(reply_count - 1, 0) WHERE id = $1', [reply.topic_id]);
-    } else if (reply) {
-      sqlite
-        .prepare('UPDATE topics SET reply_count = CASE WHEN reply_count > 0 THEN reply_count - 1 ELSE 0 END WHERE id = ?')
-        .run(reply.topic_id);
+    const reply = await row('SELECT topic_id, status FROM topic_replies WHERE id = ? LIMIT 1', [n]);
+    if (reply && reply.status === 'visible') {
+      if (mode === 'pg') {
+        await pool.query('UPDATE topics SET reply_count = GREATEST(reply_count - 1, 0) WHERE id = $1', [reply.topic_id]);
+      } else {
+        sqlite
+          .prepare('UPDATE topics SET reply_count = CASE WHEN reply_count > 0 THEN reply_count - 1 ELSE 0 END WHERE id = ?')
+          .run(reply.topic_id);
+      }
     }
   }
   await exec(`DELETE FROM ${table} WHERE id = ?`, [n]);
   return true;
 }
 
+/** Approve (or re-hide) a community item. Approving a reply updates the board. */
+export async function setCommunityStatus(type, id, status) {
+  const table = COMMUNITY_TABLES[type];
+  const n = Number(id);
+  if (!table || !Number.isInteger(n)) return false;
+  if (type === 'reply' && status === 'visible') {
+    const reply = await row('SELECT topic_id FROM topic_replies WHERE id = ? LIMIT 1', [n]);
+    if (reply) {
+      if (mode === 'pg') {
+        await pool.query("UPDATE topics SET reply_count = reply_count + 1, last_activity = NOW() WHERE id = $1", [reply.topic_id]);
+      } else {
+        sqlite
+          .prepare("UPDATE topics SET reply_count = reply_count + 1, last_activity = datetime('now') WHERE id = ?")
+          .run(reply.topic_id);
+      }
+    }
+  }
+  await exec(`UPDATE ${table} SET status = ? WHERE id = ?`, [status, n]);
+  return true;
+}
+
 export async function countCommunity() {
-  const [c, t, r, m] = await Promise.all([
-    row('SELECT COUNT(*) AS n FROM comments'),
-    row('SELECT COUNT(*) AS n FROM topics'),
-    row('SELECT COUNT(*) AS n FROM topic_replies'),
-    row('SELECT COUNT(*) AS n FROM chat_messages'),
+  const one = async (table, status) =>
+    Number((await row(`SELECT COUNT(*) AS n FROM ${table} WHERE status = ?`, [status]))?.n ?? 0);
+  const [cv, tv, rv, mv, cp, tp, rp, mp] = await Promise.all([
+    one('comments', 'visible'),
+    one('topics', 'visible'),
+    one('topic_replies', 'visible'),
+    one('chat_messages', 'visible'),
+    one('comments', 'pending'),
+    one('topics', 'pending'),
+    one('topic_replies', 'pending'),
+    one('chat_messages', 'pending'),
   ]);
   return {
-    comments: Number(c?.n ?? 0),
-    topics: Number(t?.n ?? 0),
-    replies: Number(r?.n ?? 0),
-    chat: Number(m?.n ?? 0),
+    visible: { comments: cv, topics: tv, replies: rv, chat: mv },
+    pending: { comments: cp, topics: tp, replies: rp, chat: mp },
   };
 }

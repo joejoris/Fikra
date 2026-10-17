@@ -261,7 +261,7 @@ export async function initComments() {
         const result = await api<{ comment: Comment }>('/api/comments', data);
         const textarea = form.querySelector<HTMLTextAreaElement>('[name="body"]');
         if (textarea) textarea.value = '';
-        setStatus(statusEl, 'Thanks — your comment is posted.', 'ok');
+        setStatus(statusEl, 'Thanks — your comment is awaiting review and will appear once approved.', 'ok');
         const current = await api<{ comments: Comment[] }>(`/api/comments?page=${encodeURIComponent(page)}`);
         render(current.comments);
         void result;
@@ -345,7 +345,7 @@ export async function initBoard() {
       try {
         await api(`/api/topics/${topic.id}/replies`, data);
         replyInput.value = '';
-        setStatus(replyStatus, 'Posted.', 'ok');
+        setStatus(replyStatus, 'Thanks — your reply is awaiting review.', 'ok');
         await loadReplies();
       } catch (error) {
         setStatus(replyStatus, error instanceof Error ? error.message : 'Could not post reply.', 'error');
@@ -385,7 +385,7 @@ export async function initBoard() {
       try {
         await api('/api/topics', data);
         form.reset();
-        setStatus(statusEl, 'Posted — your topic is live.', 'ok');
+        setStatus(statusEl, 'Thanks — your topic is awaiting review and will appear once approved.', 'ok');
         await load();
       } catch (error) {
         setStatus(statusEl, error instanceof Error ? error.message : 'Could not post your topic.', 'error');

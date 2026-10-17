@@ -5,6 +5,7 @@ import Section from '../components/Section.astro';
 import PageHero from '../components/PageHero.astro';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import StatStrip from '../components/StatStrip.astro';
+import Comments from '../components/Comments.astro';
 import CTASection from '../components/CTASection.astro';
 import { IMPACT_STATS } from '../lib/site';
 
@@ -304,6 +305,9 @@ const rendered = await Promise.all(
               )}
               <div class="prose mt-6">
                 <Content />
+              </div>
+              <div class="mt-8">
+                <Comments page={`impact/${story.id}`} heading="Comments on this story" />
               </div>
             </article>
           ))}
