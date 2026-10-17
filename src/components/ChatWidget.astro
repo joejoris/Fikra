@@ -44,22 +44,14 @@
           placeholder="Type your message…"
           class="block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
         />
-        <div data-guest-fields class="grid gap-2 sm:grid-cols-2">
-          <input
-            type="text"
-            name="name"
-            autocomplete="name"
-            placeholder="Your name"
-            class="block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
-          />
-          <input
-            type="email"
-            name="email"
-            autocomplete="email"
-            placeholder="Email (private)"
-            class="block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
-          />
-        </div>
+        <input
+          type="text"
+          name="name"
+          autocomplete="name"
+          required
+          placeholder="Your name"
+          class="block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+        />
         <div class="flex items-center gap-2">
           <button
             type="submit"

@@ -1,6 +1,6 @@
 ---
 // Comments + likes for a single page. Pass a stable `page` key (e.g. the news
-// slug). Guests post with a name + email; signed-in members post as themselves.
+// slug). Anyone can post with just a name — no account or email needed.
 interface Props {
   page: string;
   heading?: string;
@@ -19,26 +19,16 @@ const { page, heading = 'Comments' } = Astro.props;
   </div>
 
   <form data-comment-form class="mt-5 space-y-3" novalidate>
-    <div data-guest-fields class="grid gap-3 sm:grid-cols-2">
-      <label class="text-sm font-semibold text-ink">
-        Your name
-        <input
-          type="text"
-          name="name"
-          autocomplete="name"
-          class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
-        />
-      </label>
-      <label class="text-sm font-semibold text-ink">
-        Your email <span class="font-normal text-muted">(not shown)</span>
-        <input
-          type="email"
-          name="email"
-          autocomplete="email"
-          class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
-        />
-      </label>
-    </div>
+    <label class="block text-sm font-semibold text-ink">
+      Your name
+      <input
+        type="text"
+        name="name"
+        autocomplete="name"
+        required
+        class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+      />
+    </label>
     <label class="block text-sm font-semibold text-ink">
       Comment
       <textarea

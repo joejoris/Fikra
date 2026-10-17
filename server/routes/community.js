@@ -11,9 +11,9 @@
  *   GET  /api/chat?after=<id>        chat messages (polling)
  *   POST /api/chat                   { body, name?, email? }
  *
- * Posting works two ways: signed-in members post as themselves; guests post
- * with a name and email. Everything is shown immediately and can be removed
- * from /inbox/community (the user's chosen "publish, delete later" model).
+ * Posting works with just a name — no account or email required. Everything is
+ * shown immediately and can be removed from /inbox/community (the user's chosen
+ * "publish, delete later" model).
  */
 import { Router } from 'express';
 import {
@@ -55,8 +55,8 @@ function fail(res, status, error) {
 }
 
 /**
- * Resolve who is posting. A signed-in member wins; otherwise a guest must
- * supply a name and email.
+ * Resolve who is posting. A signed-in member wins; otherwise anyone can post
+ * with just a name. Email is optional and, when given, is never shown publicly.
  */
 async function resolvePoster(req) {
   const memberId = currentMemberId(req);
@@ -67,9 +67,9 @@ async function resolvePoster(req) {
     }
   }
   const name = clean(req.body?.name).slice(0, 60);
+  if (!name) return null;
   const email = clean(req.body?.email).toLowerCase();
-  if (!name || !isEmail(email)) return null;
-  return { member_id: null, author_name: name, author_email: email };
+  return { member_id: null, author_name: name, author_email: isEmail(email) ? email : null };
 }
 
 function rateLimit(res, limiter, req) {
@@ -136,7 +136,7 @@ communityRouter.post(
     if (looksSpammy(body)) return fail(res, 400, 'That looks like spam, so it was not posted.');
 
     const poster = await resolvePoster(req);
-    if (!poster) return fail(res, 400, 'Please add your name and a valid email, or sign in.');
+    if (!poster) return fail(res, 400, 'Please add your name before posting.');
 
     const id = await insertComment({ page, body, ...poster });
     if (id == null) return fail(res, 502, 'We could not post your comment just now. Please try again.');
@@ -188,7 +188,7 @@ communityRouter.post(
     if (looksSpammy(`${title} ${body}`)) return fail(res, 400, 'That looks like spam, so it was not posted.');
 
     const poster = await resolvePoster(req);
-    if (!poster) return fail(res, 400, 'Please add your name and a valid email, or sign in.');
+    if (!poster) return fail(res, 400, 'Please add your name before posting.');
 
     const id = await insertTopic({ title, body, ...poster });
     if (id == null) return fail(res, 502, 'We could not post that just now. Please try again.');
@@ -214,7 +214,7 @@ communityRouter.post(
     if (looksSpammy(body)) return fail(res, 400, 'That looks like spam, so it was not posted.');
 
     const poster = await resolvePoster(req);
-    if (!poster) return fail(res, 400, 'Please add your name and a valid email, or sign in.');
+    if (!poster) return fail(res, 400, 'Please add your name before posting.');
 
     const id = await insertReply(Number(req.params.id), { body, ...poster });
     if (id == null) return fail(res, 404, 'That topic no longer exists.');
@@ -242,7 +242,7 @@ communityRouter.post(
     if (looksSpammy(body)) return fail(res, 400, 'That looks like spam, so it was not sent.');
 
     const poster = await resolvePoster(req);
-    if (!poster) return fail(res, 400, 'Please add your name and a valid email, or sign in.');
+    if (!poster) return fail(res, 400, 'Please add your name before posting.');
 
     const id = await insertChat({ body, ...poster });
     if (id == null) return fail(res, 502, 'We could not send that just now. Please try again.');
