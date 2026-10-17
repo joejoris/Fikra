@@ -3,7 +3,6 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import PageHero from '../components/PageHero.astro';
-import NewsletterForm from '../components/NewsletterForm.astro';
 import CTASection from '../components/CTASection.astro';
 
 const editions = (
@@ -39,14 +38,7 @@ const fmt = (date: Date) =>
 
   <Section tone="white">
     <div class="mx-auto max-w-2xl">
-      <div class="rounded-[var(--radius-card)] border border-border bg-surface p-6">
-        <h2 class="text-lg font-bold">Get the next edition by email</h2>
-        <div class="mt-4">
-          <NewsletterForm />
-        </div>
-      </div>
-
-      <div class="mt-12 space-y-12">
+      <div class="space-y-12">
         {
           rendered.length > 0 ? (
             rendered.map(({ edition, Content }) => (
@@ -65,9 +57,7 @@ const fmt = (date: Date) =>
             ))
           ) : (
             <p class="text-ink-soft">
-              No editions published yet —
-              <a class="text-primary underline" href="/#newsletter">subscribe</a>
-              and you will get the first one by email.
+              No editions published yet — check back soon.
             </p>
           )
         }
