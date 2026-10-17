@@ -37,6 +37,7 @@ import { authRouter } from './routes/auth.js';
 import { communityRouter } from './routes/community.js';
 import { moderationRouter } from './routes/moderation.js';
 import { dmRouter } from './routes/dm.js';
+import { cmsAuthRouter } from './routes/cms-auth.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -63,9 +64,9 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; " +
-      "form-action 'self'; img-src 'self' data:; font-src 'self' data:; " +
-      "style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://challenges.cloudflare.com; " +
-      "connect-src 'self' https://cloudflareinsights.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com",
+      "form-action 'self'; img-src 'self' data: https://avatars.githubusercontent.com https://*.githubusercontent.com; font-src 'self' data:; " +
+      "style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://challenges.cloudflare.com https://unpkg.com; worker-src 'self' blob:; " +
+      "connect-src 'self' https://cloudflareinsights.com https://challenges.cloudflare.com https://api.github.com https://raw.githubusercontent.com; frame-src https://challenges.cloudflare.com",
   );
   next();
 });
@@ -94,6 +95,7 @@ app.use(mpesaRouter);
 app.use(authRouter);
 app.use(communityRouter);
 app.use(dmRouter);
+app.use(cmsAuthRouter);
 
 // Unknown API route: always JSON, never the HTML 404 page (the browser forms
 // parse the response as JSON and would otherwise show a generic error).

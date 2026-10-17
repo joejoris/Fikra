@@ -7,8 +7,33 @@
     <title>FIKRA content admin</title>
   </head>
   <body>
-    <!-- Decap CMS loads from a CDN. If you prefer no third-party CDN, vendor
-         the script into /public/admin/ during handover. -->
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script>
+      // Decap CMS is loaded from the unpkg CDN (allowed in our CSP). If this
+      // deployment has no GitHub OAuth keys yet, show a clear note instead of a
+      // broken login screen.
+      (function () {
+        function loadCms() {
+          var script = document.createElement('script');
+          script.src = 'https://unpkg.com/decap-cms@3.17.1/dist/decap-cms.js';
+          document.body.appendChild(script);
+        }
+        fetch('/api/cms/status')
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (status) {
+            if (status && status.enabled === true) {
+              loadCms();
+              return;
+            }
+            document.body.innerHTML =
+              '<div style="font-family:system-ui,-apple-system,sans-serif;max-width:34rem;margin:15vh auto;padding:0 1.25rem;color:#0b1f33;line-height:1.5">' +
+              '<h1 style="font-size:1.35rem">Content admin is not set up yet</h1>' +
+              '<p>A maintainer needs to add the GitHub OAuth keys before browser editing works. See <code>docs/admin-guide.md</code>.</p>' +
+              '</div>';
+          })
+          .catch(loadCms);
+      })();
+    </script>
   </body>
 </html>

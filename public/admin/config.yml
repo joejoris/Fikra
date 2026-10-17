@@ -2,12 +2,12 @@ backend:
   name: github
   repo: joejoris/Fikra
   branch: main
+  # Browser editing signs in through this site's own GitHub OAuth endpoints
+  # (see server/routes/cms-auth.js). base_url must be the bare origin.
+  base_url: https://fikra-gen-innovators.vercel.app
+  auth_endpoint: api/cms/auth
   # Enables editing on your own machine with `npm run cms`.
   local_backend: true
-
-# `local_backend: true` is ignored in production. To let staff edit in the
-# browser, FIKRA must set up GitHub OAuth or an auth proxy. See
-# docs/admin-guide.md for the options and steps.
 
 media_folder: 'public/images/uploads'
 public_folder: '/images/uploads'

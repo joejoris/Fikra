@@ -70,23 +70,34 @@ your files.
 
 ## Setting up browser editing in production
 
-By default Decap needs a way to authenticate with GitHub. Two common options:
+Browser editing is built into the site: it runs its own small GitHub OAuth
+endpoint (`server/routes/cms-auth.js`), so editors sign in with GitHub without
+leaving the site. A maintainer does this one-time setup.
 
-### Option A — GitHub OAuth via a small auth proxy (recommended for Cloudflare)
+### One-time setup (maintainer)
 
-1. Create a GitHub OAuth app under FIKRA's GitHub organisation.
-2. Deploy an OAuth proxy (e.g. `vencax/netlify-cms-github-oauth-provider` or a
-   Cloudflare Worker equivalent).
-3. In `public/admin/config.yml`, set the backend to `github` and add
-   `base_url` pointing at your proxy.
+1. Create a **GitHub OAuth App** at <https://github.com/settings/developers>
+   (create it under the FIKRA organisation so FIKRA owns it):
+   - **Application name:** FIKRA website admin
+   - **Homepage URL:** `https://<your-domain>`
+   - **Authorization callback URL:** `https://<your-domain>/api/cms/callback`
+2. Copy the **Client ID**, then generate and copy a **Client secret**.
+3. Add both to the hosting environment (Vercel → Project → Settings →
+   Environment Variables) for **Production** and **Preview**:
+   - `GITHUB_OAUTH_CLIENT_ID`
+   - `GITHUB_OAUTH_CLIENT_SECRET`
+   - `SITE_URL` (only if the site is not at the default URL)
+4. Redeploy, open `https://<your-domain>/admin`, and click **Login with GitHub**.
 
-### Option B — Netlify Identity + Git Gateway
+### Who can edit
 
-If the site is hosted on Netlify, enable Identity and Git Gateway, then set the
-backend to `git-gateway`. Invite staff by email from the Netlify dashboard.
+There are no separate CMS accounts. Only people with **write access to the
+`joejoris/Fikra` GitHub repository** can publish — add editors as collaborators
+on GitHub.
 
-Either way, the repository in `public/admin/config.yml` (`repo:`) must be the one
-FIKRA owns.
+### If it says "not set up yet"
+
+The OAuth keys are missing. Add them as in step 3 and redeploy.
 
 ## Account ownership (important)
 
