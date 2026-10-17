@@ -11,6 +11,7 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index" },
     { "source": "/inbox", "destination": "/api/index" },
+    { "source": "/inbox/:path*", "destination": "/api/index" },
     { "source": "/donate/return", "destination": "/api/index" },
     { "source": "/healthz", "destination": "/api/index" }
   ],
