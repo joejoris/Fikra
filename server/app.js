@@ -10,6 +10,8 @@
  *   POST /api/rsvp         event registrations
  *   GET  /api/files/:id    uploaded files (inbox login required)
  *   GET/POST /inbox        private submissions inbox
+ *   GET/POST /inbox/community  community moderation (comments, board, chat)
+ *   community API: /api/comments, /api/topics, /api/chat, /api/auth/*
  *
  * This module only builds and exports the Express app. `server/index.js`
  * runs it as a long-lived process (local dev, Render); `api/index.js` exports
@@ -31,6 +33,9 @@ import { inboxRouter } from './routes/inbox.js';
 import { filesRouter } from './routes/files.js';
 import { paypalRouter } from './routes/paypal.js';
 import { mpesaRouter } from './routes/mpesa.js';
+import { authRouter } from './routes/auth.js';
+import { communityRouter } from './routes/community.js';
+import { moderationRouter } from './routes/moderation.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -71,9 +76,12 @@ app.use(contactRouter);
 app.use(subscribeRouter);
 app.use(rsvpRouter);
 app.use(inboxRouter);
+app.use(moderationRouter);
 app.use(filesRouter);
 app.use(paypalRouter);
 app.use(mpesaRouter);
+app.use(authRouter);
+app.use(communityRouter);
 
 // Unknown API route: always JSON, never the HTML 404 page (the browser forms
 // parse the response as JSON and would otherwise show a generic error).

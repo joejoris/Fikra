@@ -242,6 +242,7 @@ inboxRouter.get(
     const body = `<header>
       <div><h1>FIKRA inbox</h1><div class="meta">${results.length} shown · ${newCount} to handle</div></div>
       <div class="row">
+        <a href="/inbox/community">Community</a>
         <a href="/inbox${formName ? `?form=${encodeURIComponent(formName)}&` : '?'}export=csv">Export CSV</a>
         <a href="/inbox?logout=1">Sign out</a>
       </div>

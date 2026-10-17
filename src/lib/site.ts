@@ -166,6 +166,7 @@ export const NAV_LINKS = [
   { label: 'Events', href: '/events' },
   { label: 'Get Involved', href: '/get-involved' },
   { label: 'News', href: '/news' },
+  { label: 'Community', href: '/community' },
 ] as const;
 
 export const FOOTER_LINKS = {
@@ -176,6 +177,7 @@ export const FOOTER_LINKS = {
     { label: 'Events', href: '/events' },
     { label: 'Team', href: '/team' },
     { label: 'News', href: '/news' },
+    { label: 'Community', href: '/community' },
     { label: 'Newsletter', href: '/newsletter' },
   ],
   engage: [

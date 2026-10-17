@@ -55,7 +55,66 @@ CREATE TABLE IF NOT EXISTS files (
   mime TEXT NOT NULL DEFAULT 'application/octet-stream',
   bytes BYTEA NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);`;
+);
+CREATE TABLE IF NOT EXISTS members (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  email TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  salt TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS comments (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  page TEXT NOT NULL,
+  member_id INTEGER,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  body TEXT NOT NULL,
+  likes INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'visible'
+);
+CREATE INDEX IF NOT EXISTS idx_comments_page ON comments (page, id);
+CREATE TABLE IF NOT EXISTS comment_likes (
+  comment_id INTEGER NOT NULL,
+  liker TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (comment_id, liker)
+);
+CREATE TABLE IF NOT EXISTS topics (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_activity TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  member_id INTEGER,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  reply_count INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'visible'
+);
+CREATE TABLE IF NOT EXISTS topic_replies (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  topic_id INTEGER NOT NULL,
+  member_id INTEGER,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  body TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'visible'
+);
+CREATE INDEX IF NOT EXISTS idx_replies_topic ON topic_replies (topic_id, id);
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  member_id INTEGER,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  body TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'visible'
+);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_id ON chat_messages (id);`;
 
 const DDL_SQLITE = `
 CREATE TABLE IF NOT EXISTS submissions (
@@ -87,7 +146,66 @@ CREATE TABLE IF NOT EXISTS files (
   mime TEXT NOT NULL DEFAULT 'application/octet-stream',
   bytes BLOB NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
-);`;
+);
+CREATE TABLE IF NOT EXISTS members (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  email TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  salt TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS comments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  page TEXT NOT NULL,
+  member_id INTEGER,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  body TEXT NOT NULL,
+  likes INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'visible'
+);
+CREATE INDEX IF NOT EXISTS idx_comments_page ON comments (page, id);
+CREATE TABLE IF NOT EXISTS comment_likes (
+  comment_id INTEGER NOT NULL,
+  liker TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (comment_id, liker)
+);
+CREATE TABLE IF NOT EXISTS topics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  last_activity TEXT NOT NULL DEFAULT (datetime('now')),
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  member_id INTEGER,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  reply_count INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'visible'
+);
+CREATE TABLE IF NOT EXISTS topic_replies (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  topic_id INTEGER NOT NULL,
+  member_id INTEGER,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  body TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'visible'
+);
+CREATE INDEX IF NOT EXISTS idx_replies_topic ON topic_replies (topic_id, id);
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  member_id INTEGER,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  body TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'visible'
+);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_id ON chat_messages (id);`;
 
 function pgSql(sql) {
   let i = 0;
@@ -307,4 +425,302 @@ export async function getFile(id) {
   }
   const row = sqlite.prepare('SELECT id, name, mime, bytes FROM files WHERE id = ? LIMIT 1').get(n);
   return row ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Community: comments + likes, discussion board, live chat, optional accounts
+// ---------------------------------------------------------------------------
+
+/** Run a query and return the rows (works for both backends). */
+async function rows(sql, params = []) {
+  await initDb();
+  if (mode === 'pg') return (await pool.query(pgSql(sql), params)).rows;
+  return sqlite.prepare(sql).all(...params);
+}
+
+/** Run a query and return the first row, or null. */
+async function row(sql, params = []) {
+  return (await rows(sql, params))[0] ?? null;
+}
+
+/** Run a write (INSERT/UPDATE/DELETE) for its side effect. */
+async function exec(sql, params = []) {
+  await initDb();
+  if (mode === 'pg') {
+    await pool.query(pgSql(sql), params);
+    return;
+  }
+  sqlite.prepare(sql).run(...params);
+}
+
+/** Run an INSERT and return the new id (both backends). */
+async function insert(sql, params = []) {
+  await initDb();
+  if (mode === 'pg') {
+    const res = await pool.query(pgSql(sql) + ' RETURNING id', params);
+    return res.rows[0]?.id ?? null;
+  }
+  const result = sqlite.prepare(sql).run(...params);
+  return result.lastInsertRowid != null ? Number(result.lastInsertRowid) : null;
+}
+
+export async function createMember(name, email, passwordHash, salt) {
+  await initDb();
+  if (mode === 'pg') {
+    const res = await pool.query(
+      `INSERT INTO members (name, email, password_hash, salt) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (email) DO NOTHING RETURNING id`,
+      [name, email, passwordHash, salt],
+    );
+    return res.rows[0]?.id ?? null;
+  }
+  const result = sqlite
+    .prepare('INSERT OR IGNORE INTO members (name, email, password_hash, salt) VALUES (?, ?, ?, ?)')
+    .run(name, email, passwordHash, salt);
+  return result.changes > 0 ? Number(result.lastInsertRowid) : null;
+}
+
+export async function findMemberByEmail(email) {
+  return row('SELECT id, name, email, password_hash, salt FROM members WHERE email = ? LIMIT 1', [email]);
+}
+
+export async function getMember(id) {
+  const n = Number(id);
+  if (!Number.isInteger(n)) return null;
+  return row('SELECT id, name, email FROM members WHERE id = ? LIMIT 1', [n]);
+}
+
+function commentView(r, likedIds) {
+  return {
+    id: Number(r.id),
+    created_at: displayDate(r.created_at),
+    author_name: r.author_name,
+    body: r.body,
+    likes: Number(r.likes ?? 0),
+    liked: likedIds.has(Number(r.id)),
+    is_member: r.member_id != null,
+  };
+}
+
+export async function listComments(page, viewer) {
+  const items = await rows(
+    "SELECT id, created_at, author_name, body, likes, member_id FROM comments WHERE page = ? AND status = 'visible' ORDER BY id ASC LIMIT 500",
+    [page],
+  );
+  let likedIds = new Set();
+  if (viewer) {
+    const liked = await rows('SELECT comment_id FROM comment_likes WHERE liker = ?', [viewer]);
+    likedIds = new Set(liked.map((r) => Number(r.comment_id)));
+  }
+  return items.map((r) => commentView(r, likedIds));
+}
+
+export async function insertComment(fields) {
+  return insert(
+    'INSERT INTO comments (page, member_id, author_name, author_email, body) VALUES (?, ?, ?, ?, ?)',
+    [fields.page, fields.member_id ?? null, fields.author_name, fields.author_email ?? null, fields.body],
+  );
+}
+
+export async function commentLikeCount(id) {
+  const r = await row('SELECT likes FROM comments WHERE id = ? LIMIT 1', [Number(id)]);
+  return Number(r?.likes ?? 0);
+}
+
+/** Toggle a like for `liker`; returns the new like count. */
+export async function toggleCommentLike(commentId, liker) {
+  await initDb();
+  const n = Number(commentId);
+  if (!Number.isInteger(n)) return null;
+  if (mode === 'pg') {
+    const existing = await pool.query('SELECT 1 FROM comment_likes WHERE comment_id = $1 AND liker = $2', [n, liker]);
+    if (existing.rows.length > 0) {
+      await pool.query('DELETE FROM comment_likes WHERE comment_id = $1 AND liker = $2', [n, liker]);
+      await pool.query('UPDATE comments SET likes = GREATEST(likes - 1, 0) WHERE id = $1', [n]);
+    } else {
+      await pool.query('INSERT INTO comment_likes (comment_id, liker) VALUES ($1, $2) ON CONFLICT DO NOTHING', [n, liker]);
+      await pool.query('UPDATE comments SET likes = likes + 1 WHERE id = $1', [n]);
+    }
+  } else {
+    const existing = sqlite.prepare('SELECT 1 FROM comment_likes WHERE comment_id = ? AND liker = ?').get(n, liker);
+    if (existing) {
+      sqlite.prepare('DELETE FROM comment_likes WHERE comment_id = ? AND liker = ?').run(n, liker);
+      sqlite.prepare('UPDATE comments SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END WHERE id = ?').run(n);
+    } else {
+      sqlite.prepare('INSERT OR IGNORE INTO comment_likes (comment_id, liker) VALUES (?, ?)').run(n, liker);
+      sqlite.prepare('UPDATE comments SET likes = likes + 1 WHERE id = ?').run(n);
+    }
+  }
+  return commentLikeCount(n);
+}
+
+export async function listTopics() {
+  const items = await rows(
+    "SELECT id, created_at, last_activity, title, body, author_name, reply_count, member_id FROM topics WHERE status = 'visible' ORDER BY last_activity DESC LIMIT 100",
+  );
+  return items.map((r) => ({
+    id: Number(r.id),
+    created_at: displayDate(r.created_at),
+    last_activity: displayDate(r.last_activity),
+    title: r.title,
+    body: r.body,
+    author_name: r.author_name,
+    reply_count: Number(r.reply_count ?? 0),
+    is_member: r.member_id != null,
+  }));
+}
+
+export async function insertTopic(fields) {
+  return insert(
+    'INSERT INTO topics (title, body, member_id, author_name, author_email) VALUES (?, ?, ?, ?, ?)',
+    [fields.title, fields.body, fields.member_id ?? null, fields.author_name, fields.author_email ?? null],
+  );
+}
+
+export async function getTopic(id) {
+  const n = Number(id);
+  if (!Number.isInteger(n)) return null;
+  const t = await row(
+    'SELECT id, created_at, last_activity, title, body, author_name, reply_count FROM topics WHERE id = ? LIMIT 1',
+    [n],
+  );
+  if (!t) return null;
+  const replies = await rows(
+    "SELECT id, created_at, author_name, body FROM topic_replies WHERE topic_id = ? AND status = 'visible' ORDER BY id ASC LIMIT 500",
+    [n],
+  );
+  return {
+    id: Number(t.id),
+    created_at: displayDate(t.created_at),
+    last_activity: displayDate(t.last_activity),
+    title: t.title,
+    body: t.body,
+    author_name: t.author_name,
+    reply_count: Number(t.reply_count ?? 0),
+    replies: replies.map((r) => ({
+      id: Number(r.id),
+      created_at: displayDate(r.created_at),
+      author_name: r.author_name,
+      body: r.body,
+    })),
+  };
+}
+
+export async function insertReply(topicId, fields) {
+  const n = Number(topicId);
+  if (!Number.isInteger(n)) return null;
+  const id = await insert(
+    'INSERT INTO topic_replies (topic_id, member_id, author_name, author_email, body) VALUES (?, ?, ?, ?, ?)',
+    [n, fields.member_id ?? null, fields.author_name, fields.author_email ?? null, fields.body],
+  );
+  if (id != null) {
+    if (mode === 'pg') {
+      await pool.query('UPDATE topics SET reply_count = reply_count + 1, last_activity = NOW() WHERE id = $1', [n]);
+    } else {
+      sqlite
+        .prepare("UPDATE topics SET reply_count = reply_count + 1, last_activity = datetime('now') WHERE id = ?")
+        .run(n);
+    }
+  }
+  return id;
+}
+
+export async function listChat(afterId = null) {
+  let items;
+  if (afterId != null && Number.isInteger(Number(afterId))) {
+    items = await rows(
+      "SELECT id, created_at, author_name, body FROM chat_messages WHERE id > ? AND status = 'visible' ORDER BY id ASC LIMIT 200",
+      [Number(afterId)],
+    );
+  } else {
+    const recent = await rows(
+      "SELECT id, created_at, author_name, body FROM chat_messages WHERE status = 'visible' ORDER BY id DESC LIMIT 100",
+    );
+    items = recent.reverse();
+  }
+  return items.map((r) => ({
+    id: Number(r.id),
+    created_at: displayDate(r.created_at),
+    author_name: r.author_name,
+    body: r.body,
+  }));
+}
+
+export async function insertChat(fields) {
+  return insert('INSERT INTO chat_messages (member_id, author_name, author_email, body) VALUES (?, ?, ?, ?)', [
+    fields.member_id ?? null,
+    fields.author_name,
+    fields.author_email ?? null,
+    fields.body,
+  ]);
+}
+
+// --- Moderation helpers (used by the /inbox community view) ---
+
+export async function listAllComments() {
+  const items = await rows('SELECT id, created_at, page, author_name, body, likes FROM comments ORDER BY id DESC LIMIT 500');
+  return items.map((r) => ({ ...r, created_at: displayDate(r.created_at) }));
+}
+
+export async function listAllTopics() {
+  const items = await rows('SELECT id, created_at, title, author_name, reply_count FROM topics ORDER BY id DESC LIMIT 500');
+  return items.map((r) => ({ ...r, created_at: displayDate(r.created_at) }));
+}
+
+export async function listAllReplies() {
+  const items = await rows('SELECT id, created_at, topic_id, author_name, body FROM topic_replies ORDER BY id DESC LIMIT 500');
+  return items.map((r) => ({ ...r, created_at: displayDate(r.created_at) }));
+}
+
+export async function listAllChatMessages() {
+  const items = await rows('SELECT id, created_at, author_name, body FROM chat_messages ORDER BY id DESC LIMIT 500');
+  return items.map((r) => ({ ...r, created_at: displayDate(r.created_at) }));
+}
+
+const COMMUNITY_TABLES = {
+  comment: 'comments',
+  topic: 'topics',
+  reply: 'topic_replies',
+  chat: 'chat_messages',
+};
+
+/** Delete a single community item (comment, topic + its replies, reply, or chat message). */
+export async function deleteCommunityItem(type, id) {
+  const table = COMMUNITY_TABLES[type];
+  const n = Number(id);
+  if (!table || !Number.isInteger(n)) return false;
+  await initDb();
+  if (type === 'comment') {
+    await exec('DELETE FROM comment_likes WHERE comment_id = ?', [n]);
+  }
+  if (type === 'topic') {
+    await exec('DELETE FROM topic_replies WHERE topic_id = ?', [n]);
+  }
+  if (type === 'reply') {
+    const reply = await row('SELECT topic_id FROM topic_replies WHERE id = ? LIMIT 1', [n]);
+    if (reply && mode === 'pg') {
+      await pool.query('UPDATE topics SET reply_count = GREATEST(reply_count - 1, 0) WHERE id = $1', [reply.topic_id]);
+    } else if (reply) {
+      sqlite
+        .prepare('UPDATE topics SET reply_count = CASE WHEN reply_count > 0 THEN reply_count - 1 ELSE 0 END WHERE id = ?')
+        .run(reply.topic_id);
+    }
+  }
+  await exec(`DELETE FROM ${table} WHERE id = ?`, [n]);
+  return true;
+}
+
+export async function countCommunity() {
+  const [c, t, r, m] = await Promise.all([
+    row('SELECT COUNT(*) AS n FROM comments'),
+    row('SELECT COUNT(*) AS n FROM topics'),
+    row('SELECT COUNT(*) AS n FROM topic_replies'),
+    row('SELECT COUNT(*) AS n FROM chat_messages'),
+  ]);
+  return {
+    comments: Number(c?.n ?? 0),
+    topics: Number(t?.n ?? 0),
+    replies: Number(r?.n ?? 0),
+    chat: Number(m?.n ?? 0),
+  };
 }

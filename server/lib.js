@@ -115,3 +115,86 @@ export function asyncHandler(fn) {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 }
+
+// ---------------------------------------------------------------------------
+// Optional member accounts (email + password) for the community features
+// ---------------------------------------------------------------------------
+
+export const MEMBER_COOKIE = 'fikra_member';
+const MEMBER_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+
+function sessionSecret() {
+  return process.env.SESSION_SECRET || process.env.INBOX_PASSWORD || 'fikra-dev-secret';
+}
+
+/** Hash a password with a per-user random salt (scrypt, built into Node). */
+export function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return { salt, hash };
+}
+
+export function verifyPassword(password, salt, hash) {
+  try {
+    const candidate = crypto.scryptSync(password, salt, 64);
+    const expected = Buffer.from(hash, 'hex');
+    return candidate.length === expected.length && crypto.timingSafeEqual(candidate, expected);
+  } catch {
+    return false;
+  }
+}
+
+/** Signed, expiring session token for a member id. */
+export function memberToken(id) {
+  const exp = Date.now() + MEMBER_MAX_AGE * 1000;
+  const payload = `${id}.${exp}`;
+  const sig = crypto.createHmac('sha256', sessionSecret()).update(payload).digest('base64url');
+  return `${payload}.${sig}`;
+}
+
+export function readMemberToken(token) {
+  if (typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const [id, exp, sig] = parts;
+  const expected = crypto.createHmac('sha256', sessionSecret()).update(`${id}.${exp}`).digest('base64url');
+  if (sig.length !== expected.length) return null;
+  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
+  if (Number(exp) < Date.now()) return null;
+  const n = Number(id);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+export function memberCookieHeader(req, value, maxAge = MEMBER_MAX_AGE) {
+  const secure = req.secure ? '; Secure' : '';
+  return `${MEMBER_COOKIE}=${encodeURIComponent(value)}; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=${maxAge}`;
+}
+
+/** The logged-in member id for this request, or null. */
+export function currentMemberId(req) {
+  return readMemberToken(getCookie(req, MEMBER_COOKIE));
+}
+
+/** Stable, anonymous key for rate limits and "one like per visitor". */
+export function anonKey(ip) {
+  return 'ip:' + crypto.createHash('sha256').update(String(ip ?? '')).digest('hex').slice(0, 32);
+}
+
+/**
+ * Very small starter spam screen. Not a substitute for moderation — it only
+ * catches the obvious (link spam and a few keywords). Extend the list as
+ * needed. Titles/bodies are still shown only after a person posts them.
+ */
+const SPAM_TERMS = [
+  'viagra', 'cialis', 'casino', 'porn', 'xxx', 'sexcam', 'sex cam',
+  'free bitcoin', 'crypto giveaway', 'loan offer', 'work from home',
+  'make money fast', 'seo services', 'rank your website',
+];
+
+export function looksSpammy(text) {
+  const lower = String(text).toLowerCase();
+  if (SPAM_TERMS.some((term) => lower.includes(term))) return true;
+  const links = (lower.match(/https?:\/\//g) ?? []).length;
+  if (links > 2) return true;
+  if (/(.)\1{12,}/.test(lower)) return true; // aaaaaaaaaaaa
+  return false;
+}

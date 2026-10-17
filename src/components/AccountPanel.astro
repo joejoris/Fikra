@@ -1,0 +1,121 @@
+---
+// Optional accounts. Guests can post with just a name + email; signing in
+// gives a name badge and skips re-entering details. See src/scripts/community.ts.
+---
+
+<div
+  class="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)]"
+  data-account
+>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-widest text-primary">Your account</p>
+      <p class="mt-1 text-sm text-ink-soft" data-account-guest>
+        Optional. Sign in for a “Member” badge, or just post as a guest.
+      </p>
+      <p class="mt-1 text-sm text-ink-soft" data-account-user hidden>
+        Signed in as <strong data-account-name>Member</strong>.
+      </p>
+    </div>
+
+    <div class="flex gap-2">
+      <div class="flex gap-2" data-account-guest>
+        <button
+          type="button"
+          data-account-show="login"
+          class="rounded-full border border-border px-4 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          Sign in
+        </button>
+        <button
+          type="button"
+          data-account-show="signup"
+          class="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          Create account
+        </button>
+      </div>
+      <div data-account-user hidden>
+        <button
+          type="button"
+          data-account-logout
+          class="rounded-full border border-border px-4 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          Sign out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <form data-auth-form="login" hidden class="mt-4 grid gap-3 sm:grid-cols-2">
+    <label class="text-sm font-semibold text-ink">
+      Email
+      <input
+        type="email"
+        name="email"
+        autocomplete="email"
+        required
+        class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+      />
+    </label>
+    <label class="text-sm font-semibold text-ink">
+      Password
+      <input
+        type="password"
+        name="password"
+        autocomplete="current-password"
+        required
+        class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+      />
+    </label>
+    <div class="sm:col-span-2">
+      <button type="submit" class="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white">
+        Sign in
+      </button>
+    </div>
+  </form>
+
+  <form data-auth-form="signup" hidden class="mt-4 grid gap-3">
+    <div class="grid gap-3 sm:grid-cols-3">
+      <label class="text-sm font-semibold text-ink">
+        Name
+        <input
+          type="text"
+          name="name"
+          autocomplete="name"
+          required
+          class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+        />
+      </label>
+      <label class="text-sm font-semibold text-ink">
+        Email
+        <input
+          type="email"
+          name="email"
+          autocomplete="email"
+          required
+          class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+        />
+      </label>
+      <label class="text-sm font-semibold text-ink">
+        Password
+        <input
+          type="password"
+          name="password"
+          autocomplete="new-password"
+          minlength="8"
+          required
+          class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+        />
+      </label>
+    </div>
+    <p class="text-xs text-muted">At least 8 characters. No email confirmation is sent.</p>
+    <div>
+      <button type="submit" class="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white">
+        Create account
+      </button>
+    </div>
+  </form>
+
+  <p data-auth-status class="mt-3 text-sm text-muted" aria-live="polite"></p>
+</div>

@@ -1,0 +1,71 @@
+---
+// Live chat room. Messages refresh by polling every few seconds (works on
+// serverless hosting). Publishes immediately; moderate from /inbox/community.
+---
+
+<div
+  class="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)]"
+  data-chat
+>
+  <div class="flex items-center gap-2">
+    <span class="h-2 w-2 rounded-full bg-green-500" aria-hidden="true"></span>
+    <h2 class="text-xl font-bold text-ink">Live chat</h2>
+  </div>
+  <p class="mt-1 text-sm text-ink-soft">Say hello — messages update every few seconds.</p>
+
+  <div
+    data-chat-list
+    class="mt-4 max-h-80 space-y-3 overflow-y-auto rounded-lg border border-border bg-bg p-4"
+    aria-live="polite"
+  >
+    <p class="text-sm text-muted">Loading…</p>
+  </div>
+
+  <form data-chat-form class="mt-4 space-y-3" novalidate>
+    <label class="block text-sm font-semibold text-ink">
+      Message
+      <input
+        type="text"
+        name="body"
+        maxlength="2000"
+        required
+        placeholder="Type your message…"
+        class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+      />
+    </label>
+    <div data-guest-fields class="grid gap-3 sm:grid-cols-2">
+      <label class="text-sm font-semibold text-ink">
+        Your name
+        <input
+          type="text"
+          name="name"
+          autocomplete="name"
+          class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+        />
+      </label>
+      <label class="text-sm font-semibold text-ink">
+        Your email <span class="font-normal text-muted">(not shown)</span>
+        <input
+          type="email"
+          name="email"
+          autocomplete="email"
+          class="mt-1 block w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+        />
+      </label>
+    </div>
+    <div class="flex items-center gap-3">
+      <button
+        type="submit"
+        class="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+      >
+        Send
+      </button>
+      <p data-chat-status class="text-sm text-red-600" aria-live="polite"></p>
+    </div>
+  </form>
+</div>
+
+<script>
+  import { initChat } from '../scripts/community';
+  initChat();
+</script>

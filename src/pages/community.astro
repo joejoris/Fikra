@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PageHero from '../components/PageHero.astro';
+import AccountPanel from '../components/AccountPanel.astro';
+import CommunityBoard from '../components/CommunityBoard.astro';
+import Chat from '../components/Chat.astro';
+import Comments from '../components/Comments.astro';
+import CTASection from '../components/CTASection.astro';
+---
+
+<BaseLayout
+  title="Community"
+  description="Talk with FIKRA and other founders — ask questions, share opportunities, and join the conversation."
+>
+  <Section>
+    <PageHero
+      eyebrow="Community"
+      title="Talk, ask and share"
+      intro="A place for founders, mentors and friends of FIKRA to ask questions, swap opportunities and encourage one another. Be kind and constructive."
+    />
+  </Section>
+
+  <Section tone="white">
+    <div class="mx-auto max-w-3xl">
+      <AccountPanel />
+    </div>
+  </Section>
+
+  <Section tone="soft">
+    <div class="grid gap-8 lg:grid-cols-2 lg:items-start">
+      <CommunityBoard />
+      <Chat />
+    </div>
+    <p class="mx-auto mt-8 max-w-3xl text-sm text-muted">
+      Posts appear immediately and are moderated. Anything unsuitable is removed.
+      Do not share personal or sensitive information you would not want public.
+    </p>
+  </Section>
+
+  <Section>
+    <div class="mx-auto max-w-3xl">
+      <Comments page="community" heading="Community wall" />
+    </div>
+  </Section>
+
+  <CTASection />
+</BaseLayout>
