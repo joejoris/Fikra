@@ -41,7 +41,7 @@ function json(res, body, status = 200) {
 
 /** Public address visitors can write to if we truly cannot take their message. */
 function fallbackEmail() {
-  return process.env.CONTACT_TO_EMAIL || 'fikrainnovator@gmail.com';
+  return process.env.CONTACT_TO_EMAIL || 'fikrainnovator9@gmail.com';
 }
 
 contactRouter.post(

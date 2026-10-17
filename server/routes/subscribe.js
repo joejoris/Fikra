@@ -20,7 +20,7 @@ function json(res, body, status = 200) {
 }
 
 function fallbackEmail() {
-  return process.env.CONTACT_TO_EMAIL || 'fikrainnovator@gmail.com';
+  return process.env.CONTACT_TO_EMAIL || 'fikrainnovator9@gmail.com';
 }
 
 subscribeRouter.post(

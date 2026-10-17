@@ -14,7 +14,7 @@ export const SITE = {
   // Replace with the real domain before launch (also update astro.config.mjs).
   url: 'https://fikra-gen-innovators.vercel.app',
   locale: 'en',
-  email: 'fikrainnovator@gmail.com', // Public address, shown on the site.
+  email: 'fikrainnovator9@gmail.com', // Public address, shown on the site.
   phone: '', // Set when FIKRA confirms a public phone number.
   address: {
     // Intentionally blank until FIKRA confirms a public address.

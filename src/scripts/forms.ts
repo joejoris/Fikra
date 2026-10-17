@@ -6,7 +6,7 @@
  */
 
 const THANKS_PATH = '/thanks';
-const CONTACT_EMAIL = 'fikrainnovator@gmail.com';
+const CONTACT_EMAIL = 'fikrainnovator9@gmail.com';
 
 type Status = 'idle' | 'sending' | 'success' | 'error';
 
