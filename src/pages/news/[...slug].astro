@@ -7,6 +7,7 @@ import Section from '../../components/Section.astro';
 import CTASection from '../../components/CTASection.astro';
 import ShareButtons from '../../components/ShareButtons.astro';
 import Comments from '../../components/Comments.astro';
+import { SITE } from '../../lib/site';
 
 export async function getStaticPaths() {
   const posts = await getCollection('news', ({ data }) =>
@@ -33,9 +34,31 @@ const date = post.data.pubDate.toLocaleDateString('en-GB', {
   year: 'numeric',
   timeZone: 'UTC',
 });
+
+const site = Astro.site ?? SITE.url;
+const articleUrl = new URL(`/news/${post.id}`, site).href;
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: post.data.pubDate.toISOString(),
+  author: { '@type': 'Organization', name: post.data.author },
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+  url: articleUrl,
+  image: new URL(ogImage ?? '/og/default.png', site).href,
+};
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description} ogType="article" image={ogImage}>
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+  image={ogImage}
+  jsonLd={articleJsonLd}
+>
   <Section>
     <div class="mx-auto max-w-2xl">
       <p class="mb-4">

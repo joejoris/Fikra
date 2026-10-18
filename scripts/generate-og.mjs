@@ -1,6 +1,9 @@
 /**
- * Generate per-page Open Graph images (1200x630 PNG) for news posts and
- * program pages, written to public/og/.
+ * Generate Open Graph images (1200x630 PNG), written to public/og/.
+ *
+ * Produces:
+ *   - /og/default.png              the site-wide share image (used by every page)
+ *   - /og/news-<slug>.png          one per news post
  *
  * Runs automatically before `astro build` (see the `og` npm script). If
  * anything fails here, the build still succeeds — pages fall back to
@@ -23,7 +26,6 @@ const HEIGHT = 630;
 /** Which content collections get images, and which frontmatter keys to use. */
 const COLLECTIONS = [
   { dir: 'news', kind: 'News', titleKey: 'title', subKey: 'description' },
-  { dir: 'programs', kind: 'Program', titleKey: 'title', subKey: 'summary' },
 ];
 
 /** Minimal frontmatter reader for single-line `key: value` pairs. */
@@ -183,6 +185,19 @@ async function main() {
 
   mkdirSync(outDir, { recursive: true });
   let count = 0;
+
+  // Site-wide default share image (used by every page).
+  const defaultSvg = await satori(
+    card(
+      'From idea to enterprise',
+      '',
+      'FIKRA helps young innovators turn ideas into real businesses.',
+    ),
+    { width: WIDTH, height: HEIGHT, fonts },
+  );
+  const defaultPng = new Resvg(defaultSvg, { fitTo: { mode: 'width', value: WIDTH } }).render().asPng();
+  writeFileSync(join(outDir, 'default.png'), defaultPng);
+  count += 1;
 
   for (const collection of COLLECTIONS) {
     const base = join(root, 'src/content', collection.dir);

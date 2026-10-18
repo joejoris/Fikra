@@ -17,11 +17,31 @@ const rendered = await Promise.all(
     Content: (await render(entry)).Content,
   })),
 );
+
+// Strip markdown so the structured-data answer matches the visible text.
+const toText = (markdown: string) =>
+  markdown
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/[`*_>#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: rendered.map(({ entry }) => ({
+    '@type': 'Question',
+    name: entry.data.question,
+    acceptedAnswer: { '@type': 'Answer', text: toText(entry.body ?? '') },
+  })),
+};
 ---
 
 <BaseLayout
   title="Frequently asked questions"
   description="Answers to common questions about joining FIKRA, costs, and how we work."
+  jsonLd={faqJsonLd}
 >
   <Section>
     <PageHero

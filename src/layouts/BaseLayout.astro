@@ -5,6 +5,8 @@ interface Props {
   image?: string;
   ogType?: 'website' | 'article';
   noindex?: boolean;
+  /** Extra JSON-LD structured data (object or array) for this page. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 import { SITE } from '../lib/site';
@@ -19,9 +21,10 @@ import '../styles/global.css';
 const {
   title,
   description = SITE.description,
-  image = '/og-default.svg',
+  image = '/og/default.png',
   ogType = 'website',
   noindex = false,
+  jsonLd,
 } = Astro.props;
 
 const pageTitle = title.includes(SITE.name) ? title : `${title} — ${SITE.name}`;
@@ -47,6 +50,22 @@ const structuredData = {
   email: SITE.email,
   sameAs: socialUrls,
 };
+
+// Enables the Google "sitelinks search box" for /search?q=…
+const websiteData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${SITE.url}/search?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
 ---
 
 <!doctype html>
@@ -68,6 +87,10 @@ const structuredData = {
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="alternate" type="application/rss+xml" title="FIKRA news" href="/rss.xml" />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(websiteData)} />
+    {jsonLd && (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+    )}
 
     <!-- Open Graph / social -->
     <meta property="og:type" content={ogType} />
