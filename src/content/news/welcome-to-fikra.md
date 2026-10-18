@@ -13,12 +13,12 @@ coffee. But the front door to all of it is here.
 
 ## What is new
 
-- A clear picture of our **programmes** and who they are for
+- A clear picture of our **services** and who they are for
 - Ways to **get involved** as a volunteer, partner or member
 - A simple way to **support our work**
 - Regular **news** you can follow as we grow
 
 ## What is next
 
-We are opening the next **Idea Lab** cohort soon and preparing to launch
-**Launchpad**. Watch this space, or [get in touch](/contact) to be told first.
+We are preparing our next round of founder training and mentorship. Watch this
+space, or [get in touch](/contact) to be told first.

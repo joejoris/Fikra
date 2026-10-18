@@ -9,5 +9,5 @@ This is a **draft sample** — it is hidden on the live site and only visible
 during local development. Delete this file once the first real edition is
 written.
 
-A good edition is short: one founder story, one piece of programme news, and
+A good edition is short: one founder story, one piece of news from our work, and
 one clear way to help (volunteer, partner, give, or share).

@@ -21,7 +21,7 @@ on the live website — it only exists to show how publishing works.
 
 - Lead with the most important sentence.
 - Keep paragraphs short.
-- Link to the relevant programme or page where it helps.
+- Link to the relevant service or page where it helps.
 
 Once you save, the site rebuilds automatically and your post goes live within a
 minute or two.

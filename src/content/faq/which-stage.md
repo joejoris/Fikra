@@ -3,8 +3,8 @@ question: 'Do I need a business already, or just an idea?'
 order: 3
 ---
 
-Both are welcome. **Idea Lab** is for people with an idea and no business yet.
-**Launchpad** is for founders who have tested their idea and want to build.
-**Growth Circles** is for people already trading who want to grow.
+Both are welcome. We work with people who have an idea and no business yet, as
+well as founders who are already building or trading and want to grow.
 
-If you are unsure where you fit, just apply and we will help you choose.
+Tell us where you are and we will point you to the right training and support.
+If you are unsure, just apply and we will help you choose.

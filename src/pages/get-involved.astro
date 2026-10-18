@@ -26,11 +26,11 @@ import CTASection from '../components/CTASection.astro';
       </a>
       <a class="rounded-[var(--radius-card)] border border-border p-6 hover:border-primary/40" href="#partner">
         <h2 class="text-lg font-bold text-ink">Partner</h2>
-        <p class="mt-2 text-sm text-ink-soft">Bring your organisation's support to our programmes.</p>
+        <p class="mt-2 text-sm text-ink-soft">Bring your organisation's support to our work.</p>
       </a>
       <a class="rounded-[var(--radius-card)] border border-border p-6 hover:border-primary/40" href="#member">
         <h2 class="text-lg font-bold text-ink">Become a member</h2>
-        <p class="mt-2 text-sm text-ink-soft">Join a FIKRA programme as a founder.</p>
+        <p class="mt-2 text-sm text-ink-soft">Join FIKRA as a founder and build with us.</p>
       </a>
     </div>
   </Section>
@@ -79,7 +79,7 @@ import CTASection from '../components/CTASection.astro';
           funding partners, corporate partners and delivery partners.
         </p>
         <ul class="mt-5 space-y-2 text-sm text-ink-soft">
-          <li>· Sponsor a programme or a cohort</li>
+          <li>· Sponsor a training cohort</li>
           <li>· Offer internships, work or market access</li>
           <li>· Co-deliver training or mentorship</li>
           <li>· Fund a specific piece of work</li>
@@ -91,7 +91,7 @@ import CTASection from '../components/CTASection.astro';
           submitLabel="Start a conversation"
           showMessage
           interestOptions={[
-            { value: 'funding', label: 'Funding a programme' },
+            { value: 'funding', label: 'Funding our work' },
             { value: 'access', label: 'Market or work access' },
             { value: 'delivery', label: 'Co-delivering training' },
             { value: 'other', label: 'Other partnership' },
@@ -110,7 +110,7 @@ import CTASection from '../components/CTASection.astro';
         <p class="mt-3 text-ink-soft">
           If you have an idea and the drive to build it, we would like to hear
           from you. Tell us where you are and we will point you to the right
-          programme — Idea Lab, Launchpad or Growth Circles.
+          training, mentorship and support.
         </p>
         <p class="mt-3 text-sm text-muted">
           Membership terms and any fees are set out in our constitution and will
@@ -124,12 +124,12 @@ import CTASection from '../components/CTASection.astro';
           showMessage
           allowFile
           interestOptions={[
-            { value: 'idea-lab', label: 'Idea Lab — I have an idea' },
-            { value: 'launchpad', label: 'Launchpad — I am building' },
-            { value: 'growth-circles', label: 'Growth Circles — I am trading' },
+            { value: 'idea', label: 'I have an idea' },
+            { value: 'building', label: 'I am building' },
+            { value: 'trading', label: 'I am already trading' },
             { value: 'unsure', label: 'I am not sure yet' },
           ]}
-          heading="Join a programme"
+          heading="Become a member"
         />
       </div>
     </div>

@@ -22,7 +22,7 @@ market access, a licence.
 
 ## What changed
 
-Which FIKRA programme did they join, and what did they do with it? Focus on
+Which FIKRA service did they join, and what did they do with it? Focus on
 their action, not ours.
 
 ## Where they are now
