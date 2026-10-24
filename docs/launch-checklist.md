@@ -8,8 +8,8 @@ marked.
 - [ ] Every `[CONFIRM]` placeholder is replaced with real information
       (search the project for `[CONFIRM]` and `[N]`).
 - [ ] Team page shows real people with their permission.
-- [ ] Programs are accurate and each status (`open` / `coming-soon` / `closed`)
-      is correct.
+- [ ] Services are accurate, and each one described on the Services page reflects
+      what FIKRA actually offers.
 - [ ] At least one real news post is published (drafts hidden).
 - [ ] Impact stories are real, verified and consented — or left as drafts.
 - [ ] All statistics on the homepage and Impact page are verified. Do not publish
@@ -25,14 +25,15 @@ marked.
       registration number.
 - [ ] Donation methods added in `src/lib/site.ts` (or left clearly as "coming
       soon").
-- [ ] `public/og-default.svg` replaced with a 1200×630 PNG/JPG.
+- [ ] Default share image generated at `public/og/default.png` and shown correctly
+      when a page is shared.
 
 ## Forms and email
 
 - [ ] `RESEND_API_KEY` **or** `GMAIL_USER` + `GMAIL_APP_PASSWORD`,
       plus `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`, set in hosting.
-- [ ] Newsletter: with Resend, `RESEND_AUDIENCE_ID` set and a test sign-up
-      confirmed; with Gmail, a test sign-up confirmed (local subscribers table).
+- [ ] (Optional) Newsletter sign-up re-enabled and tested (with Resend,
+      `RESEND_AUDIENCE_ID` set; with Gmail, a test sign-up confirmed).
 - [ ] Submissions inbox: Supabase project created, `DATABASE_URL` set (use the
       transaction pooler string on Vercel), strong `INBOX_PASSWORD` set, and
       `/inbox` tested. Without `DATABASE_URL` nothing is stored on Vercel.
@@ -40,8 +41,8 @@ marked.
       disallowed type; confirm the file downloads from the inbox. (Vercel caps a
       whole request at 4.5 MB, hence the 2 MB per-file limit.)
 - [ ] SPF/DKIM configured for the sending domain (or mail may go to spam).
-- [ ] Each form tested end-to-end: contact, volunteer, partner, member, program
-      interest, newsletter, event RSVP (notification + confirmation emails).
+- [ ] Each form tested end-to-end: contact, volunteer, partner, member and event
+      RSVP (notification + confirmation emails).
 - [ ] Confirmation that submissions arrive in the FIKRA inbox — **check the spam
       folder too**.
 - [ ] Honeypot confirmed to work; rate limiting confirmed to respond with 429

@@ -1,12 +1,13 @@
 # FIKRA website
 
-A fast, low-bandwidth website for FIKRA, built as a **static** site with
-[Astro](https://astro.build) and [Tailwind CSS](https://tailwindcss.com). Content
-is edited through a browser-based CMS ([Decap](https://decapcms.org)) that saves
-changes back to this repository; every save rebuilds and republishes the site.
+A fast, low-bandwidth website for FIKRA, built with
+[Astro](https://astro.build) and [Tailwind CSS](https://tailwindcss.com), plus a
+small serverless API for forms, community features and the private inbox.
+Content is edited through a browser-based CMS ([Decap](https://decapcms.org))
+that commits changes to this repository.
 
-There is no database and no server to maintain. Forms are handled by one small
-serverless function.
+The site runs entirely on [Vercel](https://vercel.com) and stores data in
+[Supabase](https://supabase.com) Postgres. There is no server to maintain.
 
 ## Quick start
 
@@ -24,11 +25,12 @@ npm run check      # type-check Astro + TypeScript
 public/
   admin/            Decap CMS (the staff editing interface)
   documents/        Downloadable PDFs (constitution, reports, policies)
-  favicon.svg, og-default.svg, robots.txt
+  og/               Generated share images (default + news)
+  favicon.svg, robots.txt
   manifest.webmanifest, sw.js  PWA-lite: installable shell + offline support
 src/
   components/       Reusable UI pieces (Header, Footer, cards, Form…)
-  content/          Editable content (programs, news, impact, team, faq, events, documents, newsletters, testimonials)
+  content/          Editable content (news, impact, team, faq, events, documents, newsletters, testimonials)
   content.config.ts Content schemas — the rules each entry must follow
   layouts/          BaseLayout (head, SEO, header, footer)
   lib/site.ts       Organisation details, nav, stats, donation settings
@@ -36,13 +38,13 @@ src/
   scripts/forms.ts  Client-side form handling
   styles/global.css Design tokens + base styles
 scripts/
-  generate-og.mjs   Per-page OG images, rebuilt before every build
+  generate-og.mjs   Default + news share images, rebuilt before every build
   generate-icons.mjs  PNG favicons + app icons, rebuilt before every build
 server/             Node API + inbox, served on the same origin as the site
   app.js            Express app (static dist + API + security headers)
   index.js          Long-lived entry point (local dev / Render)
   db.js             Postgres (DATABASE_URL) or local SQLite (./data/app.db)
-  routes/           contact, subscribe, rsvp, inbox, files
+  routes/           contact, subscribe, rsvp, inbox, files, community, cms-auth
 api/
   index.js          Vercel serverless entry point (exports the Express app)
 vercel.json         Vercel config: build, rewrites to the function, security headers
@@ -74,9 +76,10 @@ These are tracked in [docs/fikra-inputs.md](docs/fikra-inputs.md). At minimum:
   registration number, social links, stats).
 - **Donation:** add one or more giving methods to `DONATION.methods` in
   `src/lib/site.ts` when a payment link or bank account exists.
-- **Team, programs, news, stories, FAQ, events, documents:** replace placeholder
-  `[CONFIRM]` content.
-- **Social image:** replace `public/og-default.svg` with a 1200×630 PNG/JPG.
+- **Team, news, stories, FAQ, events, documents:** replace draft or placeholder
+  content with real, consented information.
+- **Social image:** the default share image is generated at
+  `public/og/default.png`; edit `scripts/generate-og.mjs` to change it.
 - **Forms:** configure email delivery (see below).
 
 ## Forms and email delivery
@@ -119,12 +122,13 @@ SQLite file (`./data/app.db`, gitignored) when it is unset.
 
 ### Newsletter
 
-The footer and homepage sign-up forms post to `/api/subscribe`. With Resend
-configured, the address joins a Resend Audience (`RESEND_AUDIENCE_ID`) and
-gets a welcome email; with Gmail configured, the signup is recorded locally
-(subscribers table, exportable via the inbox CSV) and gets the same welcome
-email. Past editions live in `src/content/newsletters/` and are listed on the
-public archive at `/newsletter`.
+Newsletter sign-up is currently turned off (the footer and homepage forms were
+removed), while past editions live in `src/content/newsletters/` and are listed
+on the public archive at `/newsletter`. The `/api/subscribe` endpoint still
+exists, so forms can be re-enabled when a sending provider and audience are
+ready. With Resend configured, the address joins a Resend Audience
+(`RESEND_AUDIENCE_ID`); with Gmail, the signup is stored in the subscribers
+table and exportable from the inbox.
 
 ### Donations (PayPal)
 
@@ -205,9 +209,9 @@ locally. `PUBLIC_FORM_ENDPOINT` is only used by the browser and defaults to
 - **Document downloads** (`/documents`) for governance documents and reports.
 - **Newsletter archive** (`/newsletter`) of past editions.
 - **Testimonials** collection, shown on the home and impact pages when present.
-- **Per-page share images**: `npm run build` auto-generates OG PNGs for news
-  and program pages (`scripts/generate-og.mjs`); pages fall back to
-  `og-default.svg` if generation is skipped.
+- **Per-page share images**: `npm run build` auto-generates a default OG PNG and
+  news share images (`scripts/generate-og.mjs`); pages fall back to
+  `/og/default.png` if generation is skipped.
 - **Donation thank-you page** (`/donate/thanks`) — point the giving provider's
   return URL at `DONATION.thanksUrl`.
 - **Security headers** (CSP, HSTS, clickjacking guards) set by the server on
@@ -218,7 +222,7 @@ locally. `PUBLIC_FORM_ENDPOINT` is only used by the browser and defaults to
 - **PWA-lite**: web manifest plus a small offline-first service worker.
 - **Announcement bar**: set `ANNOUNCEMENT` in `src/lib/site.ts` to show a
   dismissible banner on every page; empty text hides it.
-- **Share buttons** on news and program pages, plus a copy-link button.
+- **Share buttons** on news pages, plus a copy-link button.
 - **Favicon pack**: PNG icons (including Apple touch icon) generated from the
   SVG before every build.
 - **Accessibility statement** at `/accessibility`, linked from the footer.
@@ -230,6 +234,10 @@ The site runs on [Vercel](https://vercel.com): the static Astro build is served
 by the platform, and the API + inbox run as one serverless function
 (`api/index.js`, via `vercel.json` rewrites for `/api/*`, `/inbox` and
 `/donate/return`).
+
+Deployments are created from the current working tree through the Vercel API.
+If you connect this repository to Vercel, pushes to the production branch will
+also deploy automatically.
 
 - **Import the repo** at Vercel; it will use `buildCommand: npm run build` and
   `outputDirectory: dist` from `vercel.json`.

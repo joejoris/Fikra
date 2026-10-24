@@ -1,7 +1,7 @@
 ---
 quote: '[CONFIRM real quote from a founder, mentor or partner]'
 name: '[CONFIRM name]'
-role: 'Program graduate'
+role: 'FIKRA participant'
 order: 1
 draft: true
 ---

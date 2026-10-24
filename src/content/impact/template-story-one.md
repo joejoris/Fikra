@@ -34,4 +34,4 @@ is one.
 
 > "[CONFIRM a short, consented quotation.]"
 
-![Placeholder — replace with a real photo of the founder at work.](/og-default.svg)
+![Placeholder — replace with a real photo of the founder at work.](/og/default.png)

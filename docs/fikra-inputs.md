@@ -7,7 +7,7 @@ points are fine.
 ## Needed now (discovery)
 
 - [ ] **(blocking)** What is the site's single most important job — showcase
-      programs, attract partners and donors, recruit members, or all three?
+      services, attract partners and donors, recruit members, or all three?
 - [x] Language: English only (decided).
 - [ ] **(blocking)** Who is the one person at FIKRA who consolidates feedback and
       gives final approval on content and documents? Name them.
@@ -24,7 +24,8 @@ points are fine.
 - [ ] Real organisation details: full registered name, address, email, phone,
       registration number.
 - [ ] Social media accounts that actually exist (remove the rest).
-- [ ] Program details: names, who each is for, duration, location, status.
+- [ ] Service details: what each service covers, who it is for, duration,
+      location and availability.
 - [ ] Team: names, roles, short bios, photos, and permission to publish.
 - [ ] Verified statistics for the homepage and Impact page.
 - [ ] At least one real news item for launch.
@@ -51,12 +52,12 @@ points are fine.
 
 - [ ] **Constitution:** founding member list, intended legal status and
       jurisdiction, proposed board size.
-- [ ] **Strategic plan:** current programs, baseline numbers (however rough),
+- [ ] **Strategic plan:** current services, baseline numbers (however rough),
       funding situation, top 3–4 priorities for 2026–2028.
 - [ ] **Org chart:** who currently does what, and which roles are planned.
 - [ ] **Staff handbook:** actual employment and leave practices (we will not
       invent these), code-of-conduct expectations, and whether FIKRA runs youth
-      programs requiring safeguarding policies.
+      services requiring safeguarding policies.
 
 ## Accounts to create under FIKRA ownership
 
@@ -67,7 +68,8 @@ points are fine.
 - [ ] Email sending: either Resend (API key + audience) **or** Gmail
       (address + App Password from Google Account → Security → 2-Step
       Verification), plus the receiving inbox
-- [ ] Resend Audience (for newsletter sign-ups) — only if using Resend
+- [ ] (Optional) Resend Audience for newsletter sign-ups — only if using Resend
+      and re-enabling the newsletter forms.
 - [ ] Supabase project (submissions inbox + uploads)
 
 ## Review gates

@@ -1,14 +1,13 @@
 # Admin guide
 
 This guide is for FIKRA staff who update the website. You do not need to know
-how to code to publish news, add a program, or update the team page.
+how to code to publish news or update the team, FAQ or events pages.
 
 ## What you can edit yourself
 
 | Content | Where it appears |
 |---|---|
 | **News** | The News page and the homepage |
-| **Programs** | The Programs page and each program's own page |
 | **Impact stories** | The Impact page and the homepage |
 | **Team** | The Team page |
 | **FAQ** | The FAQ page |
