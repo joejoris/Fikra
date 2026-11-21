@@ -1,7 +1,7 @@
 ---
 name: 'Santos Ogindo'
-role: 'Services Lead'
-bio: 'Runs FIKRA''s services and matches founders with the right mentors.'
-order: 2
+role: 'Executive Director'
+bio: 'Leads FIKRA''s strategy and partnerships, and represents the organisation to funders, government and the community.'
+order: 1
 photo: '/images/uploads/santos-ogindo.jpg'
 ---
