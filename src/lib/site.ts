@@ -58,8 +58,8 @@ export interface DonationMethod {
   id: string;
   label: string;
   description?: string;
-  /** 'link' opens `url`; 'bank' lists `accounts`. */
-  kind?: 'link' | 'bank';
+  /** 'link' opens `url`; 'bank' lists `accounts`; 'mobile' shows a pay-to number. */
+  kind?: 'link' | 'bank' | 'mobile';
   url?: string;
   accounts?: DonationAccount[];
 }
@@ -84,34 +84,20 @@ export const DONATION: {
   goal: { target: number; raised: number; currency: string; label: string };
 } = {
   methods: [
-    // Uncomment and fill in once a provider and/or bank account is confirmed:
-    //
-    // {
-    //   id: 'chapa',
-    //   label: 'Give by card or mobile money',
-    //   description: 'Secure checkout via Chapa.',
-    //   kind: 'link',
-    //   url: 'https://checkout.chapa.co/REPLACE_ME',
-    // },
-    // {
-    //   id: 'paypal',
-    //   label: 'Give with PayPal',
-    //   kind: 'link',
-    //   url: 'https://www.paypal.com/donate/?hosted_button_id=REPLACE_ME',
-    // },
-    // {
-    //   id: 'bank',
-    //   label: 'Bank transfer',
-    //   kind: 'bank',
-    //   accounts: [
-    //     {
-    //       name: 'FIKRA [CONFIRM registered name]',
-    //       bank: '[CONFIRM bank]',
-    //       number: '[CONFIRM account number]',
-    //       swift: '[CONFIRM SWIFT/BIC]',
-    //     },
-    //   ],
-    // },
+    {
+      id: 'mpesa',
+      label: 'M-Pesa',
+      description: 'Send a gift directly by M-Pesa. Use your name as the reference.',
+      kind: 'mobile',
+      accounts: [
+        {
+          name: 'FIKRA',
+          bank: 'M-Pesa',
+          number: '0115500209',
+          note: 'Use your name as the reference.',
+        },
+      ],
+    },
   ],
   presets: [], // e.g. [10, 25, 50, 100]
   amountParam: 'amount',
