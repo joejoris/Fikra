@@ -78,8 +78,9 @@ These are tracked in [docs/fikra-inputs.md](docs/fikra-inputs.md). At minimum:
   `src/lib/site.ts` when a payment link or bank account exists.
 - **Team, news, stories, FAQ, events, documents:** replace draft or placeholder
   content with real, consented information.
-- **Social image:** the default share image is generated at
-  `public/og/default.png`; edit `scripts/generate-og.mjs` to change it.
+- **Social image:** the site-wide share image is
+  `public/images/fikra-og.png` (replace the file to change it). News posts get
+  generated share images.
 - **Forms:** configure email delivery (see below).
 
 ## Forms and email delivery
@@ -209,9 +210,8 @@ locally. `PUBLIC_FORM_ENDPOINT` is only used by the browser and defaults to
 - **Document downloads** (`/documents`) for governance documents and reports.
 - **Newsletter archive** (`/newsletter`) of past editions.
 - **Testimonials** collection, shown on the home and impact pages when present.
-- **Per-page share images**: `npm run build` auto-generates a default OG PNG and
-  news share images (`scripts/generate-og.mjs`); pages fall back to
-  `/og/default.png` if generation is skipped.
+- **Per-page share images**: `npm run build` auto-generates news share images
+  (`scripts/generate-og.mjs`); other pages use `public/images/fikra-og.png`.
 - **Donation thank-you page** (`/donate/thanks`) — point the giving provider's
   return URL at `DONATION.thanksUrl`.
 - **Security headers** (CSP, HSTS, clickjacking guards) set by the server on

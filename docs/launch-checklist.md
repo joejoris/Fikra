@@ -25,7 +25,7 @@ marked.
       registration number.
 - [ ] Donation methods added in `src/lib/site.ts` (or left clearly as "coming
       soon").
-- [ ] Default share image generated at `public/og/default.png` and shown correctly
+- [ ] Default share image at `public/images/fikra-og.png` shown correctly
       when a page is shared.
 
 ## Forms and email

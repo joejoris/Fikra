@@ -2,7 +2,7 @@
  * Generate Open Graph images (1200x630 PNG), written to public/og/.
  *
  * Produces:
- *   - /og/default.png              the site-wide share image (used by every page)
+ *   - /og/default.png              legacy default (live site uses /images/fikra-og.png)
  *   - /og/news-<slug>.png          one per news post
  *
  * Runs automatically before `astro build` (see the `og` npm script). If
